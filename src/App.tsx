@@ -2,26 +2,48 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
+import { useState } from "react";
+import BottomNavigation from "@/components/BottomNavigation";
+import TranslatePage from "@/pages/TranslatePage";
+import AlbumPage from "@/pages/AlbumPage";
+import TrainingPage from "@/pages/TrainingPage";
+import SettingsPage from "@/pages/SettingsPage";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const [activeTab, setActiveTab] = useState("translate");
+
+  const renderActivePage = () => {
+    switch (activeTab) {
+      case "translate":
+        return <TranslatePage />;
+      case "album":
+        return <AlbumPage />;
+      case "training":
+        return <TrainingPage />;
+      case "settings":
+        return <SettingsPage />;
+      default:
+        return <TranslatePage />;
+    }
+  };
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <div className="relative">
+          {renderActivePage()}
+          <BottomNavigation 
+            activeTab={activeTab} 
+            onTabChange={setActiveTab} 
+          />
+        </div>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

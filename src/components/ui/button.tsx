@@ -18,6 +18,9 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        coral: "bg-gradient-to-r from-pet-coral to-pet-coral-light text-white hover:from-pet-coral-dark hover:to-pet-coral shadow-soft hover:shadow-coral transition-all duration-300",
+        teal: "bg-gradient-to-r from-pet-teal to-pet-teal-light text-white hover:opacity-90 shadow-soft transition-all duration-300",
+        playful: "bg-gradient-to-r from-pet-coral via-pet-orange to-pet-yellow text-white font-semibold shadow-floating hover:scale-105 transition-all duration-300",
       },
       size: {
         default: "h-10 px-4 py-2",

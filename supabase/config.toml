@@ -1,1 +1,4 @@
 project_id = "vashmbxzrijjissukhei"
+
+[functions.pet-translate]
+verify_jwt = false

@@ -61,7 +61,19 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				'pet-coral': {
+					DEFAULT: 'hsl(var(--pet-coral))',
+					light: 'hsl(var(--pet-coral-light))',
+					dark: 'hsl(var(--pet-coral-dark))'
+				},
+				'pet-teal': {
+					DEFAULT: 'hsl(var(--pet-teal))',
+					light: 'hsl(var(--pet-teal-light))'
+				},
+				'pet-purple': 'hsl(var(--pet-purple))',
+				'pet-orange': 'hsl(var(--pet-orange))',
+				'pet-yellow': 'hsl(var(--pet-yellow))'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

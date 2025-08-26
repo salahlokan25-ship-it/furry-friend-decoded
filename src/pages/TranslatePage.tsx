@@ -145,28 +145,98 @@ const TranslatePage = () => {
           </Card>
         )}
 
-        {/* Quick Sounds */}
+        {/* Pet Sound Library */}
         <Card className="border-0 shadow-soft">
           <CardContent className="p-6">
-            <h3 className="font-semibold mb-4">Quick Pet Sounds</h3>
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { label: "Happy", emoji: "😊" },
-                { label: "Hungry", emoji: "🍖" },
-                { label: "Playful", emoji: "🎾" },
-                { label: "Sleepy", emoji: "😴" },
-                { label: "Excited", emoji: "🎉" },
-                { label: "Curious", emoji: "🤔" },
-              ].map((sound) => (
-                <Button
-                  key={sound.label}
-                  variant="outline"
-                  className="h-16 flex-col space-y-1 hover:bg-primary/5"
-                >
-                  <span className="text-2xl">{sound.emoji}</span>
-                  <span className="text-xs">{sound.label}</span>
-                </Button>
-              ))}
+            <h3 className="font-semibold mb-4">Pet Sound Library</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Tap any sound to communicate with your pet
+            </p>
+            
+            {/* Dog Sounds */}
+            <div className="mb-6">
+              <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                <Dog size={16} className="text-coral" />
+                Dog Sounds
+              </h4>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { label: "Happy Bark", sound: "woof woof!" },
+                  { label: "Playful Yip", sound: "yip yip yip!" },
+                  { label: "Excited Whine", sound: "whiiine whine!" },
+                  { label: "Hungry Whimper", sound: "whimper whimper" },
+                  { label: "Alert Bark", sound: "WOOF! WOOF!" },
+                  { label: "Gentle Ruff", sound: "ruff ruff" },
+                  { label: "Howl", sound: "awooooo!" },
+                  { label: "Panting Happy", sound: "hah hah hah" },
+                  { label: "Sleepy Sigh", sound: "huff... sigh" },
+                  { label: "Greeting Bark", sound: "woof woof woof!" },
+                  { label: "Attention Whine", sound: "whine whine whine" },
+                  { label: "Confused Tilt", sound: "ruff?" },
+                  { label: "Protective Growl", sound: "grrrr woof" },
+                  { label: "Lap Dog Yap", sound: "yap yap yap!" },
+                  { label: "Deep Woof", sound: "WOOF! WOOF!" }
+                ].map((sound) => (
+                  <Button
+                    key={sound.label}
+                    variant="outline"
+                    className="h-16 flex-col space-y-1 hover:bg-coral/10 text-xs p-2"
+                    onClick={() => {
+                      const utterance = new SpeechSynthesisUtterance(sound.sound);
+                      utterance.rate = 1.2;
+                      utterance.pitch = 0.7;
+                      utterance.volume = 0.8;
+                      speechSynthesis.speak(utterance);
+                    }}
+                  >
+                    <Dog size={14} className="text-coral" />
+                    <span className="leading-tight">{sound.label}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* Cat Sounds */}
+            <div>
+              <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                <Cat size={16} className="text-teal" />
+                Cat Sounds
+              </h4>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { label: "Happy Purr", sound: "purrrr purrrr" },
+                  { label: "Meow", sound: "meow meow!" },
+                  { label: "Chirp", sound: "chirp chirp!" },
+                  { label: "Trill", sound: "prrrrow!" },
+                  { label: "Hungry Mew", sound: "mew mew mew" },
+                  { label: "Loud Meow", sound: "MEOW! MEOW!" },
+                  { label: "Question Meow", sound: "meow?" },
+                  { label: "Chatty Trill", sound: "prrrr-ow prrrr-ow!" },
+                  { label: "Sleepy Purr", sound: "purrrr... purrrr..." },
+                  { label: "Kitten Mew", sound: "mew mew mew!" },
+                  { label: "Greeting Chirp", sound: "chirp! prrrrow!" },
+                  { label: "Annoyed Meow", sound: "mrow! mrow!" },
+                  { label: "Gentle Purr", sound: "purr purr purr" },
+                  { label: "Demanding Yowl", sound: "yowwwwl!" },
+                  { label: "Content Purr", sound: "purrrrrr..." }
+                ].map((sound) => (
+                  <Button
+                    key={sound.label}
+                    variant="outline"
+                    className="h-16 flex-col space-y-1 hover:bg-teal/10 text-xs p-2"
+                    onClick={() => {
+                      const utterance = new SpeechSynthesisUtterance(sound.sound);
+                      utterance.rate = 0.9;
+                      utterance.pitch = 1.4;
+                      utterance.volume = 0.7;
+                      speechSynthesis.speak(utterance);
+                    }}
+                  >
+                    <Cat size={14} className="text-teal" />
+                    <span className="leading-tight">{sound.label}</span>
+                  </Button>
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -12,10 +12,30 @@ interface VoiceRecorderProps {
 const VoiceRecorder = ({ onRecordingComplete, isAnalyzing }: VoiceRecorderProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [microphoneStatus, setMicrophoneStatus] = useState<'unknown' | 'granted' | 'denied' | 'prompt'>('unknown');
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
+
+  // Check microphone permissions on component mount
+  useEffect(() => {
+    checkMicrophonePermission();
+  }, []);
+
+  const checkMicrophonePermission = async () => {
+    try {
+      const permission = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+      setMicrophoneStatus(permission.state);
+      
+      permission.addEventListener('change', () => {
+        setMicrophoneStatus(permission.state);
+      });
+    } catch (error) {
+      console.log('Permission API not supported');
+      setMicrophoneStatus('unknown');
+    }
+  };
 
   useEffect(() => {
     return () => {
@@ -73,12 +93,29 @@ const VoiceRecorder = ({ onRecordingComplete, isAnalyzing }: VoiceRecorderProps)
         setRecordingTime(prev => prev + 1);
       }, 1000);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error accessing microphone:', error);
+      setMicrophoneStatus('denied');
+      
+      let errorMessage = "Please allow microphone access to record your pet's voice.";
+      let title = "Microphone Error";
+      
+      if (error.name === 'NotAllowedError') {
+        title = "Microphone Permission Denied";
+        errorMessage = "🎤 To record your pet's voice:\n\n1. Click the microphone icon in your browser's address bar\n2. Select 'Allow' for microphone access\n3. Refresh the page and try again";
+      } else if (error.name === 'NotFoundError') {
+        title = "No Microphone Found";
+        errorMessage = "No microphone detected. Please connect a microphone and try again.";
+      } else if (error.name === 'NotSupportedError') {
+        title = "Microphone Not Supported";
+        errorMessage = "Your browser doesn't support microphone recording. Try using Chrome, Firefox, or Safari.";
+      }
+      
       toast({
-        title: "Microphone Error",
-        description: "Please allow microphone access to record your pet's voice.",
+        title,
+        description: errorMessage,
         variant: "destructive",
+        duration: 8000,
       });
     }
   };
@@ -144,10 +181,37 @@ const VoiceRecorder = ({ onRecordingComplete, isAnalyzing }: VoiceRecorderProps)
             <p className="text-lg font-semibold text-primary">Analyzing...</p>
             <p className="text-sm text-muted-foreground">Understanding your pet's voice</p>
           </div>
+        ) : microphoneStatus === 'denied' ? (
+          <div className="space-y-3 text-center">
+            <p className="text-lg font-semibold text-red-600">🎤 Microphone Access Needed</p>
+            <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-200 dark:border-red-800">
+              <p className="text-sm text-red-700 dark:text-red-300 leading-relaxed">
+                To record your pet's voice:
+              </p>
+              <ol className="text-sm text-red-700 dark:text-red-300 mt-2 text-left space-y-1">
+                <li>1. Click the 🎤 icon in your browser's address bar</li>
+                <li>2. Select "Allow" for microphone access</li>
+                <li>3. Refresh the page and try again</li>
+              </ol>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => window.location.reload()}
+              className="mt-2"
+            >
+              Refresh Page
+            </Button>
+          </div>
         ) : (
           <div className="space-y-2">
-            <p className="text-lg font-semibold text-foreground">Hold to Record</p>
+            <p className="text-lg font-semibold text-foreground">Tap to Record</p>
             <p className="text-sm text-muted-foreground">Let your pet make some sounds!</p>
+            {microphoneStatus === 'prompt' && (
+              <p className="text-xs text-orange-600 bg-orange-50 dark:bg-orange-900/20 p-2 rounded border border-orange-200 dark:border-orange-800">
+                💡 You may be prompted to allow microphone access
+              </p>
+            )}
           </div>
         )}
       </div>

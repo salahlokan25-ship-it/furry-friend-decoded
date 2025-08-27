@@ -57,9 +57,25 @@ const TranslatePage = () => {
 
   const speakTranslation = () => {
     if (translationResult) {
+      // Cancel any ongoing speech
+      speechSynthesis.cancel();
+      
       const utterance = new SpeechSynthesisUtterance(translationResult);
       utterance.rate = 0.8;
       utterance.pitch = selectedPetType === "cat" ? 1.3 : 0.8;
+      utterance.volume = 1.0;
+      utterance.lang = 'en-US';
+      
+      // Try to use a more natural English voice
+      const voices = speechSynthesis.getVoices();
+      const englishVoice = voices.find(voice => 
+        voice.lang.includes('en') && voice.name.includes('Google')
+      ) || voices.find(voice => voice.lang.includes('en-US'));
+      
+      if (englishVoice) {
+        utterance.voice = englishVoice;
+      }
+      
       speechSynthesis.speak(utterance);
     }
   };
@@ -193,6 +209,16 @@ const TranslatePage = () => {
                         utterance.volume = 0.8;
                         utterance.lang = 'en-US';
                         
+                        // Try to use a more natural English voice
+                        const voices = speechSynthesis.getVoices();
+                        const englishVoice = voices.find(voice => 
+                          voice.lang.includes('en') && voice.name.includes('Google')
+                        ) || voices.find(voice => voice.lang.includes('en-US'));
+                        
+                        if (englishVoice) {
+                          utterance.voice = englishVoice;
+                        }
+                        
                         // Play the sound
                         speechSynthesis.speak(utterance);
                       } catch (error) {
@@ -251,6 +277,16 @@ const TranslatePage = () => {
                         utterance.pitch = 1.4;
                         utterance.volume = 0.7;
                         utterance.lang = 'en-US';
+                        
+                        // Try to use a more natural English voice
+                        const voices = speechSynthesis.getVoices();
+                        const englishVoice = voices.find(voice => 
+                          voice.lang.includes('en') && voice.name.includes('Google')
+                        ) || voices.find(voice => voice.lang.includes('en-US'));
+                        
+                        if (englishVoice) {
+                          utterance.voice = englishVoice;
+                        }
                         
                         // Play the sound
                         speechSynthesis.speak(utterance);

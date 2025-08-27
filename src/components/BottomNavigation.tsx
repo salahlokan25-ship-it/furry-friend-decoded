@@ -29,7 +29,9 @@ const BottomNavigation = ({ activeTab, onTabChange }: BottomNavigationProps) => 
               className={cn(
                 "flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200",
                 isActive 
-                  ? "text-primary scale-110" 
+                  ? tab.id === "translate" 
+                    ? "text-orange-500 scale-110" 
+                    : "text-primary scale-110"
                   : "text-muted-foreground hover:text-primary"
               )}
             >
@@ -42,7 +44,11 @@ const BottomNavigation = ({ activeTab, onTabChange }: BottomNavigationProps) => 
               />
               <span className={cn(
                 "text-xs mt-1 font-medium transition-all duration-200",
-                isActive ? "text-primary" : "text-muted-foreground"
+                isActive 
+                  ? tab.id === "translate" 
+                    ? "text-orange-500" 
+                    : "text-primary"
+                  : "text-muted-foreground"
               )}>
                 {tab.label}
               </span>

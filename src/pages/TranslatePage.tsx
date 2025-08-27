@@ -182,11 +182,27 @@ const TranslatePage = () => {
                     variant="outline"
                     className="h-16 flex-col space-y-1 hover:bg-coral/10 text-xs p-2"
                     onClick={() => {
-                      const utterance = new SpeechSynthesisUtterance(sound.sound);
-                      utterance.rate = 1.2;
-                      utterance.pitch = 0.7;
-                      utterance.volume = 0.8;
-                      speechSynthesis.speak(utterance);
+                      try {
+                        // Cancel any ongoing speech
+                        speechSynthesis.cancel();
+                        
+                        // Create and configure utterance
+                        const utterance = new SpeechSynthesisUtterance(sound.sound);
+                        utterance.rate = 1.2;
+                        utterance.pitch = 0.7;
+                        utterance.volume = 0.8;
+                        utterance.lang = 'en-US';
+                        
+                        // Play the sound
+                        speechSynthesis.speak(utterance);
+                      } catch (error) {
+                        console.error('Speech synthesis error:', error);
+                        // Fallback: show toast with the sound text
+                        toast({
+                          title: "Dog Sound",
+                          description: sound.sound,
+                        });
+                      }
                     }}
                   >
                     <Dog size={14} className="text-coral" />
@@ -225,11 +241,27 @@ const TranslatePage = () => {
                     variant="outline"
                     className="h-16 flex-col space-y-1 hover:bg-teal/10 text-xs p-2"
                     onClick={() => {
-                      const utterance = new SpeechSynthesisUtterance(sound.sound);
-                      utterance.rate = 0.9;
-                      utterance.pitch = 1.4;
-                      utterance.volume = 0.7;
-                      speechSynthesis.speak(utterance);
+                      try {
+                        // Cancel any ongoing speech
+                        speechSynthesis.cancel();
+                        
+                        // Create and configure utterance
+                        const utterance = new SpeechSynthesisUtterance(sound.sound);
+                        utterance.rate = 0.9;
+                        utterance.pitch = 1.4;
+                        utterance.volume = 0.7;
+                        utterance.lang = 'en-US';
+                        
+                        // Play the sound
+                        speechSynthesis.speak(utterance);
+                      } catch (error) {
+                        console.error('Speech synthesis error:', error);
+                        // Fallback: show toast with the sound text
+                        toast({
+                          title: "Cat Sound",
+                          description: sound.sound,
+                        });
+                      }
                     }}
                   >
                     <Cat size={14} className="text-teal" />

@@ -16,7 +16,7 @@ const BottomNavigation = ({ activeTab, onTabChange }: BottomNavigationProps) => 
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 safe-area-pb">
+    <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-orange-500 to-orange-600 border-t border-orange-400 px-4 py-2 safe-area-pb shadow-lg">
       <div className="flex items-center justify-around max-w-md mx-auto">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -29,10 +29,8 @@ const BottomNavigation = ({ activeTab, onTabChange }: BottomNavigationProps) => 
               className={cn(
                 "flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200",
                 isActive 
-                  ? tab.id === "translate" 
-                    ? "text-orange-500 scale-110" 
-                    : "text-primary scale-110"
-                  : "text-muted-foreground hover:text-primary"
+                  ? "text-white scale-110 bg-white/20 backdrop-blur-sm" 
+                  : "text-orange-100 hover:text-white hover:bg-white/10"
               )}
             >
               <Icon 
@@ -45,10 +43,8 @@ const BottomNavigation = ({ activeTab, onTabChange }: BottomNavigationProps) => 
               <span className={cn(
                 "text-xs mt-1 font-medium transition-all duration-200",
                 isActive 
-                  ? tab.id === "translate" 
-                    ? "text-orange-500" 
-                    : "text-primary"
-                  : "text-muted-foreground"
+                  ? "text-white font-semibold"
+                  : "text-orange-100"
               )}>
                 {tab.label}
               </span>

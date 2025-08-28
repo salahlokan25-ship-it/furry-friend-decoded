@@ -535,7 +535,11 @@ const TrainingPage = () => {
                   <span className="text-lg">0%</span>
                 </div>
               </div>
-              <Button variant="coral" size="sm">
+              <Button 
+                variant="coral" 
+                size="sm"
+                onClick={() => setSelectedCourse(courses[0])}
+              >
                 Start Now
               </Button>
             </div>

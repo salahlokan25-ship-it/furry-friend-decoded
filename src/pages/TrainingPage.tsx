@@ -378,7 +378,16 @@ const TrainingPage = () => {
           : lesson
       )
     };
+    
     setSelectedCourse(updatedCourse);
+    
+    // Update selected lesson state if it's the current lesson being toggled
+    if (selectedLesson && selectedLesson.id === lessonId) {
+      setSelectedLesson({
+        ...selectedLesson,
+        completed: !selectedLesson.completed
+      });
+    }
   };
 
   // Render individual lesson view

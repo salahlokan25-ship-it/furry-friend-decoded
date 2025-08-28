@@ -25,40 +25,16 @@ const VoiceRecorder = ({ onRecordingComplete, isAnalyzing }: VoiceRecorderProps)
 
   const checkMicrophonePermission = async () => {
     try {
-      // First try to get permission status from API
+      // Simple permission check without aggressive testing
       const permission = await navigator.permissions.query({ name: 'microphone' as PermissionName });
-      
-      // If permission is granted, do a quick test to verify actual access
-      if (permission.state === 'granted') {
-        try {
-          const testStream = await navigator.mediaDevices.getUserMedia({ 
-            audio: { sampleRate: 8000, channelCount: 1 } 
-          });
-          testStream.getTracks().forEach(track => track.stop());
-          setMicrophoneStatus('granted');
-        } catch (testError) {
-          console.log('Permission granted but microphone test failed:', testError);
-          setMicrophoneStatus('denied');
-        }
-      } else {
-        setMicrophoneStatus(permission.state);
-      }
+      setMicrophoneStatus(permission.state);
       
       permission.addEventListener('change', () => {
         setMicrophoneStatus(permission.state);
       });
     } catch (error) {
-      console.log('Permission API not supported, testing direct access');
-      // Fallback: try direct access test
-      try {
-        const testStream = await navigator.mediaDevices.getUserMedia({ 
-          audio: { sampleRate: 8000, channelCount: 1 } 
-        });
-        testStream.getTracks().forEach(track => track.stop());
-        setMicrophoneStatus('granted');
-      } catch (testError) {
-        setMicrophoneStatus('unknown');
-      }
+      // Permission API not supported, assume unknown and let user try
+      setMicrophoneStatus('unknown');
     }
   };
 
@@ -234,10 +210,10 @@ const VoiceRecorder = ({ onRecordingComplete, isAnalyzing }: VoiceRecorderProps)
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={checkMicrophonePermission}
+                onClick={startRecording}
                 className="flex-1"
               >
-                Try Again
+                Try Recording
               </Button>
               <Button 
                 variant="outline" 

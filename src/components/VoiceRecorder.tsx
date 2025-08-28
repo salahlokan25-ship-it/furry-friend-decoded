@@ -25,15 +25,40 @@ const VoiceRecorder = ({ onRecordingComplete, isAnalyzing }: VoiceRecorderProps)
 
   const checkMicrophonePermission = async () => {
     try {
+      // First try to get permission status from API
       const permission = await navigator.permissions.query({ name: 'microphone' as PermissionName });
-      setMicrophoneStatus(permission.state);
+      
+      // If permission is granted, do a quick test to verify actual access
+      if (permission.state === 'granted') {
+        try {
+          const testStream = await navigator.mediaDevices.getUserMedia({ 
+            audio: { sampleRate: 8000, channelCount: 1 } 
+          });
+          testStream.getTracks().forEach(track => track.stop());
+          setMicrophoneStatus('granted');
+        } catch (testError) {
+          console.log('Permission granted but microphone test failed:', testError);
+          setMicrophoneStatus('denied');
+        }
+      } else {
+        setMicrophoneStatus(permission.state);
+      }
       
       permission.addEventListener('change', () => {
         setMicrophoneStatus(permission.state);
       });
     } catch (error) {
-      console.log('Permission API not supported');
-      setMicrophoneStatus('unknown');
+      console.log('Permission API not supported, testing direct access');
+      // Fallback: try direct access test
+      try {
+        const testStream = await navigator.mediaDevices.getUserMedia({ 
+          audio: { sampleRate: 8000, channelCount: 1 } 
+        });
+        testStream.getTracks().forEach(track => track.stop());
+        setMicrophoneStatus('granted');
+      } catch (testError) {
+        setMicrophoneStatus('unknown');
+      }
     }
   };
 
@@ -50,14 +75,22 @@ const VoiceRecorder = ({ onRecordingComplete, isAnalyzing }: VoiceRecorderProps)
 
   const startRecording = async () => {
     try {
+      // Reset microphone status to avoid stale state
+      setMicrophoneStatus('unknown');
+      
+      // Request microphone access with proper constraints
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
           sampleRate: 44100,
           channelCount: 1,
           echoCancellation: true,
-          noiseSuppression: true
+          noiseSuppression: true,
+          autoGainControl: true
         } 
       });
+      
+      // If we get here, access was granted
+      setMicrophoneStatus('granted');
       
       streamRef.current = stream;
       
@@ -101,21 +134,24 @@ const VoiceRecorder = ({ onRecordingComplete, isAnalyzing }: VoiceRecorderProps)
       let title = "Microphone Error";
       
       if (error.name === 'NotAllowedError') {
-        title = "Microphone Permission Denied";
-        errorMessage = "🎤 To record your pet's voice:\n\n1. Click the microphone icon in your browser's address bar\n2. Select 'Allow' for microphone access\n3. Refresh the page and try again";
+        title = "Microphone Access Required";
+        errorMessage = "🎤 Please allow microphone access:\n\n• Click the microphone icon (🎤) in your browser's address bar\n• Select 'Allow' when prompted\n• Or try the button below to request access again";
       } else if (error.name === 'NotFoundError') {
         title = "No Microphone Found";
         errorMessage = "No microphone detected. Please connect a microphone and try again.";
       } else if (error.name === 'NotSupportedError') {
         title = "Microphone Not Supported";
         errorMessage = "Your browser doesn't support microphone recording. Try using Chrome, Firefox, or Safari.";
+      } else if (error.name === 'AbortError') {
+        title = "Microphone Access Interrupted";
+        errorMessage = "Microphone access was interrupted. Please try again.";
       }
       
       toast({
         title,
         description: errorMessage,
         variant: "destructive",
-        duration: 8000,
+        duration: 10000,
       });
     }
   };
@@ -191,17 +227,27 @@ const VoiceRecorder = ({ onRecordingComplete, isAnalyzing }: VoiceRecorderProps)
               <ol className="text-sm text-red-700 dark:text-red-300 mt-2 text-left space-y-1">
                 <li>1. Click the 🎤 icon in your browser's address bar</li>
                 <li>2. Select "Allow" for microphone access</li>
-                <li>3. Refresh the page and try again</li>
+                <li>3. Try the button below to request access</li>
               </ol>
             </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => window.location.reload()}
-              className="mt-2"
-            >
-              Refresh Page
-            </Button>
+            <div className="flex gap-2 mt-3">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={checkMicrophonePermission}
+                className="flex-1"
+              >
+                Try Again
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => window.location.reload()}
+                className="flex-1"
+              >
+                Refresh Page
+              </Button>
+            </div>
           </div>
         ) : (
           <div className="space-y-2">

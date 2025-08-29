@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import VoiceRecorder from "@/components/VoiceRecorder";
+import PetPlayAnimation from "@/components/PetPlayAnimation";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Volume2, Cat, Dog } from "lucide-react";
@@ -126,13 +126,10 @@ const TranslatePage = () => {
           </CardContent>
         </Card>
 
-        {/* Voice Recorder */}
+        {/* Pet Play Animation */}
         <Card className="border-0 shadow-soft">
-          <CardContent className="p-8">
-            <VoiceRecorder 
-              onRecordingComplete={handleRecordingComplete}
-              isAnalyzing={isAnalyzing}
-            />
+          <CardContent className="p-6">
+            <PetPlayAnimation />
           </CardContent>
         </Card>
 

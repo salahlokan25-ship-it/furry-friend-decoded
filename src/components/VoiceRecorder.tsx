@@ -25,7 +25,7 @@ const VoiceRecorder = ({ onRecordingComplete, isAnalyzing }: VoiceRecorderProps)
 
   const checkMicrophonePermission = async () => {
     try {
-      // Simple permission check without aggressive testing
+      // Only check permission status, don't request access yet
       const permission = await navigator.permissions.query({ name: 'microphone' as PermissionName });
       setMicrophoneStatus(permission.state);
       
@@ -33,7 +33,7 @@ const VoiceRecorder = ({ onRecordingComplete, isAnalyzing }: VoiceRecorderProps)
         setMicrophoneStatus(permission.state);
       });
     } catch (error) {
-      // Permission API not supported, assume unknown and let user try
+      // Permission API not supported, show normal button
       setMicrophoneStatus('unknown');
     }
   };
@@ -51,9 +51,6 @@ const VoiceRecorder = ({ onRecordingComplete, isAnalyzing }: VoiceRecorderProps)
 
   const startRecording = async () => {
     try {
-      // Reset microphone status to avoid stale state
-      setMicrophoneStatus('unknown');
-      
       // Request microphone access with proper constraints
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {

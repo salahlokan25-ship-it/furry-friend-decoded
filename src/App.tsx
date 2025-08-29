@@ -7,6 +7,7 @@ import BottomNavigation from "@/components/BottomNavigation";
 import TranslatePage from "@/pages/TranslatePage";
 import AlbumPage from "@/pages/AlbumPage";
 import TrainingPage from "@/pages/TrainingPage";
+import ChatPage from "@/pages/ChatPage";
 import SettingsPage from "@/pages/SettingsPage";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,8 @@ const App = () => {
         return <AlbumPage />;
       case "training":
         return <TrainingPage />;
+      case "chat":
+        return <ChatPage />;
       case "settings":
         return <SettingsPage />;
       default:

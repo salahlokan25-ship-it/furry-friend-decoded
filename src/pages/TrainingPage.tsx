@@ -880,57 +880,124 @@ const TrainingPage = () => {
         </Card>
 
         {/* Course Categories */}
-        <div className="space-y-4">
-          <h3 className="font-semibold text-lg">Training Courses</h3>
-          
-          {courses.map((course) => (
-            <Card 
-              key={course.id}
-              className="border-0 shadow-soft cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={() => setSelectedCourse(course)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-4">
-                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
-                    <img 
-                      src={course.petType === "dog" ? happyDog : cuteCat} 
-                      alt={course.petType} 
-                      className="w-10 h-10"
-                    />
-                  </div>
-                  
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <h4 className="font-medium">{course.title}</h4>
-                      <ChevronRight size={20} className="text-muted-foreground" />
-                    </div>
-                    
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {course.description}
-                    </p>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <Badge variant="outline" className="text-xs">
-                          {course.difficulty}
-                        </Badge>
-                        <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-                          <Clock size={12} />
-                          <span>{course.duration}</span>
+        <div className="space-y-6">
+          {/* Dog Courses Section */}
+          <div>
+            <div className="flex items-center space-x-3 mb-4">
+              <img src={happyDog} alt="Dog" className="w-8 h-8" />
+              <h3 className="font-semibold text-lg text-foreground">Dog Training Courses</h3>
+            </div>
+            
+            <div className="space-y-3">
+              {courses.filter(course => course.petType === "dog").map((course) => (
+                <Card 
+                  key={course.id}
+                  className="border-0 shadow-soft cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => setSelectedCourse(course)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+                        <img 
+                          src={happyDog} 
+                          alt="dog" 
+                          className="w-10 h-10"
+                        />
+                      </div>
+                      
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="font-medium">{course.title}</h4>
+                          <ChevronRight size={20} className="text-muted-foreground" />
+                        </div>
+                        
+                        <p className="text-sm text-muted-foreground mb-2">
+                          {course.description}
+                        </p>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            <Badge variant="outline" className="text-xs">
+                              {course.difficulty}
+                            </Badge>
+                            <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+                              <Clock size={12} />
+                              <span>{course.duration}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Progress value={course.progress} className="w-16 h-2" />
+                            <span className="text-xs text-muted-foreground">
+                              {course.progress}%
+                            </span>
+                          </div>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Progress value={course.progress} className="w-16 h-2" />
-                        <span className="text-xs text-muted-foreground">
-                          {course.progress}%
-                        </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Cat Courses Section */}
+          <div>
+            <div className="flex items-center space-x-3 mb-4">
+              <img src={cuteCat} alt="Cat" className="w-8 h-8" />
+              <h3 className="font-semibold text-lg text-foreground">Cat Training Courses</h3>
+            </div>
+            
+            <div className="space-y-3">
+              {courses.filter(course => course.petType === "cat").map((course) => (
+                <Card 
+                  key={course.id}
+                  className="border-0 shadow-soft cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => setSelectedCourse(course)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+                        <img 
+                          src={cuteCat} 
+                          alt="cat" 
+                          className="w-10 h-10"
+                        />
+                      </div>
+                      
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="font-medium">{course.title}</h4>
+                          <ChevronRight size={20} className="text-muted-foreground" />
+                        </div>
+                        
+                        <p className="text-sm text-muted-foreground mb-2">
+                          {course.description}
+                        </p>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            <Badge variant="outline" className="text-xs">
+                              {course.difficulty}
+                            </Badge>
+                            <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+                              <Clock size={12} />
+                              <span>{course.duration}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Progress value={course.progress} className="w-16 h-2" />
+                            <span className="text-xs text-muted-foreground">
+                              {course.progress}%
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Quick Tips */}

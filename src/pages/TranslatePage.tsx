@@ -305,6 +305,158 @@ const TranslatePage = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Pet Food Guide */}
+        <Card className="border-0 shadow-soft">
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-4">Pet Food Guide</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Discover the best foods for your furry friend
+            </p>
+            
+            {/* Dog Foods */}
+            <div className="mb-6">
+              <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                <Dog size={16} className="text-coral" />
+                Dog Foods
+              </h4>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { 
+                    name: "Premium Dry Kibble", 
+                    image: "🥘",
+                    description: "Balanced nutrition for daily meals",
+                    benefits: "Complete protein, vitamins & minerals"
+                  },
+                  { 
+                    name: "Wet Canned Food", 
+                    image: "🥫",
+                    description: "High moisture content for hydration",
+                    benefits: "Easy to digest, great for seniors"
+                  },
+                  { 
+                    name: "Raw Diet Mix", 
+                    image: "🥩",
+                    description: "Natural raw food blend",
+                    benefits: "High protein, natural enzymes"
+                  },
+                  { 
+                    name: "Training Treats", 
+                    image: "🦴",
+                    description: "Small rewards for good behavior",
+                    benefits: "Motivation, bonding, skills building"
+                  },
+                  { 
+                    name: "Dental Chews", 
+                    image: "🦷",
+                    description: "Promotes oral health",
+                    benefits: "Cleans teeth, fresh breath"
+                  },
+                  { 
+                    name: "Puppy Formula", 
+                    image: "🍼",
+                    description: "Specially formulated for growing pups",
+                    benefits: "Growth support, brain development"
+                  },
+                  { 
+                    name: "Senior Dog Food", 
+                    image: "👴",
+                    description: "Gentle nutrition for older dogs",
+                    benefits: "Joint support, easy digestion"
+                  },
+                  { 
+                    name: "Grain-Free Option", 
+                    image: "🌾",
+                    description: "For dogs with grain sensitivities",
+                    benefits: "Reduces allergies, better digestion"
+                  }
+                ].map((food) => (
+                  <Card key={food.name} className="p-4 hover:bg-coral/5 transition-colors cursor-pointer">
+                    <div className="flex items-start space-x-3">
+                      <div className="text-2xl">{food.image}</div>
+                      <div className="flex-1">
+                        <h5 className="font-medium text-sm mb-1">{food.name}</h5>
+                        <p className="text-xs text-muted-foreground mb-2">{food.description}</p>
+                        <Badge variant="secondary" className="text-xs">{food.benefits}</Badge>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            {/* Cat Foods */}
+            <div>
+              <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                <Cat size={16} className="text-teal" />
+                Cat Foods
+              </h4>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { 
+                    name: "Premium Cat Kibble", 
+                    image: "🥣",
+                    description: "Complete nutrition for adult cats",
+                    benefits: "Balanced protein, healthy coat"
+                  },
+                  { 
+                    name: "Wet Pâté", 
+                    image: "🍖",
+                    description: "Rich, smooth textured meals",
+                    benefits: "High moisture, irresistible taste"
+                  },
+                  { 
+                    name: "Fish-Based Diet", 
+                    image: "🐟",
+                    description: "Ocean-fresh protein source",
+                    benefits: "Omega-3, brain health"
+                  },
+                  { 
+                    name: "Freeze-Dried Treats", 
+                    image: "❄️",
+                    description: "Pure protein snacks",
+                    benefits: "Training rewards, natural flavor"
+                  },
+                  { 
+                    name: "Hairball Control", 
+                    image: "🧼",
+                    description: "Helps reduce hairball formation",
+                    benefits: "Digestive health, fiber blend"
+                  },
+                  { 
+                    name: "Kitten Formula", 
+                    image: "🐱",
+                    description: "Growth nutrition for kittens",
+                    benefits: "Brain development, immune support"
+                  },
+                  { 
+                    name: "Indoor Cat Food", 
+                    image: "🏠",
+                    description: "Tailored for indoor lifestyle",
+                    benefits: "Weight control, less odor"
+                  },
+                  { 
+                    name: "Sensitive Stomach", 
+                    image: "💚",
+                    description: "Gentle formula for sensitive cats",
+                    benefits: "Easy digestion, limited ingredients"
+                  }
+                ].map((food) => (
+                  <Card key={food.name} className="p-4 hover:bg-teal/5 transition-colors cursor-pointer">
+                    <div className="flex items-start space-x-3">
+                      <div className="text-2xl">{food.image}</div>
+                      <div className="flex-1">
+                        <h5 className="font-medium text-sm mb-1">{food.name}</h5>
+                        <p className="text-xs text-muted-foreground mb-2">{food.description}</p>
+                        <Badge variant="secondary" className="text-xs">{food.benefits}</Badge>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

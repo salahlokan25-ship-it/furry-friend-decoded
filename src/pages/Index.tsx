@@ -4,12 +4,19 @@ import { Badge } from "@/components/ui/badge";
 import { ExternalLink, Star, Heart, ShoppingCart } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
+// Import product images
+import nailTrimmerImg from "@/assets/products/nail-trimmer.jpg";
+import catHammockImg from "@/assets/products/cat-hammock.jpg";
+import dogRopeTokyImg from "@/assets/products/dog-rope-toy.jpg";
+import gpsTrackerImg from "@/assets/products/gps-tracker.jpg";
+import sprayBrushImg from "@/assets/products/spray-brush.jpg";
+
 const products = [
   {
     id: 1,
     name: "QuietClip: Stress-Free Pet Nail Trimmer",
     price: "$24.99",
-    image: "https://petparadise.it.com/cdn/shop/files/store2image32.png?v=1746823288&width=400",
+    image: nailTrimmerImg,
     description: "Revolutionary quiet nail trimmer that reduces pet anxiety during grooming sessions.",
     category: "Grooming",
     rating: 4.8,
@@ -19,7 +26,7 @@ const products = [
     id: 2,
     name: "PurrFect Paws: Ultimate Cat Grooming Hammock",
     price: "$24.99",
-    image: "https://petparadise.it.com/cdn/shop/files/store2image17.png?v=1746803732&width=400",
+    image: catHammockImg,
     description: "Transform nail-trimming from a battle to a calm 5-minute session with this innovative hammock.",
     category: "Grooming",
     rating: 4.9,
@@ -29,7 +36,7 @@ const products = [
     id: 3,
     name: "TugJoy: Interactive Dog Toy That Bonds & Cleans",
     price: "$19.99",
-    image: "https://petparadise.it.com/cdn/shop/files/store2image27.png?v=1746816894&width=400",
+    image: dogRopeTokyImg,
     description: "Durable rope toy that survives even the toughest chewers while promoting dental health.",
     category: "Toys",
     rating: 4.7,
@@ -39,7 +46,7 @@ const products = [
     id: 4,
     name: "TrackTag: Anti-Loss Pet Locators",
     price: "$24.99",
-    image: "https://petparadise.it.com/cdn/shop/files/store2image53.png?v=1746890042&width=400",
+    image: gpsTrackerImg,
     description: "Advanced GPS tracking system to keep your beloved pets safe and never lose them again.",
     category: "Safety",
     rating: 4.6,
@@ -49,7 +56,7 @@ const products = [
     id: 5,
     name: "SpaSpray: 2-in-1 Pet Grooming Brush",
     price: "$23.99",
-    image: "https://petparadise.it.com/cdn/shop/files/store2image43.png?v=1746871079&width=400",
+    image: sprayBrushImg,
     description: "Revolutionary grooming brush with built-in spray system for professional results at home.",
     category: "Grooming",
     rating: 4.8,

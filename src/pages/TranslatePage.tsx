@@ -235,6 +235,156 @@ const TranslatePage = () => {
               </div>
             </div>
 
+            {/* Interactive Pet Games */}
+            <div className="my-8 p-4 bg-gradient-to-r from-primary/5 via-secondary/5 to-accent/5 rounded-lg border border-primary/10">
+              <h4 className="text-sm font-medium mb-3 flex items-center gap-2 justify-center">
+                🎮 Interactive Pet Games
+              </h4>
+              <p className="text-xs text-muted-foreground text-center mb-4">
+                Fun games to play with your pets using sounds and interactions
+              </p>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  variant="outline"
+                  className="h-20 flex-col space-y-2 hover:bg-primary/10 bg-gradient-to-br from-coral/10 to-coral/5"
+                  onClick={() => {
+                    const sounds = ["woof woof!", "meow meow!", "chirp chirp!", "ruff ruff!"];
+                    const randomSound = sounds[Math.floor(Math.random() * sounds.length)];
+                    
+                    try {
+                      speechSynthesis.cancel();
+                      const utterance = new SpeechSynthesisUtterance(randomSound);
+                      utterance.rate = 1.0;
+                      utterance.pitch = randomSound.includes("meow") ? 1.3 : 0.8;
+                      utterance.volume = 0.8;
+                      speechSynthesis.speak(utterance);
+                      
+                      toast({
+                        title: "🎲 Random Sound Game",
+                        description: `Playing: "${randomSound}" - See how your pet reacts!`,
+                      });
+                    } catch (error) {
+                      toast({
+                        title: "🎲 Random Sound Game",
+                        description: randomSound,
+                      });
+                    }
+                  }}
+                >
+                  <span className="text-lg">🎲</span>
+                  <span className="text-xs text-center leading-tight">Random Sound Game</span>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="h-20 flex-col space-y-2 hover:bg-secondary/10 bg-gradient-to-br from-teal/10 to-teal/5"
+                  onClick={() => {
+                    const sequence = ["chirp chirp!", "meow!", "purrrr"];
+                    let index = 0;
+                    
+                    const playSequence = () => {
+                      if (index < sequence.length) {
+                        try {
+                          speechSynthesis.cancel();
+                          const utterance = new SpeechSynthesisUtterance(sequence[index]);
+                          utterance.rate = 0.9;
+                          utterance.pitch = 1.2;
+                          utterance.volume = 0.7;
+                          speechSynthesis.speak(utterance);
+                        } catch (error) {
+                          console.error('Speech error:', error);
+                        }
+                        index++;
+                        setTimeout(playSequence, 1500);
+                      }
+                    };
+                    
+                    toast({
+                      title: "🎵 Call & Response",
+                      description: "Playing a sequence for your pet to respond to!",
+                    });
+                    playSequence();
+                  }}
+                >
+                  <span className="text-lg">🎵</span>
+                  <span className="text-xs text-center leading-tight">Call & Response</span>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="h-20 flex-col space-y-2 hover:bg-accent/10 bg-gradient-to-br from-purple-100/50 to-purple-50"
+                  onClick={() => {
+                    const hideAndSeekSounds = [
+                      "Where are you? Come find me!",
+                      "I'm hiding! Can you find me?",
+                      "Peek-a-boo! I see you!"
+                    ];
+                    const randomPhrase = hideAndSeekSounds[Math.floor(Math.random() * hideAndSeekSounds.length)];
+                    
+                    try {
+                      speechSynthesis.cancel();
+                      const utterance = new SpeechSynthesisUtterance(randomPhrase);
+                      utterance.rate = 0.8;
+                      utterance.pitch = 1.1;
+                      utterance.volume = 0.9;
+                      speechSynthesis.speak(utterance);
+                    } catch (error) {
+                      console.error('Speech error:', error);
+                    }
+                    
+                    toast({
+                      title: "🙈 Hide & Seek",
+                      description: "Try hiding and calling your pet to find you!",
+                    });
+                  }}
+                >
+                  <span className="text-lg">🙈</span>
+                  <span className="text-xs text-center leading-tight">Hide & Seek</span>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="h-20 flex-col space-y-2 hover:bg-green-50 bg-gradient-to-br from-green-100/50 to-green-50"
+                  onClick={() => {
+                    const commands = [
+                      { text: "Sit! Good pet!", type: "command" },
+                      { text: "Come here! That's it!", type: "command" },
+                      { text: "Stay! Very good!", type: "command" },
+                      { text: "woof woof!", type: "reward" },
+                      { text: "purrrr purrrr", type: "reward" }
+                    ];
+                    const randomCommand = commands[Math.floor(Math.random() * commands.length)];
+                    
+                    try {
+                      speechSynthesis.cancel();
+                      const utterance = new SpeechSynthesisUtterance(randomCommand.text);
+                      utterance.rate = randomCommand.type === "command" ? 0.9 : 1.1;
+                      utterance.pitch = randomCommand.type === "command" ? 0.9 : 1.2;
+                      utterance.volume = 0.8;
+                      speechSynthesis.speak(utterance);
+                    } catch (error) {
+                      console.error('Speech error:', error);
+                    }
+                    
+                    toast({
+                      title: "🎯 Training Game",
+                      description: "Practice basic commands with your pet!",
+                    });
+                  }}
+                >
+                  <span className="text-lg">🎯</span>
+                  <span className="text-xs text-center leading-tight">Training Game</span>
+                </Button>
+              </div>
+              
+              <div className="mt-4 p-3 bg-white/50 rounded-lg border border-primary/10">
+                <p className="text-xs text-muted-foreground text-center">
+                  💡 <strong>Tip:</strong> Play these games regularly to strengthen your bond and keep your pets mentally stimulated!
+                </p>
+              </div>
+            </div>
+
             {/* Cat Sounds */}
             <div>
               <h4 className="text-sm font-medium mb-3 flex items-center gap-2">

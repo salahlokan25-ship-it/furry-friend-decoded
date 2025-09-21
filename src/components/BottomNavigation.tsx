@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, Camera, GraduationCap, Settings, Mic, MessageCircle } from "lucide-react";
+import { Home, Camera, GraduationCap, Settings, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BottomNavigationProps {
@@ -9,7 +9,7 @@ interface BottomNavigationProps {
 
 const BottomNavigation = ({ activeTab, onTabChange }: BottomNavigationProps) => {
   const tabs = [
-    { id: "translate", icon: Mic, label: "Translate" },
+    { id: "translate", icon: Home, label: "Home" },
     { id: "album", icon: Camera, label: "Album" }, 
     { id: "training", icon: GraduationCap, label: "Training" },
     { id: "chat", icon: MessageCircle, label: "Chat" },

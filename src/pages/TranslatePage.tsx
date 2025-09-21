@@ -306,6 +306,156 @@ const TranslatePage = () => {
           </CardContent>
         </Card>
 
+        {/* Pet Mood Interpreter */}
+        <Card className="border-0 shadow-soft">
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-4">🎭 Pet Mood Interpreter</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Learn to read your pet's emotions and understand what they're feeling
+            </p>
+            
+            {/* Dog Moods */}
+            <div className="mb-6">
+              <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                <Dog size={16} className="text-coral" />
+                Dog Emotions
+              </h4>
+              <div className="space-y-3">
+                {[
+                  { 
+                    mood: "Happy & Excited", 
+                    emoji: "😄",
+                    signs: "Tail wagging, bouncing, panting with relaxed mouth",
+                    meaning: "Your dog is joyful and ready to play or interact",
+                    color: "bg-green-100 border-green-200"
+                  },
+                  { 
+                    mood: "Anxious & Nervous", 
+                    emoji: "😰",
+                    signs: "Pacing, whining, trembling, hiding",
+                    meaning: "Your dog feels stressed and needs comfort or space",
+                    color: "bg-yellow-100 border-yellow-200"
+                  },
+                  { 
+                    mood: "Alert & Curious", 
+                    emoji: "🤔",
+                    signs: "Ears forward, head tilted, focused stare",
+                    meaning: "Your dog is interested and paying attention to something",
+                    color: "bg-blue-100 border-blue-200"
+                  },
+                  { 
+                    mood: "Tired & Sleepy", 
+                    emoji: "😴",
+                    signs: "Yawning, lying down, slow movements",
+                    meaning: "Your dog needs rest and a comfortable place to sleep",
+                    color: "bg-purple-100 border-purple-200"
+                  },
+                  { 
+                    mood: "Hungry & Begging", 
+                    emoji: "🤤",
+                    signs: "Staring at food, drooling, pawing at you",
+                    meaning: "Your dog wants food or treats",
+                    color: "bg-orange-100 border-orange-200"
+                  },
+                  { 
+                    mood: "Guilty & Submissive", 
+                    emoji: "😅",
+                    signs: "Lowered head, avoiding eye contact, tail between legs",
+                    meaning: "Your dog knows they did something wrong",
+                    color: "bg-red-100 border-red-200"
+                  }
+                ].map((mood) => (
+                  <div key={mood.mood} className={`p-3 rounded-lg border ${mood.color}`}>
+                    <div className="flex items-start space-x-3">
+                      <div className="text-xl">{mood.emoji}</div>
+                      <div className="flex-1">
+                        <h5 className="font-medium text-sm mb-1">{mood.mood}</h5>
+                        <p className="text-xs text-muted-foreground mb-1"><strong>Signs:</strong> {mood.signs}</p>
+                        <p className="text-xs text-foreground">{mood.meaning}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Cat Moods */}
+            <div className="mb-6">
+              <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                <Cat size={16} className="text-teal" />
+                Cat Emotions
+              </h4>
+              <div className="space-y-3">
+                {[
+                  { 
+                    mood: "Content & Relaxed", 
+                    emoji: "😌",
+                    signs: "Slow blinking, purring, kneading with paws",
+                    meaning: "Your cat feels safe, loved, and comfortable",
+                    color: "bg-green-100 border-green-200"
+                  },
+                  { 
+                    mood: "Playful & Energetic", 
+                    emoji: "😸",
+                    signs: "Pouncing, running, dilated pupils, chirping",
+                    meaning: "Your cat wants to play and has lots of energy",
+                    color: "bg-blue-100 border-blue-200"
+                  },
+                  { 
+                    mood: "Scared & Defensive", 
+                    emoji: "😿",
+                    signs: "Hissing, arched back, flattened ears, hiding",
+                    meaning: "Your cat feels threatened and needs space to calm down",
+                    color: "bg-red-100 border-red-200"
+                  },
+                  { 
+                    mood: "Curious & Investigating", 
+                    emoji: "🧐",
+                    signs: "Sniffing, slow approach, ears forward, tail up",
+                    meaning: "Your cat is interested in exploring something new",
+                    color: "bg-purple-100 border-purple-200"
+                  },
+                  { 
+                    mood: "Hungry & Demanding", 
+                    emoji: "😋",
+                    signs: "Meowing loudly, following you, rubbing against legs",
+                    meaning: "Your cat wants food and is asking for your attention",
+                    color: "bg-orange-100 border-orange-200"
+                  },
+                  { 
+                    mood: "Annoyed & Overstimulated", 
+                    emoji: "😤",
+                    signs: "Tail twitching, ears back, swatting, quick movements",
+                    meaning: "Your cat needs a break from interaction or stimulation",
+                    color: "bg-yellow-100 border-yellow-200"
+                  }
+                ].map((mood) => (
+                  <div key={mood.mood} className={`p-3 rounded-lg border ${mood.color}`}>
+                    <div className="flex items-start space-x-3">
+                      <div className="text-xl">{mood.emoji}</div>
+                      <div className="flex-1">
+                        <h5 className="font-medium text-sm mb-1">{mood.mood}</h5>
+                        <p className="text-xs text-muted-foreground mb-1"><strong>Signs:</strong> {mood.signs}</p>
+                        <p className="text-xs text-foreground">{mood.meaning}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 p-4 rounded-lg border border-primary/20">
+              <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
+                💡 Pro Tip
+              </h4>
+              <p className="text-xs text-muted-foreground">
+                Understanding your pet's moods helps you respond appropriately to their needs and strengthens your bond. 
+                Use this guide alongside the sound translator for better communication!
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Pet Food Guide */}
         <Card className="border-0 shadow-soft">
           <CardContent className="p-6">

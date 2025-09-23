@@ -13,9 +13,14 @@ import {
   RotateCcw,
   ChevronRight,
   User,
-  Settings
+  Settings,
+  Calendar,
+  Star
 } from "lucide-react";
 import petLogo from "@/assets/pet-paradise-logo.png";
+import { useSubscription } from "@/contexts/SubscriptionContext";
+import PremiumGate from "@/components/PremiumGate";
+import SubscriptionPlans from "@/components/SubscriptionPlans";
 
 interface UserProfile {
   name: string;
@@ -27,6 +32,40 @@ interface UserProfile {
 }
 
 const SettingsPage = () => {
+  const { subscribed, plan, subscriptionEnd, createCheckout, openCustomerPortal, loading } = useSubscription();
+  const [showPlans, setShowPlans] = useState(false);
+
+  const getSubscriptionBadge = () => {
+    if (plan === 'yearly') return { label: 'Yearly Premium', color: 'bg-green-500' };
+    if (plan === 'monthly') return { label: 'Monthly Premium', color: 'bg-primary' };
+    return { label: 'Free Plan', color: 'bg-gray-500' };
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  if (showPlans) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-orange-50/30 to-red-50/30 pb-20">
+        <div className="max-w-md mx-auto px-4 py-6">
+          <Button
+            variant="outline"
+            onClick={() => setShowPlans(false)}
+            className="mb-4"
+          >
+            ← Back to Settings
+          </Button>
+          <SubscriptionPlans showTitle={false} />
+        </div>
+      </div>
+    );
+  }
+
   const [profile] = useState<UserProfile>({
     name: "Alex Johnson",
     email: "alex@example.com", 
@@ -104,23 +143,55 @@ const SettingsPage = () => {
       </div>
 
       <div className="max-w-md mx-auto px-4 py-6 space-y-6">
-        {/* Premium Banner */}
-        <Card className="border-0 shadow-soft bg-gradient-to-r from-pet-coral to-pet-orange overflow-hidden">
+        {/* Subscription Status */}
+        <Card className={`border-0 shadow-soft overflow-hidden ${
+          subscribed 
+            ? 'bg-gradient-to-r from-primary to-accent' 
+            : 'bg-gradient-to-r from-gray-400 to-gray-500'
+        }`}>
           <CardContent className="p-6 relative">
             <div className="flex items-center justify-between">
               <div className="text-white">
                 <div className="flex items-center space-x-2 mb-2">
-                  <Crown size={24} />
-                  <h2 className="text-xl font-bold">Unlimited</h2>
+                  {subscribed ? <Crown size={24} /> : <Star size={24} />}
+                  <h2 className="text-xl font-bold">
+                    {subscribed ? 'Premium Active' : 'Free Plan'}
+                  </h2>
                 </div>
                 <p className="text-white/90 text-sm">
-                  Access to all features
+                  {subscribed 
+                    ? `${plan === 'yearly' ? 'Yearly' : 'Monthly'} subscription`
+                    : 'Limited features available'
+                  }
                 </p>
+                {subscribed && subscriptionEnd && (
+                  <p className="text-white/70 text-xs mt-1 flex items-center gap-1">
+                    <Calendar size={12} />
+                    Renews {formatDate(subscriptionEnd)}
+                  </p>
+                )}
               </div>
-              <div className="text-right">
-                <Button variant="secondary" size="sm" className="bg-white text-pet-coral hover:bg-white/90">
-                  Upgrade
-                </Button>
+              <div className="text-right space-y-2">
+                {subscribed ? (
+                  <Button 
+                    variant="secondary" 
+                    size="sm" 
+                    className="bg-white text-primary hover:bg-white/90"
+                    onClick={openCustomerPortal}
+                    disabled={loading}
+                  >
+                    Manage
+                  </Button>
+                ) : (
+                  <Button 
+                    variant="secondary" 
+                    size="sm" 
+                    className="bg-white text-gray-600 hover:bg-white/90"
+                    onClick={() => setShowPlans(true)}
+                  >
+                    Upgrade
+                  </Button>
+                )}
               </div>
             </div>
             {/* Decorative paw prints */}
@@ -172,37 +243,76 @@ const SettingsPage = () => {
         </Card>
 
         {/* Notification Settings */}
-        <Card className="border-0 shadow-soft">
-          <CardContent className="p-6">
-            <h3 className="font-semibold mb-4">Notifications</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Training Notifications</p>
-                  <p className="text-sm text-muted-foreground">Get notified about training sessions</p>
+        {subscribed ? (
+          <Card className="border-0 shadow-soft">
+            <CardContent className="p-6">
+              <h3 className="font-semibold mb-4">Notifications</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">Training Notifications</p>
+                    <p className="text-sm text-muted-foreground">Get notified about training sessions</p>
+                  </div>
+                  <Switch 
+                    checked={notifications.training}
+                    onCheckedChange={(checked) => 
+                      setNotifications(prev => ({ ...prev, training: checked }))
+                    }
+                  />
                 </div>
-                <Switch 
-                  checked={notifications.training}
-                  onCheckedChange={(checked) => 
-                    setNotifications(prev => ({ ...prev, training: checked }))
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Translation Updates</p>
-                  <p className="text-sm text-muted-foreground">New translation features</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">Translation Updates</p>
+                    <p className="text-sm text-muted-foreground">New translation features</p>
+                  </div>
+                  <Switch 
+                    checked={notifications.translation}
+                    onCheckedChange={(checked) => 
+                      setNotifications(prev => ({ ...prev, translation: checked }))
+                    }
+                  />
                 </div>
-                <Switch 
-                  checked={notifications.translation}
-                  onCheckedChange={(checked) => 
-                    setNotifications(prev => ({ ...prev, translation: checked }))
-                  }
-                />
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        ) : (
+          <PremiumGate 
+            feature="Advanced Notifications"
+            description="Get personalized training reminders and translation updates with premium subscription."
+          >
+            <Card className="border-0 shadow-soft">
+              <CardContent className="p-6">
+                <h3 className="font-semibold mb-4">Notifications</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Training Notifications</p>
+                      <p className="text-sm text-muted-foreground">Get notified about training sessions</p>
+                    </div>
+                    <Switch 
+                      checked={notifications.training}
+                      onCheckedChange={(checked) => 
+                        setNotifications(prev => ({ ...prev, training: checked }))
+                      }
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Translation Updates</p>
+                      <p className="text-sm text-muted-foreground">New translation features</p>
+                    </div>
+                    <Switch 
+                      checked={notifications.translation}
+                      onCheckedChange={(checked) => 
+                        setNotifications(prev => ({ ...prev, translation: checked }))
+                      }
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </PremiumGate>
+        )}
 
         {/* Settings Menu */}
         <Card className="border-0 shadow-soft">

@@ -5,16 +5,21 @@ import { Badge } from "@/components/ui/badge";
 import PetPlayAnimation from "@/components/PetPlayAnimation";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { Volume2, Cat, Dog } from "lucide-react";
+import { Volume2, Cat, Dog, Crown, Zap } from "lucide-react";
 import petLogo from "@/assets/pet-ai-logo.png";
 import happyDog from "@/assets/happy-dog.png";
 import cuteCat from "@/assets/cute-cat.png";
+import { useSubscription } from "@/contexts/SubscriptionContext";
+import { useUsageTracking } from "@/hooks/useUsageTracking";
+import PremiumGate from "@/components/PremiumGate";
 
 const TranslatePage = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [translationResult, setTranslationResult] = useState("");
   const [selectedPetType, setSelectedPetType] = useState<"cat" | "dog" | null>(null);
   const { toast } = useToast();
+  const { subscribed } = useSubscription();
+  const { canUseFeature, incrementUsage, getRemainingUsage } = useUsageTracking();
 
   const handleRecordingComplete = async (audioData: string) => {
     if (!selectedPetType) {
@@ -26,9 +31,26 @@ const TranslatePage = () => {
       return;
     }
 
+    // Check usage limits for free users
+    if (!canUseFeature('scan')) {
+      toast({
+        title: "Daily Limit Reached",
+        description: "You've reached your daily translation limit. Upgrade to premium for unlimited access!",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsAnalyzing(true);
     
     try {
+      // Increment usage count
+      const canProceed = await incrementUsage('scan');
+      if (!canProceed) {
+        setIsAnalyzing(false);
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke("pet-translate", {
         body: { 
           audio: audioData,

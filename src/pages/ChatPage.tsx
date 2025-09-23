@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { Send, Bot, User, Stethoscope, Heart, Cat, Dog } from "lucide-react";
+import { Send, Bot, User, Stethoscope, Heart, Cat, Dog, Crown } from "lucide-react";
 import petLogo from "@/assets/pet-ai-logo.png";
+import { useSubscription } from "@/contexts/SubscriptionContext";
+import { useUsageTracking } from "@/hooks/useUsageTracking";
 
 interface Message {
   id: string;
@@ -17,6 +19,8 @@ interface Message {
 }
 
 const ChatPage = () => {
+  const { subscribed } = useSubscription();
+  const { canUseFeature, incrementUsage, getRemainingUsage } = useUsageTracking();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -38,6 +42,16 @@ const ChatPage = () => {
 
   const sendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return;
+
+    // Check usage limits for free users
+    if (!canUseFeature('chat')) {
+      toast({
+        title: "Daily Limit Reached",
+        description: "You've reached your daily chat limit. Upgrade to premium for unlimited access!",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),

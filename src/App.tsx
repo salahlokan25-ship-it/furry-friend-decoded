@@ -10,18 +10,27 @@ import TrainingPage from "@/pages/TrainingPage";
 import ChatPage from "@/pages/ChatPage";
 import SettingsPage from "@/pages/SettingsPage";
 import OnboardingQuiz, { QuizResults } from "@/components/OnboardingQuiz";
+import SubscriptionPlans from "@/components/SubscriptionPlans";
+import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 
 const queryClient = new QueryClient();
 
 const App = () => {
   const [activeTab, setActiveTab] = useState("translate");
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+  const [showSubscriptionPlans, setShowSubscriptionPlans] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Check if user has completed onboarding
     const onboardingCompleted = localStorage.getItem("petparadise-onboarding-completed");
-    setHasCompletedOnboarding(!!onboardingCompleted);
+    const subscriptionSeen = localStorage.getItem("petparadise-subscription-seen");
+    
+    if (onboardingCompleted && !subscriptionSeen) {
+      setShowSubscriptionPlans(true);
+    } else {
+      setHasCompletedOnboarding(!!onboardingCompleted);
+    }
     setIsLoading(false);
   }, []);
 
@@ -37,6 +46,13 @@ const App = () => {
       setActiveTab("chat");
     }
     
+    // Show subscription plans after quiz
+    setShowSubscriptionPlans(true);
+  };
+
+  const handleSubscriptionComplete = () => {
+    localStorage.setItem("petparadise-subscription-seen", "true");
+    setShowSubscriptionPlans(false);
     setHasCompletedOnboarding(true);
   };
 
@@ -74,13 +90,32 @@ const App = () => {
   }
 
   // Show onboarding quiz for new users
-  if (!hasCompletedOnboarding) {
+  if (!hasCompletedOnboarding && !showSubscriptionPlans) {
     return (
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <OnboardingQuiz onComplete={handleOnboardingComplete} />
+          <SubscriptionProvider>
+            <Toaster />
+            <Sonner />
+            <OnboardingQuiz onComplete={handleOnboardingComplete} />
+          </SubscriptionProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  }
+
+  // Show subscription plans after quiz
+  if (showSubscriptionPlans) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <SubscriptionProvider>
+            <Toaster />
+            <Sonner />
+            <div className="min-h-screen bg-gradient-to-br from-background via-green-50/30 to-blue-50/30 flex items-center justify-center p-4">
+              <SubscriptionPlans onComplete={handleSubscriptionComplete} />
+            </div>
+          </SubscriptionProvider>
         </TooltipProvider>
       </QueryClientProvider>
     );
@@ -90,15 +125,17 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <div className="relative">
-          {renderActivePage()}
-          <BottomNavigation 
-            activeTab={activeTab} 
-            onTabChange={setActiveTab} 
-          />
-        </div>
+        <SubscriptionProvider>
+          <Toaster />
+          <Sonner />
+          <div className="relative">
+            {renderActivePage()}
+            <BottomNavigation 
+              activeTab={activeTab} 
+              onTabChange={setActiveTab} 
+            />
+          </div>
+        </SubscriptionProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

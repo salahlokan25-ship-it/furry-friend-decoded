@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, Camera, GraduationCap, Settings, MessageCircle } from "lucide-react";
+import { Home, Plus, GraduationCap, Settings, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BottomNavigationProps {
@@ -10,8 +10,8 @@ interface BottomNavigationProps {
 const BottomNavigation = ({ activeTab, onTabChange }: BottomNavigationProps) => {
   const tabs = [
     { id: "translate", icon: Home, label: "Home" },
-    { id: "album", icon: Camera, label: "Album" }, 
     { id: "training", icon: GraduationCap, label: "Training" },
+    { id: "album", icon: Plus, label: "Album" }, 
     { id: "chat", icon: MessageCircle, label: "Chat" },
     { id: "settings", icon: Settings, label: "Settings" },
   ];
@@ -29,23 +29,28 @@ const BottomNavigation = ({ activeTab, onTabChange }: BottomNavigationProps) => 
               onClick={() => onTabChange(tab.id)}
               className={cn(
                 "flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200",
-                isActive 
-                  ? "text-white scale-110 bg-white/20 backdrop-blur-sm" 
-                  : "text-orange-100 hover:text-white hover:bg-white/10"
+                tab.id === "album"
+                  ? "bg-white text-orange-500 scale-110 hover:bg-orange-50"
+                  : isActive 
+                    ? "text-white scale-110 bg-white/20 backdrop-blur-sm" 
+                    : "text-orange-100 hover:text-white hover:bg-white/10"
               )}
             >
               <Icon 
                 size={20} 
                 className={cn(
                   "transition-all duration-200",
+                  tab.id === "album" ? "stroke-[3]" : "",
                   isActive && "drop-shadow-sm"
                 )} 
               />
               <span className={cn(
                 "text-xs mt-1 font-medium transition-all duration-200",
-                isActive 
-                  ? "text-white font-semibold"
-                  : "text-orange-100"
+                tab.id === "album"
+                  ? "text-orange-500 font-semibold"
+                  : isActive 
+                    ? "text-white font-semibold"
+                    : "text-orange-100"
               )}>
                 {tab.label}
               </span>

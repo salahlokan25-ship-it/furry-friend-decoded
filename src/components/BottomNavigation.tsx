@@ -28,32 +28,42 @@ const BottomNavigation = ({ activeTab, onTabChange }: BottomNavigationProps) => 
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
               className={cn(
-                "flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200",
+                "flex flex-col items-center justify-center transition-all duration-200",
                 tab.id === "album"
-                  ? "bg-white text-orange-500 scale-110 hover:bg-orange-50"
+                  ? "relative -mt-6"
                   : isActive 
-                    ? "text-white scale-110 bg-white/20 backdrop-blur-sm" 
-                    : "text-orange-100 hover:text-white hover:bg-white/10"
+                    ? "text-white scale-110 bg-white/20 backdrop-blur-sm p-2 rounded-lg" 
+                    : "text-orange-100 hover:text-white hover:bg-white/10 p-2 rounded-lg"
               )}
             >
-              <Icon 
-                size={20} 
-                className={cn(
-                  "transition-all duration-200",
-                  tab.id === "album" ? "stroke-[3]" : "",
-                  isActive && "drop-shadow-sm"
-                )} 
-              />
-              <span className={cn(
-                "text-xs mt-1 font-medium transition-all duration-200",
-                tab.id === "album"
-                  ? "text-orange-500 font-semibold"
-                  : isActive 
-                    ? "text-white font-semibold"
-                    : "text-orange-100"
-              )}>
-                {tab.label}
-              </span>
+              {tab.id === "album" ? (
+                <div className="flex flex-col items-center">
+                  <div className="w-14 h-14 rounded-full bg-orange-500 shadow-lg flex items-center justify-center hover:bg-orange-600 transition-colors">
+                    <Icon size={28} className="text-white stroke-[2.5]" />
+                  </div>
+                  <span className="text-xs mt-2 font-medium text-orange-100">
+                    {tab.label}
+                  </span>
+                </div>
+              ) : (
+                <>
+                  <Icon 
+                    size={20} 
+                    className={cn(
+                      "transition-all duration-200",
+                      isActive && "drop-shadow-sm"
+                    )} 
+                  />
+                  <span className={cn(
+                    "text-xs mt-1 font-medium transition-all duration-200",
+                    isActive 
+                      ? "text-white font-semibold"
+                      : "text-orange-100"
+                  )}>
+                    {tab.label}
+                  </span>
+                </>
+              )}
             </button>
           );
         })}

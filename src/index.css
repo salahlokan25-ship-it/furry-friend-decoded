@@ -8,25 +8,31 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Brand Colors - Playful Pet Theme */
+    /* Brand Colors - Bright Orange & White Theme */
+    --pet-orange: 25 100% 60%; /* Bright warm orange */
+    --pet-orange-light: 25 100% 70%;
+    --pet-orange-dark: 25 100% 50%;
+    --pet-beige: 35 30% 92%; /* Subtle beige highlight */
+    --pet-gray-light: 0 0% 96%; /* Light gray highlight */
     --pet-coral: 14 100% 64%;
     --pet-coral-light: 14 100% 75%;
     --pet-coral-dark: 14 100% 55%;
     --pet-teal: 178 64% 45%;
     --pet-teal-light: 178 64% 65%;
     --pet-purple: 270 60% 70%;
-    --pet-orange: 28 100% 65%;
     --pet-yellow: 45 100% 70%;
     
     /* Gradients */
+    --gradient-orange: linear-gradient(135deg, hsl(var(--pet-orange)) 0%, hsl(var(--pet-orange-light)) 100%);
+    --gradient-orange-warm: linear-gradient(135deg, hsl(var(--pet-orange-dark)) 0%, hsl(var(--pet-orange)) 100%);
     --gradient-coral: linear-gradient(135deg, hsl(var(--pet-coral)) 0%, hsl(var(--pet-coral-light)) 100%);
     --gradient-teal: linear-gradient(135deg, hsl(var(--pet-teal)) 0%, hsl(var(--pet-teal-light)) 100%);
     --gradient-hero: linear-gradient(135deg, hsl(var(--pet-coral)) 0%, hsl(var(--pet-orange)) 100%);
     
     /* Shadows */
-    --shadow-soft: 0 4px 20px hsl(var(--pet-coral) / 0.15);
-    --shadow-coral: 0 8px 30px hsl(var(--pet-coral) / 0.25);
-    --shadow-floating: 0 10px 40px hsl(var(--pet-coral) / 0.2);
+    --shadow-soft: 0 2px 12px hsl(var(--pet-orange) / 0.1);
+    --shadow-orange: 0 4px 20px hsl(var(--pet-orange) / 0.2);
+    --shadow-floating: 0 6px 30px hsl(var(--pet-orange) / 0.15);
     
     /* Animation */
     --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -40,11 +46,11 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: var(--pet-coral);
-    --primary-foreground: 0 0% 98%;
+    --primary: var(--pet-orange);
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: var(--pet-teal);
-    --secondary-foreground: 0 0% 98%;
+    --secondary: var(--pet-beige);
+    --secondary-foreground: 0 0% 20%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;

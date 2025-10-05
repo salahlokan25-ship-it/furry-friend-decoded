@@ -21,6 +21,7 @@ import petLogo from "@/assets/pet-paradise-logo.png";
 import { useSubscription } from "@/contexts/SubscriptionContext";
 import PremiumGate from "@/components/PremiumGate";
 import SubscriptionPlans from "@/components/SubscriptionPlans";
+import { toast } from "@/hooks/use-toast";
 
 interface UserProfile {
   name: string;
@@ -81,6 +82,32 @@ const SettingsPage = () => {
     reminders: false,
   });
 
+  const handleFeedback = () => {
+    window.open('mailto:support@petparadise.com?subject=Pet Paradise Feedback', '_blank');
+  };
+
+  const handleRate = () => {
+    toast({
+      title: "Thank you! 💖",
+      description: "We appreciate your support. Please rate us on your app store!",
+    });
+  };
+
+  const handlePrivacyPolicy = () => {
+    window.open('https://petparadise.com/privacy', '_blank');
+  };
+
+  const handleTermsOfUse = () => {
+    window.open('https://petparadise.com/terms', '_blank');
+  };
+
+  const handleRestore = () => {
+    toast({
+      title: "Checking purchases...",
+      description: "We're restoring your previous purchases. Please wait.",
+    });
+  };
+
   const settingsItems = [
     {
       icon: Bell,
@@ -94,36 +121,42 @@ const SettingsPage = () => {
           }
         />
       ),
+      onClick: undefined,
     },
     {
       icon: MessageSquare,
       title: "Feedback", 
       description: "Share your thoughts with us",
       action: <ChevronRight size={20} className="text-muted-foreground" />,
+      onClick: handleFeedback,
     },
     {
       icon: Heart,
       title: "Rate",
       description: "Rate Pet Paradise on app store",
       action: <ChevronRight size={20} className="text-muted-foreground" />,
+      onClick: handleRate,
     },
     {
       icon: Shield,
       title: "Privacy Policy",
       description: "How we protect your data",
       action: <ChevronRight size={20} className="text-muted-foreground" />,
+      onClick: handlePrivacyPolicy,
     },
     {
       icon: FileText,
       title: "Terms of Use", 
       description: "App usage terms and conditions",
       action: <ChevronRight size={20} className="text-muted-foreground" />,
+      onClick: handleTermsOfUse,
     },
     {
       icon: RotateCcw,
       title: "Restore",
       description: "Restore previous purchases",
       action: <ChevronRight size={20} className="text-muted-foreground" />,
+      onClick: handleRestore,
     },
   ];
 
@@ -322,6 +355,7 @@ const SettingsPage = () => {
               return (
                 <div 
                   key={index}
+                  onClick={item.onClick}
                   className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors border-b last:border-b-0 cursor-pointer"
                 >
                   <div className="flex items-center space-x-4">

@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Upload, Camera, TrendingUp, Sparkles, Activity, AlertTriangle, Heart, Zap, Utensils, Droplets } from "lucide-react";
+import { Upload, Camera, TrendingUp, Sparkles, Activity, AlertTriangle, Heart, Zap, Utensils, Droplets, Moon, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
@@ -70,6 +72,11 @@ const Index = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [moodResult, setMoodResult] = useState<MoodResult | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [petName, setPetName] = useState("");
+  const [petBreed, setPetBreed] = useState("");
+  const [isGeneratingStory, setIsGeneratingStory] = useState(false);
+  const [bedtimeStory, setBedtimeStory] = useState<string | null>(null);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -117,6 +124,58 @@ const Index = () => {
     } finally {
       setIsAnalyzing(false);
     }
+  };
+
+  const handleGenerateStory = async () => {
+    if (!petName.trim() || !petBreed.trim()) {
+      toast.error("Please enter your pet's name and breed");
+      return;
+    }
+
+    setIsGeneratingStory(true);
+    setBedtimeStory(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('pet-bedtime-story', {
+        body: { 
+          petName: petName.trim(),
+          breed: petBreed.trim()
+        }
+      });
+
+      if (error) throw error;
+
+      setBedtimeStory(data.story);
+      toast.success("Bedtime story created! 🌙");
+    } catch (error) {
+      console.error("Error generating story:", error);
+      toast.error("Failed to generate bedtime story. Please try again.");
+    } finally {
+      setIsGeneratingStory(false);
+    }
+  };
+
+  const handlePlayStory = () => {
+    if (!bedtimeStory) return;
+
+    const utterance = new SpeechSynthesisUtterance(bedtimeStory);
+    utterance.rate = 0.8;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+
+    utterance.onstart = () => setIsPlayingAudio(true);
+    utterance.onend = () => setIsPlayingAudio(false);
+    utterance.onerror = () => {
+      setIsPlayingAudio(false);
+      toast.error("Failed to play audio");
+    };
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const handleStopAudio = () => {
+    window.speechSynthesis.cancel();
+    setIsPlayingAudio(false);
   };
 
   return (
@@ -302,7 +361,7 @@ const Index = () => {
         )}
 
         {/* Daily Mood Tracker */}
-        <Card className="border-2 border-pet-orange/20 shadow-lg">
+        <Card className="mb-8 border-2 border-pet-orange/20 shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-pet-orange" />
@@ -343,6 +402,102 @@ const Index = () => {
             <p className="text-sm text-muted-foreground text-center mt-4">
               Track your pet's happiness over time 📊
             </p>
+          </CardContent>
+        </Card>
+
+        {/* Dream Journal */}
+        <Card className="border-2 border-purple-400/30 shadow-lg bg-gradient-to-br from-purple-50/50 to-blue-50/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-purple-700">
+              <Moon className="w-6 h-6" />
+              Dream Journal - AI Bedtime Stories
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Generate a personalized bedtime story for your pet 🌙
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="petName">Pet Name</Label>
+                <Input
+                  id="petName"
+                  placeholder="e.g., Bella"
+                  value={petName}
+                  onChange={(e) => setPetName(e.target.value)}
+                  disabled={isGeneratingStory}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="petBreed">Breed</Label>
+                <Input
+                  id="petBreed"
+                  placeholder="e.g., Golden Retriever"
+                  value={petBreed}
+                  onChange={(e) => setPetBreed(e.target.value)}
+                  disabled={isGeneratingStory}
+                />
+              </div>
+            </div>
+
+            <Button
+              onClick={handleGenerateStory}
+              disabled={isGeneratingStory || !petName.trim() || !petBreed.trim()}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              {isGeneratingStory ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                  Creating magical story...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Generate Bedtime Story
+                </>
+              )}
+            </Button>
+
+            {bedtimeStory && (
+              <div className="animate-fade-in space-y-4">
+                <div className="bg-white/70 rounded-lg p-6 border-2 border-purple-200">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-purple-700 flex items-center gap-2">
+                      <Moon className="w-5 h-5" />
+                      Tonight's Bedtime Story
+                    </h3>
+                    {!isPlayingAudio ? (
+                      <Button
+                        onClick={handlePlayStory}
+                        variant="outline"
+                        size="sm"
+                        className="border-purple-300 text-purple-700 hover:bg-purple-50"
+                      >
+                        <Volume2 className="w-4 h-4 mr-2" />
+                        Play Story
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={handleStopAudio}
+                        variant="outline"
+                        size="sm"
+                        className="border-red-300 text-red-700 hover:bg-red-50"
+                      >
+                        Stop
+                      </Button>
+                    )}
+                  </div>
+                  <div className="prose prose-sm max-w-none">
+                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                      {bedtimeStory}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-xs text-center text-muted-foreground">
+                  💤 Perfect for bonding before bed • Generate a new story anytime
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

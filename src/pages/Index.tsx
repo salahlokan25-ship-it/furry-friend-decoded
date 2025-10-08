@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Upload, Camera, TrendingUp, Sparkles } from "lucide-react";
+import { Upload, Camera, TrendingUp, Sparkles, Activity, AlertTriangle, Heart, Zap, Utensils, Droplets } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import PetPlayAnimation from "@/components/PetPlayAnimation";
 
 type MoodType = "happy" | "anxious" | "hungry" | "tired" | "playful" | "neutral";
 
@@ -42,6 +44,26 @@ const mockMoodData = [
   { day: "Fri", score: 7 },
   { day: "Sat", score: 9 },
   { day: "Sun", score: 8 }
+];
+
+// Health metrics data
+const healthMetrics = [
+  { metric: 'Energy', value: 85, fullMark: 100 },
+  { metric: 'Appetite', value: 70, fullMark: 100 },
+  { metric: 'Hydration', value: 90, fullMark: 100 },
+  { metric: 'Activity', value: 65, fullMark: 100 },
+  { metric: 'Mood', value: 80, fullMark: 100 }
+];
+
+const healthAlerts = [
+  {
+    id: 1,
+    severity: "warning",
+    title: "Energy dropped 20% this week",
+    description: "Rocky's energy dropped 20% this week. Could be heat-related — increase hydration.",
+    icon: Zap,
+    color: "text-orange-600"
+  }
 ];
 
 const Index = () => {
@@ -110,6 +132,92 @@ const Index = () => {
             Upload a photo or video to understand your pet's emotions
           </p>
         </div>
+
+        {/* Pet Animation */}
+        <div className="mb-8">
+          <PetPlayAnimation />
+        </div>
+
+        {/* Smart Health Radar */}
+        <Card className="mb-8 border-2 border-pet-orange/20 shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="w-6 h-6 text-pet-orange" />
+              Smart Health Radar
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Health Alerts */}
+            {healthAlerts.map((alert) => (
+              <div
+                key={alert.id}
+                className="bg-orange-50 border-l-4 border-orange-500 rounded-lg p-4 flex gap-3 animate-fade-in"
+              >
+                <AlertTriangle className={`w-5 h-5 ${alert.color} flex-shrink-0 mt-0.5`} />
+                <div className="flex-1">
+                  <p className="font-semibold text-sm text-gray-900">{alert.title}</p>
+                  <p className="text-sm text-gray-700 mt-1">{alert.description}</p>
+                </div>
+              </div>
+            ))}
+
+            {/* Health Radar Chart */}
+            <div className="bg-white/50 rounded-lg p-4">
+              <ResponsiveContainer width="100%" height={300}>
+                <RadarChart data={healthMetrics}>
+                  <PolarGrid stroke="#f59e0b40" />
+                  <PolarAngleAxis 
+                    dataKey="metric" 
+                    tick={{ fill: '#f59e0b', fontSize: 12 }}
+                  />
+                  <PolarRadiusAxis 
+                    angle={90} 
+                    domain={[0, 100]}
+                    tick={{ fill: '#f59e0b80', fontSize: 10 }}
+                  />
+                  <Radar 
+                    name="Health" 
+                    dataKey="value" 
+                    stroke="#f59e0b" 
+                    fill="#f59e0b" 
+                    fillOpacity={0.6}
+                    strokeWidth={2}
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Individual Health Metrics */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-sm flex items-center gap-2">
+                <Heart className="w-4 h-4 text-pet-orange" />
+                Health Metrics
+              </h3>
+              {healthMetrics.map((metric) => (
+                <div key={metric.metric} className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-medium">{metric.metric}</span>
+                    <span className="text-pet-orange font-semibold">{metric.value}%</span>
+                  </div>
+                  <Progress value={metric.value} className="h-2" />
+                </div>
+              ))}
+            </div>
+
+            {/* Quick Health Tips */}
+            <div className="bg-pet-orange/10 rounded-lg p-4 border border-pet-orange/20">
+              <p className="text-sm font-semibold mb-2 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-pet-orange" />
+                AI Vet Tips
+              </p>
+              <ul className="text-sm space-y-1 text-muted-foreground">
+                <li>• Monitor water intake - aim for 8+ hours of activity daily</li>
+                <li>• Consider indoor play during peak heat hours</li>
+                <li>• Check for signs of dehydration (dry nose, lethargy)</li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Upload Section */}
         <Card className="mb-8 border-2 border-pet-orange/20 shadow-lg">

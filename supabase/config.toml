@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.pet-chat]
 verify_jwt = false
+
+[functions.pet-mood-detection]
+verify_jwt = false

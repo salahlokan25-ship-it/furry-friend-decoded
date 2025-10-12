@@ -223,6 +223,45 @@ export type Database = {
           },
         ]
       }
+      user_usage: {
+        Row: {
+          chat_count: number | null
+          chat_limit: number | null
+          created_at: string | null
+          id: string
+          last_reset_date: string | null
+          scan_count: number | null
+          scan_limit: number | null
+          unlimited: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          chat_count?: number | null
+          chat_limit?: number | null
+          created_at?: string | null
+          id?: string
+          last_reset_date?: string | null
+          scan_count?: number | null
+          scan_limit?: number | null
+          unlimited?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          chat_count?: number | null
+          chat_limit?: number | null
+          created_at?: string | null
+          id?: string
+          last_reset_date?: string | null
+          scan_count?: number | null
+          scan_limit?: number | null
+          unlimited?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       stripe_user_orders: {
@@ -260,7 +299,20 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      get_user_limits: {
+        Args: { user_id_param: string }
+        Returns: {
+          chat_count: number
+          chat_limit: number
+          scan_count: number
+          scan_limit: number
+          unlimited: boolean
+        }[]
+      }
+      increment_usage: {
+        Args: { usage_type: string; user_id_param: string }
+        Returns: boolean
+      }
     }
     Enums: {
       stripe_order_status: "pending" | "completed" | "canceled"

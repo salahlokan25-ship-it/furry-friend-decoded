@@ -10,236 +10,270 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.4"
+    PostgrestVersion: "12.2.12 (cd3cf9e)"
   }
   public: {
     Tables: {
-      pet_memories: {
+      profiles: {
         Row: {
-          created_at: string
-          description: string | null
-          file_url: string | null
+          created_at: string | null
+          email: string
+          experience: string | null
           id: string
-          memory_type: string
-          pet_type: string | null
-          title: string
-          user_id: string | null
+          markets: string[] | null
+          subscription: string | null
+          updated_at: string | null
         }
         Insert: {
-          created_at?: string
-          description?: string | null
-          file_url?: string | null
-          id?: string
-          memory_type: string
-          pet_type?: string | null
-          title: string
-          user_id?: string | null
+          created_at?: string | null
+          email: string
+          experience?: string | null
+          id: string
+          markets?: string[] | null
+          subscription?: string | null
+          updated_at?: string | null
         }
         Update: {
-          created_at?: string
-          description?: string | null
-          file_url?: string | null
+          created_at?: string | null
+          email?: string
+          experience?: string | null
           id?: string
-          memory_type?: string
-          pet_type?: string | null
-          title?: string
-          user_id?: string | null
+          markets?: string[] | null
+          subscription?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
-      pet_translations: {
+      stripe_customers: {
         Row: {
-          created_at: string
-          id: string
-          original_sound: string
-          pet_type: string
-          translated_text: string
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          original_sound: string
-          pet_type: string
-          translated_text: string
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          original_sound?: string
-          pet_type?: string
-          translated_text?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      subscription_plans: {
-        Row: {
-          created_at: string
-          features: Json | null
-          id: string
-          interval: string
-          name: string
-          price_cents: number
-          stripe_price_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          features?: Json | null
-          id?: string
-          interval: string
-          name: string
-          price_cents: number
-          stripe_price_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          features?: Json | null
-          id?: string
-          interval?: string
-          name?: string
-          price_cents?: number
-          stripe_price_id?: string | null
-        }
-        Relationships: []
-      }
-      training_progress: {
-        Row: {
-          completed: boolean | null
-          course_id: string
-          course_name: string
-          created_at: string
-          id: string
-          pet_type: string
-          progress_percentage: number | null
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          completed?: boolean | null
-          course_id: string
-          course_name: string
-          created_at?: string
-          id?: string
-          pet_type: string
-          progress_percentage?: number | null
-          updated_at?: string
-          user_id?: string | null
-        }
-        Update: {
-          completed?: boolean | null
-          course_id?: string
-          course_name?: string
-          created_at?: string
-          id?: string
-          pet_type?: string
-          progress_percentage?: number | null
-          updated_at?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      user_subscriptions: {
-        Row: {
-          created_at: string
-          current_period_end: string | null
-          current_period_start: string | null
-          id: string
-          plan_id: string
-          status: string
-          stripe_customer_id: string | null
-          stripe_subscription_id: string | null
-          updated_at: string
+          created_at: string | null
+          customer_id: string
+          deleted_at: string | null
+          id: number
+          updated_at: string | null
           user_id: string
         }
         Insert: {
-          created_at?: string
-          current_period_end?: string | null
-          current_period_start?: string | null
-          id?: string
-          plan_id: string
-          status?: string
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
-          updated_at?: string
+          created_at?: string | null
+          customer_id: string
+          deleted_at?: string | null
+          id?: never
+          updated_at?: string | null
           user_id: string
         }
         Update: {
-          created_at?: string
-          current_period_end?: string | null
-          current_period_start?: string | null
+          created_at?: string | null
+          customer_id?: string
+          deleted_at?: string | null
+          id?: never
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      stripe_orders: {
+        Row: {
+          amount_subtotal: number
+          amount_total: number
+          checkout_session_id: string
+          created_at: string | null
+          currency: string
+          customer_id: string
+          deleted_at: string | null
+          id: number
+          payment_intent_id: string
+          payment_status: string
+          status: Database["public"]["Enums"]["stripe_order_status"]
+          updated_at: string | null
+        }
+        Insert: {
+          amount_subtotal: number
+          amount_total: number
+          checkout_session_id: string
+          created_at?: string | null
+          currency: string
+          customer_id: string
+          deleted_at?: string | null
+          id?: never
+          payment_intent_id: string
+          payment_status: string
+          status?: Database["public"]["Enums"]["stripe_order_status"]
+          updated_at?: string | null
+        }
+        Update: {
+          amount_subtotal?: number
+          amount_total?: number
+          checkout_session_id?: string
+          created_at?: string | null
+          currency?: string
+          customer_id?: string
+          deleted_at?: string | null
+          id?: never
+          payment_intent_id?: string
+          payment_status?: string
+          status?: Database["public"]["Enums"]["stripe_order_status"]
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      stripe_subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean | null
+          created_at: string | null
+          current_period_end: number | null
+          current_period_start: number | null
+          customer_id: string
+          deleted_at: string | null
+          id: number
+          payment_method_brand: string | null
+          payment_method_last4: string | null
+          price_id: string | null
+          status: Database["public"]["Enums"]["stripe_subscription_status"]
+          subscription_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string | null
+          current_period_end?: number | null
+          current_period_start?: number | null
+          customer_id: string
+          deleted_at?: string | null
+          id?: never
+          payment_method_brand?: string | null
+          payment_method_last4?: string | null
+          price_id?: string | null
+          status: Database["public"]["Enums"]["stripe_subscription_status"]
+          subscription_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string | null
+          current_period_end?: number | null
+          current_period_start?: number | null
+          customer_id?: string
+          deleted_at?: string | null
+          id?: never
+          payment_method_brand?: string | null
+          payment_method_last4?: string | null
+          price_id?: string | null
+          status?: Database["public"]["Enums"]["stripe_subscription_status"]
+          subscription_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      trades: {
+        Row: {
+          created_at: string | null
+          day: string
+          direction: string
+          entry_date: string | null
+          entry_time: string | null
+          id: string
+          image_url: string | null
+          market: string
+          outcome: string
+          pair: string
+          profit_loss: number
+          size: number
+          strategy: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          day: string
+          direction: string
+          entry_date?: string | null
+          entry_time?: string | null
           id?: string
-          plan_id?: string
-          status?: string
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
-          updated_at?: string
+          image_url?: string | null
+          market: string
+          outcome: string
+          pair: string
+          profit_loss?: number
+          size?: number
+          strategy: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          day?: string
+          direction?: string
+          entry_date?: string | null
+          entry_time?: string | null
+          id?: string
+          image_url?: string | null
+          market?: string
+          outcome?: string
+          pair?: string
+          profit_loss?: number
+          size?: number
+          strategy?: string
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "user_subscriptions_plan_id_fkey"
-            columns: ["plan_id"]
+            foreignKeyName: "trades_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "subscription_plans"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
       }
-      user_usage: {
+    }
+    Views: {
+      stripe_user_orders: {
         Row: {
-          chat_count: number | null
-          created_at: string
-          id: string
-          last_reset_date: string | null
-          scan_count: number | null
-          updated_at: string
-          user_id: string
+          amount_subtotal: number | null
+          amount_total: number | null
+          checkout_session_id: string | null
+          currency: string | null
+          customer_id: string | null
+          order_date: string | null
+          order_id: number | null
+          order_status:
+            | Database["public"]["Enums"]["stripe_order_status"]
+            | null
+          payment_intent_id: string | null
+          payment_status: string | null
         }
-        Insert: {
-          chat_count?: number | null
-          created_at?: string
-          id?: string
-          last_reset_date?: string | null
-          scan_count?: number | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          chat_count?: number | null
-          created_at?: string
-          id?: string
-          last_reset_date?: string | null
-          scan_count?: number | null
-          updated_at?: string
-          user_id?: string
+        Relationships: []
+      }
+      stripe_user_subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean | null
+          current_period_end: number | null
+          current_period_start: number | null
+          customer_id: string | null
+          payment_method_brand: string | null
+          payment_method_last4: string | null
+          price_id: string | null
+          subscription_id: string | null
+          subscription_status:
+            | Database["public"]["Enums"]["stripe_subscription_status"]
+            | null
         }
         Relationships: []
       }
     }
-    Views: {
-      [_ in never]: never
-    }
     Functions: {
-      get_user_limits: {
-        Args: { user_id_param: string }
-        Returns: {
-          chat_count: number
-          chat_limit: number
-          plan_name: string
-          scan_count: number
-          scan_limit: number
-          unlimited: boolean
-        }[]
-      }
-      increment_usage: {
-        Args: { usage_type: string; user_id_param: string }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      stripe_order_status: "pending" | "completed" | "canceled"
+      stripe_subscription_status:
+        | "not_started"
+        | "incomplete"
+        | "incomplete_expired"
+        | "trialing"
+        | "active"
+        | "past_due"
+        | "canceled"
+        | "unpaid"
+        | "paused"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -366,6 +400,19 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      stripe_order_status: ["pending", "completed", "canceled"],
+      stripe_subscription_status: [
+        "not_started",
+        "incomplete",
+        "incomplete_expired",
+        "trialing",
+        "active",
+        "past_due",
+        "canceled",
+        "unpaid",
+        "paused",
+      ],
+    },
   },
 } as const

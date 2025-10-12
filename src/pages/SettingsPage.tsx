@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { 
@@ -12,11 +12,14 @@ import {
   Mail,
   Trash2,
   BookOpen,
-  Heart
+  Heart,
+  Camera,
+  X
 } from "lucide-react";
 import petLogo from "@/assets/pet-paradise-logo.png";
 import { useSubscription } from "@/contexts/SubscriptionContext";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +31,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface UserProfile {
   name: string;
@@ -37,11 +47,16 @@ interface UserProfile {
 
 const SettingsPage = () => {
   const { subscribed } = useSubscription();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [profile] = useState<UserProfile>({
+  const [profile, setProfile] = useState<UserProfile>({
     name: "Alex Johnson",
     email: "alex@example.com",
   });
+
+  const [isUploading, setIsUploading] = useState(false);
+  const [legalDocOpen, setLegalDocOpen] = useState(false);
+  const [legalDocType, setLegalDocType] = useState<'privacy' | 'terms' | 'references' | null>(null);
 
   const handleEditProfile = () => {
     toast({
@@ -72,19 +87,301 @@ const SettingsPage = () => {
     });
   };
 
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      toast({
+        title: "Invalid File",
+        description: "Please upload a JPG, PNG, or WEBP image",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "Image must be less than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to upload profile image",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const userId = session.user.id;
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${userId}/avatar.${fileExt}`;
+
+      // Delete old image if exists
+      const { data: existingFiles } = await supabase.storage
+        .from('profile-images')
+        .list(userId);
+
+      if (existingFiles && existingFiles.length > 0) {
+        await supabase.storage
+          .from('profile-images')
+          .remove(existingFiles.map(f => `${userId}/${f.name}`));
+      }
+
+      // Upload new image
+      const { error: uploadError } = await supabase.storage
+        .from('profile-images')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('profile-images')
+        .getPublicUrl(fileName);
+
+      setProfile({ ...profile, avatar: publicUrl });
+
+      toast({
+        title: "Success!",
+        description: "Profile image updated successfully",
+      });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload profile image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handlePrivacyPolicy = () => {
-    window.open('https://petparadise.com/privacy', '_blank');
+    setLegalDocType('privacy');
+    setLegalDocOpen(true);
   };
 
   const handleTermsOfUse = () => {
-    window.open('https://petparadise.com/terms', '_blank');
+    setLegalDocType('terms');
+    setLegalDocOpen(true);
   };
 
   const handleReferences = () => {
-    toast({
-      title: "References",
-      description: "References page coming soon!",
-    });
+    setLegalDocType('references');
+    setLegalDocOpen(true);
+  };
+
+  const getLegalDocContent = () => {
+    switch (legalDocType) {
+      case 'privacy':
+        return {
+          title: 'Privacy Policy',
+          content: `
+**Last Updated: ${new Date().toLocaleDateString()}**
+
+At Pet Paradise, we take your privacy seriously. This Privacy Policy explains how we collect, use, and protect your personal information.
+
+## Information We Collect
+
+We collect information you provide directly to us, including:
+- Personal information (name, email address)
+- Pet information (name, breed, photos)
+- Usage data and analytics
+- Health tracking information
+
+## How We Use Your Information
+
+We use the information we collect to:
+- Provide and improve our services
+- Personalize your experience
+- Send you updates and notifications
+- Analyze app usage and performance
+- Ensure security and prevent fraud
+
+## Data Storage and Security
+
+Your data is securely stored using industry-standard encryption. We implement appropriate security measures to protect against unauthorized access, alteration, or destruction of your personal information.
+
+## Sharing Your Information
+
+We do not sell your personal information. We may share your information only:
+- With your consent
+- To comply with legal obligations
+- To protect our rights and safety
+
+## Your Rights
+
+You have the right to:
+- Access your personal data
+- Correct inaccurate data
+- Request deletion of your data
+- Opt-out of marketing communications
+
+## Contact Us
+
+If you have questions about this Privacy Policy, please contact us at privacy@petparadise.com
+
+## Changes to This Policy
+
+We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new policy on this page.
+          `
+        };
+      case 'terms':
+        return {
+          title: 'Terms of Service',
+          content: `
+**Last Updated: ${new Date().toLocaleDateString()}**
+
+Welcome to Pet Paradise! By using our app, you agree to these Terms of Service.
+
+## Acceptance of Terms
+
+By accessing or using Pet Paradise, you agree to be bound by these Terms. If you do not agree, please do not use our services.
+
+## User Accounts
+
+- You must provide accurate information when creating an account
+- You are responsible for maintaining the security of your account
+- You must be at least 13 years old to use our services
+- One person or business may not maintain more than one account
+
+## Use of Services
+
+You agree to:
+- Use the app only for lawful purposes
+- Not upload harmful or inappropriate content
+- Not attempt to gain unauthorized access to our systems
+- Respect other users and their pets
+
+## Pet Health Information
+
+- Our AI mood detection is for entertainment and informational purposes only
+- Always consult a licensed veterinarian for medical advice
+- We are not responsible for decisions made based on app recommendations
+
+## Content Ownership
+
+- You retain ownership of content you upload
+- By uploading content, you grant us a license to use, display, and distribute it within the app
+- We may remove content that violates these terms
+
+## Limitations of Liability
+
+Pet Paradise is provided "as is" without warranties. We are not liable for:
+- Any indirect or consequential damages
+- Loss of data or content
+- Interruptions to service
+
+## Termination
+
+We reserve the right to suspend or terminate accounts that violate these Terms.
+
+## Changes to Terms
+
+We may modify these Terms at any time. Continued use of the app constitutes acceptance of modified terms.
+
+## Governing Law
+
+These Terms are governed by the laws of your jurisdiction.
+
+## Contact Information
+
+For questions about these Terms, contact us at legal@petparadise.com
+          `
+        };
+      case 'references':
+        return {
+          title: 'References & Credits',
+          content: `
+**Pet Paradise - Credits & References**
+
+## AI & Technology Partners
+
+### OpenAI
+We use OpenAI's GPT models for:
+- Pet mood analysis and detection
+- Bedtime story generation
+- Health recommendations
+
+### Supabase
+Our backend infrastructure is powered by Supabase for:
+- Secure data storage
+- User authentication
+- Real-time updates
+
+### Lovable AI Gateway
+AI integration powered by Lovable's AI Gateway for seamless API access.
+
+## Design & Assets
+
+### Icons
+- Lucide React Icons - Beautiful, consistent iconography
+- Custom pet illustrations created for Pet Paradise
+
+### Color Palette
+Our warm, pet-friendly color scheme is designed to create a welcoming experience for pet lovers.
+
+## Research & Methodology
+
+### Pet Behavior Analysis
+Our mood detection algorithms are informed by:
+- Veterinary behavioral science research
+- Animal body language studies
+- Computer vision best practices
+
+### Health Metrics
+Health tracking recommendations based on:
+- AAHA (American Animal Hospital Association) guidelines
+- Veterinary nutrition standards
+- Exercise recommendations for different breeds
+
+## Open Source Libraries
+
+We're grateful to the open source community for:
+- React & TypeScript
+- Tailwind CSS
+- Recharts for data visualization
+- Radix UI components
+
+## Community Contributors
+
+Special thanks to our beta testers and the pet-loving community who helped shape Pet Paradise into what it is today! 🐾
+
+## Academic References
+
+1. Bradshaw, J. (2011). "Dog Sense: How the New Science of Dog Behavior Can Make You A Better Friend"
+2. Horwitz, D. & Mills, D. (2009). "BSAVA Manual of Canine and Feline Behavioural Medicine"
+3. Overall, K. (2013). "Manual of Clinical Behavioral Medicine for Dogs and Cats"
+
+## Contact
+
+For licensing inquiries or partnership opportunities, contact us at hello@petparadise.com
+
+---
+
+Made with ❤️ for pets and their humans
+          `
+        };
+      default:
+        return { title: '', content: '' };
+    }
   };
 
   const handleReferFriend = () => {
@@ -117,9 +414,37 @@ const SettingsPage = () => {
             </div>
             
             <div className="flex items-center gap-4 mb-6">
-              {/* Circular Avatar */}
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pet-orange-light to-pet-orange flex items-center justify-center shadow-orange">
-                <User size={32} className="text-white" />
+              {/* Circular Avatar with Upload */}
+              <div className="relative group">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                {profile.avatar ? (
+                  <img 
+                    src={profile.avatar} 
+                    alt="Profile" 
+                    className="w-20 h-20 rounded-full object-cover shadow-orange"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pet-orange-light to-pet-orange flex items-center justify-center shadow-orange">
+                    <User size={32} className="text-white" />
+                  </div>
+                )}
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-pet-orange text-white flex items-center justify-center shadow-lg hover:bg-pet-orange-light transition-all disabled:opacity-50"
+                >
+                  {isUploading ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Camera size={16} />
+                  )}
+                </button>
               </div>
               
               <div className="flex-1">
@@ -301,6 +626,47 @@ const SettingsPage = () => {
           <p className="text-xs text-gray-400">Made with ❤️ for pet lovers everywhere</p>
         </div>
       </div>
+
+      {/* Legal Document Dialog */}
+      <Dialog open={legalDocOpen} onOpenChange={setLegalDocOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>{getLegalDocContent().title}</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setLegalDocOpen(false)}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="h-[60vh] pr-4">
+            <div className="prose prose-sm max-w-none">
+              {getLegalDocContent().content.split('\n').map((line, index) => {
+                if (line.startsWith('**') && line.endsWith('**')) {
+                  return <p key={index} className="font-bold text-lg mt-4 mb-2">{line.replace(/\*\*/g, '')}</p>;
+                } else if (line.startsWith('## ')) {
+                  return <h2 key={index} className="text-xl font-bold text-pet-orange mt-6 mb-3">{line.replace('## ', '')}</h2>;
+                } else if (line.startsWith('### ')) {
+                  return <h3 key={index} className="text-lg font-semibold mt-4 mb-2">{line.replace('### ', '')}</h3>;
+                } else if (line.startsWith('- ')) {
+                  return <li key={index} className="ml-6 mb-1">{line.replace('- ', '')}</li>;
+                } else if (line.trim() === '') {
+                  return <br key={index} />;
+                } else if (line.match(/^\d+\./)) {
+                  return <li key={index} className="ml-6 mb-1">{line}</li>;
+                } else if (line.startsWith('---')) {
+                  return <hr key={index} className="my-6 border-pet-orange/20" />;
+                } else {
+                  return <p key={index} className="mb-2 text-gray-700">{line}</p>;
+                }
+              })}
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -197,6 +197,166 @@ const Index = () => {
           <PetPlayAnimation />
         </div>
 
+        {/* Pet Love Meter */}
+        <Card className="mb-8 border-2 border-pink-400/30 shadow-lg bg-gradient-to-br from-pink-50/50 to-red-50/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-pink-700">
+              <Heart className="w-6 h-6 fill-current" />
+              Pet Love Meter
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Track emotional connection through daily activities
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Love Score Circle */}
+            <div className="flex flex-col items-center justify-center py-6">
+              <div className="relative w-48 h-48">
+                {/* Circular progress background */}
+                <svg className="w-48 h-48 transform -rotate-90">
+                  <circle
+                    cx="96"
+                    cy="96"
+                    r="88"
+                    stroke="currentColor"
+                    strokeWidth="12"
+                    fill="none"
+                    className="text-pink-100"
+                  />
+                  <circle
+                    cx="96"
+                    cy="96"
+                    r="88"
+                    stroke="currentColor"
+                    strokeWidth="12"
+                    fill="none"
+                    strokeDasharray={552}
+                    strokeDashoffset={552 - (552 * 85) / 100}
+                    className="text-pink-500 transition-all duration-1000 ease-out"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                {/* Center content */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <Heart className="w-12 h-12 text-pink-500 fill-current mb-2 animate-pulse" />
+                  <span className="text-4xl font-bold text-pink-700">85</span>
+                  <span className="text-sm text-muted-foreground">Love Score</span>
+                </div>
+              </div>
+              <p className="text-center text-sm text-muted-foreground mt-4 max-w-xs">
+                Your bond is <span className="font-semibold text-pink-700">Strong</span>! 
+                Keep up the quality time to reach 100! 💝
+              </p>
+            </div>
+
+            {/* Activity Metrics */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-sm flex items-center gap-2">
+                <Activity className="w-4 h-4 text-pink-600" />
+                Recent Activities
+              </h3>
+              
+              {/* Feeding */}
+              <div className="bg-white/70 rounded-lg p-4 border border-pink-200 hover-scale">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Utensils className="w-5 h-5 text-orange-600" />
+                    <span className="font-medium">Feeding</span>
+                  </div>
+                  <span className="text-sm font-semibold text-pink-600">+15 pts</span>
+                </div>
+                <Progress value={75} className="h-2 mb-1" />
+                <p className="text-xs text-muted-foreground">3 meals today • Last: 2 hours ago</p>
+              </div>
+
+              {/* Walk Time */}
+              <div className="bg-white/70 rounded-lg p-4 border border-pink-200 hover-scale">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-green-600" />
+                    <span className="font-medium">Walk Time</span>
+                  </div>
+                  <span className="text-sm font-semibold text-pink-600">+25 pts</span>
+                </div>
+                <Progress value={85} className="h-2 mb-1" />
+                <p className="text-xs text-muted-foreground">45 min today • Morning walk completed ✓</p>
+              </div>
+
+              {/* Playtime */}
+              <div className="bg-white/70 rounded-lg p-4 border border-pink-200 hover-scale">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-purple-600" />
+                    <span className="font-medium">Playtime</span>
+                  </div>
+                  <span className="text-sm font-semibold text-pink-600">+20 pts</span>
+                </div>
+                <Progress value={60} className="h-2 mb-1" />
+                <p className="text-xs text-muted-foreground">30 min today • Add 15 more for bonus!</p>
+              </div>
+
+              {/* Bonding Time */}
+              <div className="bg-white/70 rounded-lg p-4 border border-pink-200 hover-scale">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Heart className="w-5 h-5 text-pink-600 fill-current" />
+                    <span className="font-medium">Bonding Time</span>
+                  </div>
+                  <span className="text-sm font-semibold text-pink-600">+25 pts</span>
+                </div>
+                <Progress value={90} className="h-2 mb-1" />
+                <p className="text-xs text-muted-foreground">1 hour cuddle time • Perfect! 🥰</p>
+              </div>
+            </div>
+
+            {/* Encouragement Section */}
+            <div className="bg-gradient-to-r from-pink-100 to-red-100 rounded-lg p-4 border-2 border-pink-300 animate-fade-in">
+              <div className="flex items-start gap-3">
+                <Heart className="w-6 h-6 text-pink-600 fill-current flex-shrink-0 mt-1" />
+                <div>
+                  <p className="font-semibold text-pink-900 mb-1">Keep Growing Your Bond! 💕</p>
+                  <p className="text-sm text-pink-800">
+                    You're doing great! Add 15 more minutes of playtime today to boost your Love Score to 90+
+                  </p>
+                  <div className="mt-3 flex gap-2">
+                    <Button 
+                      size="sm" 
+                      className="bg-pink-600 hover:bg-pink-700 text-white"
+                    >
+                      Log Activity
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="border-pink-400 text-pink-700 hover:bg-pink-50"
+                    >
+                      View History
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Weekly Streak */}
+            <div className="bg-white/70 rounded-lg p-4 border border-pink-200">
+              <div className="flex items-center justify-between mb-3">
+                <span className="font-semibold text-sm">Weekly Streak 🔥</span>
+                <span className="text-2xl font-bold text-pink-600">7 days</span>
+              </div>
+              <div className="flex justify-between gap-1">
+                {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+                  <div key={day} className="flex flex-col items-center gap-1">
+                    <div className="w-8 h-8 rounded-full bg-pink-500 flex items-center justify-center">
+                      <Heart className="w-4 h-4 text-white fill-current" />
+                    </div>
+                    <span className="text-xs text-muted-foreground">{day}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Smart Health Radar */}
         <Card className="mb-8 border-2 border-pet-orange/20 shadow-lg">
           <CardHeader>

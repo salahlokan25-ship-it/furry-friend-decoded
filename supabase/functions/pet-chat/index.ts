@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
@@ -15,9 +16,69 @@ serve(async (req) => {
   }
 
   try {
+    // Authentication check
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }), 
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+    );
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid authentication' }), 
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check usage limits
+    const { data: canProceed } = await supabase.rpc('increment_usage', {
+      user_id_param: user.id,
+      usage_type: 'chat'
+    });
+
+    if (!canProceed) {
+      return new Response(
+        JSON.stringify({ error: 'Usage limit exceeded' }), 
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Input validation
     const { message } = await req.json();
     
-    console.log('Received message:', message);
+    if (!message || typeof message !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'Message is required and must be a string' }), 
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const trimmedMessage = message.trim();
+    if (trimmedMessage.length === 0) {
+      return new Response(
+        JSON.stringify({ error: 'Message cannot be empty' }), 
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (trimmedMessage.length > 1000) {
+      return new Response(
+        JSON.stringify({ error: 'Message too long (max 1000 characters)' }), 
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    console.log('Received message from user:', user.id);
 
     if (!openAIApiKey) {
       console.error('OpenAI API key not found');
@@ -56,7 +117,7 @@ Always end serious health concerns with: "If you're worried about your pet's con
           },
           {
             role: 'user',
-            content: message
+            content: trimmedMessage
           }
         ],
         temperature: 0.7,

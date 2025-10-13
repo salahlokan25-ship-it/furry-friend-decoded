@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,15 +14,69 @@ serve(async (req) => {
   }
 
   try {
+    // Authentication check
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }), 
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+    );
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid authentication' }), 
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check usage limits
+    const { data: canProceed } = await supabase.rpc('increment_usage', {
+      user_id_param: user.id,
+      usage_type: 'chat'
+    });
+
+    if (!canProceed) {
+      return new Response(
+        JSON.stringify({ error: 'Usage limit exceeded' }), 
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Input validation
     const { audio, petType } = await req.json();
     
-    if (!audio) {
-      throw new Error('No audio data provided');
+    if (!audio || typeof audio !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'Audio data is required and must be a string' }), 
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate audio size (10MB limit for base64)
+    if (audio.length > 10485760) {
+      return new Response(
+        JSON.stringify({ error: 'Audio data too large (max 10MB)' }), 
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     if (!petType || !['cat', 'dog'].includes(petType)) {
-      throw new Error('Invalid pet type provided');
+      return new Response(
+        JSON.stringify({ error: 'Pet type must be either "cat" or "dog"' }), 
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
+
+    console.log(`Translating pet audio for user ${user.id}, pet type: ${petType}`);
 
     const groqApiKey = Deno.env.get('GROQ_API_KEY');
     if (!groqApiKey) {

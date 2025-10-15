@@ -105,11 +105,23 @@ const Index = () => {
       reader.onloadend = async () => {
         const base64 = reader.result as string;
         
+        // Get current session for authentication
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          toast.error("Please sign in to use mood detection");
+          setIsAnalyzing(false);
+          return;
+        }
+        
         // Call the mood detection edge function
         const { data, error } = await supabase.functions.invoke('pet-mood-detection', {
           body: { 
             image: base64,
             fileType: file.type
+          },
+          headers: {
+            Authorization: `Bearer ${session.access_token}`
           }
         });
 
@@ -136,10 +148,22 @@ const Index = () => {
     setBedtimeStory(null);
 
     try {
+      // Get current session for authentication
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error("Please sign in to generate bedtime stories");
+        setIsGeneratingStory(false);
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('pet-bedtime-story', {
         body: { 
           petName: petName.trim(),
           breed: petBreed.trim()
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
         }
       });
 

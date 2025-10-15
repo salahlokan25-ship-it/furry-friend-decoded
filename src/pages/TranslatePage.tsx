@@ -51,11 +51,27 @@ const TranslatePage = () => {
         return;
       }
 
+      // Get current session for authentication
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to use pet translation.",
+          variant: "destructive",
+        });
+        setIsAnalyzing(false);
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke("pet-translate", {
         body: { 
           audio: audioData,
           petType: selectedPetType 
         },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
       });
 
       if (error) throw error;

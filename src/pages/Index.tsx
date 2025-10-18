@@ -1,16 +1,12 @@
-import { useState } from "react";
-import { Upload, Camera, TrendingUp, Sparkles, Activity, AlertTriangle, Heart, Zap, Utensils, Droplets, Moon, Volume2 } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Upload, Camera, Sparkles, Volume2, Music, Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import PetPlayAnimation from "@/components/PetPlayAnimation";
 
-type MoodType = "happy" | "anxious" | "hungry" | "tired" | "playful" | "neutral";
+type MoodType = "happy" | "sad" | "tired" | "excited" | "anxious" | "playful" | "neutral";
 
 interface MoodResult {
   mood: MoodType;
@@ -21,71 +17,78 @@ interface MoodResult {
 
 const moodEmojis: Record<MoodType, string> = {
   happy: "😊",
-  anxious: "😰",
-  hungry: "🍖",
+  sad: "😢",
   tired: "😴",
+  excited: "🤩",
+  anxious: "😰",
   playful: "🎾",
   neutral: "😐"
 };
 
 const moodColors: Record<MoodType, string> = {
-  happy: "bg-yellow-100 border-yellow-400 text-yellow-800",
-  anxious: "bg-purple-100 border-purple-400 text-purple-800",
-  hungry: "bg-orange-100 border-orange-400 text-orange-800",
-  tired: "bg-blue-100 border-blue-400 text-blue-800",
-  playful: "bg-green-100 border-green-400 text-green-800",
-  neutral: "bg-gray-100 border-gray-400 text-gray-800"
+  happy: "from-yellow-400 to-orange-400",
+  sad: "from-blue-400 to-indigo-400",
+  tired: "from-purple-400 to-blue-400",
+  excited: "from-pink-400 to-red-400",
+  anxious: "from-orange-400 to-red-400",
+  playful: "from-green-400 to-teal-400",
+  neutral: "from-gray-400 to-slate-400"
 };
 
-// Mock data for daily mood tracker
-const mockMoodData = [
-  { day: "Mon", score: 8 },
-  { day: "Tue", score: 6 },
-  { day: "Wed", score: 9 },
-  { day: "Thu", score: 5 },
-  { day: "Fri", score: 7 },
-  { day: "Sat", score: 9 },
-  { day: "Sun", score: 8 }
-];
+// Music playlists for different moods
+const moodMusic: Record<MoodType, string> = {
+  happy: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+  sad: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+  tired: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+  excited: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
+  anxious: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
+  playful: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
+  neutral: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3"
+};
 
-// Health metrics data
-const healthMetrics = [
-  { metric: 'Energy', value: 85, fullMark: 100 },
-  { metric: 'Appetite', value: 70, fullMark: 100 },
-  { metric: 'Hydration', value: 90, fullMark: 100 },
-  { metric: 'Activity', value: 65, fullMark: 100 },
-  { metric: 'Mood', value: 80, fullMark: 100 }
-];
-
-const healthAlerts = [
-  {
-    id: 1,
-    severity: "warning",
-    title: "Energy dropped 20% this week",
-    description: "Rocky's energy dropped 20% this week. Could be heat-related — increase hydration.",
-    icon: Zap,
-    color: "text-orange-600"
-  }
-];
+const moodMusicNames: Record<MoodType, string> = {
+  happy: "Upbeat Paws Playlist 🎵",
+  sad: "Gentle Comfort Melodies 🎶",
+  tired: "Sleepy Time Lullabies 💤",
+  excited: "High Energy Playtime Mix 🎉",
+  anxious: "Calming Zen Sounds 🧘",
+  playful: "Fun & Games Tunes 🎮",
+  neutral: "Peaceful Background Music 🌿"
+};
 
 const Index = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [moodResult, setMoodResult] = useState<MoodResult | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [petName, setPetName] = useState("");
-  const [petBreed, setPetBreed] = useState("");
-  const [isGeneratingStory, setIsGeneratingStory] = useState(false);
-  const [bedtimeStory, setBedtimeStory] = useState<string | null>(null);
-  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    // Initialize audio element
+    audioRef.current = new Audio();
+    audioRef.current.loop = true;
+    audioRef.current.volume = 0.5;
+    
+    audioRef.current.addEventListener('ended', () => setIsPlaying(false));
+    audioRef.current.addEventListener('pause', () => setIsPlaying(false));
+    audioRef.current.addEventListener('play', () => setIsPlaying(true));
+    
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     // Validate file type
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/webm'];
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
     if (!validTypes.includes(file.type)) {
-      toast.error("Please upload a valid image or video file");
+      toast.error("Please upload a valid image file (JPEG, PNG, or WebP)");
       return;
     }
 
@@ -96,6 +99,10 @@ const Index = () => {
     // Start analysis
     setIsAnalyzing(true);
     setMoodResult(null);
+    if (audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
 
     try {
       // Convert file to base64
@@ -128,7 +135,18 @@ const Index = () => {
         if (error) throw error;
 
         setMoodResult(data);
-        toast.success("Mood analysis complete!");
+        toast.success("Mood detected! 🎉");
+        
+        // Auto-play music after 1 second
+        setTimeout(() => {
+          if (audioRef.current && data.mood && moodMusic[data.mood as MoodType]) {
+            audioRef.current.src = moodMusic[data.mood as MoodType];
+            audioRef.current.play().catch(err => {
+              console.error("Error playing audio:", err);
+              toast.error("Click the play button to start music");
+            });
+          }
+        }, 1000);
       };
     } catch (error) {
       console.error("Error analyzing mood:", error);
@@ -138,552 +156,232 @@ const Index = () => {
     }
   };
 
-  const handleGenerateStory = async () => {
-    if (!petName.trim() || !petBreed.trim()) {
-      toast.error("Please enter your pet's name and breed");
-      return;
-    }
-
-    setIsGeneratingStory(true);
-    setBedtimeStory(null);
-
-    try {
-      // Get current session for authentication
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        toast.error("Please sign in to generate bedtime stories");
-        setIsGeneratingStory(false);
-        return;
-      }
-
-      const { data, error } = await supabase.functions.invoke('pet-bedtime-story', {
-        body: { 
-          petName: petName.trim(),
-          breed: petBreed.trim()
-        },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`
-        }
+  const toggleMusic = () => {
+    if (!audioRef.current || !moodResult) return;
+    
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(err => {
+        console.error("Error playing audio:", err);
+        toast.error("Failed to play music");
       });
-
-      if (error) throw error;
-
-      setBedtimeStory(data.story);
-      toast.success("Bedtime story created! 🌙");
-    } catch (error) {
-      console.error("Error generating story:", error);
-      toast.error("Failed to generate bedtime story. Please try again.");
-    } finally {
-      setIsGeneratingStory(false);
     }
-  };
-
-  const handlePlayStory = () => {
-    if (!bedtimeStory) return;
-
-    const utterance = new SpeechSynthesisUtterance(bedtimeStory);
-    utterance.rate = 0.8;
-    utterance.pitch = 1.0;
-    utterance.volume = 1.0;
-
-    utterance.onstart = () => setIsPlayingAudio(true);
-    utterance.onend = () => setIsPlayingAudio(false);
-    utterance.onerror = () => {
-      setIsPlayingAudio(false);
-      toast.error("Failed to play audio");
-    };
-
-    window.speechSynthesis.speak(utterance);
-  };
-
-  const handleStopAudio = () => {
-    window.speechSynthesis.cancel();
-    setIsPlayingAudio(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-pet-beige/20 to-pet-orange/10 pb-24">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 pb-24">
+      <div className="container mx-auto px-4 py-8 max-w-3xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Sparkles className="w-8 h-8 text-pet-orange" />
-            <h1 className="text-4xl font-bold text-pet-orange">Pet Mood Detector</h1>
+        <div className="text-center mb-12 animate-fade-in">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Camera className="w-12 h-12 text-primary animate-bounce" />
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 bg-clip-text text-transparent">
+              Pet Mood Scanner
+            </h1>
           </div>
-          <p className="text-muted-foreground">
-            Upload a photo or video to understand your pet's emotions
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            📸 Scan your pet's face with AI to detect their mood and get personalized care advice
           </p>
         </div>
 
         {/* Pet Animation */}
-        <div className="mb-8">
+        <div className="mb-12">
           <PetPlayAnimation />
         </div>
 
-        {/* Pet Love Meter */}
-        <Card className="mb-8 border-2 border-pink-400/30 shadow-lg bg-gradient-to-br from-pink-50/50 to-red-50/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-pink-700">
-              <Heart className="w-6 h-6 fill-current" />
-              Pet Love Meter
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Track emotional connection through daily activities
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Love Score Circle */}
-            <div className="flex flex-col items-center justify-center py-6">
-              <div className="relative w-48 h-48">
-                {/* Circular progress background */}
-                <svg className="w-48 h-48 transform -rotate-90">
-                  <circle
-                    cx="96"
-                    cy="96"
-                    r="88"
-                    stroke="currentColor"
-                    strokeWidth="12"
-                    fill="none"
-                    className="text-pink-100"
-                  />
-                  <circle
-                    cx="96"
-                    cy="96"
-                    r="88"
-                    stroke="currentColor"
-                    strokeWidth="12"
-                    fill="none"
-                    strokeDasharray={552}
-                    strokeDashoffset={552 - (552 * 85) / 100}
-                    className="text-pink-500 transition-all duration-1000 ease-out"
-                    strokeLinecap="round"
-                  />
-                </svg>
-                {/* Center content */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <Heart className="w-12 h-12 text-pink-500 fill-current mb-2 animate-pulse" />
-                  <span className="text-4xl font-bold text-pink-700">85</span>
-                  <span className="text-sm text-muted-foreground">Love Score</span>
-                </div>
-              </div>
-              <p className="text-center text-sm text-muted-foreground mt-4 max-w-xs">
-                Your bond is <span className="font-semibold text-pink-700">Strong</span>! 
-                Keep up the quality time to reach 100! 💝
-              </p>
-            </div>
-
-            {/* Activity Metrics */}
-            <div className="space-y-4">
-              <h3 className="font-semibold text-sm flex items-center gap-2">
-                <Activity className="w-4 h-4 text-pink-600" />
-                Recent Activities
-              </h3>
-              
-              {/* Feeding */}
-              <div className="bg-white/70 rounded-lg p-4 border border-pink-200 hover-scale">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Utensils className="w-5 h-5 text-orange-600" />
-                    <span className="font-medium">Feeding</span>
-                  </div>
-                  <span className="text-sm font-semibold text-pink-600">+15 pts</span>
-                </div>
-                <Progress value={75} className="h-2 mb-1" />
-                <p className="text-xs text-muted-foreground">3 meals today • Last: 2 hours ago</p>
-              </div>
-
-              {/* Walk Time */}
-              <div className="bg-white/70 rounded-lg p-4 border border-pink-200 hover-scale">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Activity className="w-5 h-5 text-green-600" />
-                    <span className="font-medium">Walk Time</span>
-                  </div>
-                  <span className="text-sm font-semibold text-pink-600">+25 pts</span>
-                </div>
-                <Progress value={85} className="h-2 mb-1" />
-                <p className="text-xs text-muted-foreground">45 min today • Morning walk completed ✓</p>
-              </div>
-
-              {/* Playtime */}
-              <div className="bg-white/70 rounded-lg p-4 border border-pink-200 hover-scale">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-purple-600" />
-                    <span className="font-medium">Playtime</span>
-                  </div>
-                  <span className="text-sm font-semibold text-pink-600">+20 pts</span>
-                </div>
-                <Progress value={60} className="h-2 mb-1" />
-                <p className="text-xs text-muted-foreground">30 min today • Add 15 more for bonus!</p>
-              </div>
-
-              {/* Bonding Time */}
-              <div className="bg-white/70 rounded-lg p-4 border border-pink-200 hover-scale">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Heart className="w-5 h-5 text-pink-600 fill-current" />
-                    <span className="font-medium">Bonding Time</span>
-                  </div>
-                  <span className="text-sm font-semibold text-pink-600">+25 pts</span>
-                </div>
-                <Progress value={90} className="h-2 mb-1" />
-                <p className="text-xs text-muted-foreground">1 hour cuddle time • Perfect! 🥰</p>
-              </div>
-            </div>
-
-            {/* Encouragement Section */}
-            <div className="bg-gradient-to-r from-pink-100 to-red-100 rounded-lg p-4 border-2 border-pink-300 animate-fade-in">
-              <div className="flex items-start gap-3">
-                <Heart className="w-6 h-6 text-pink-600 fill-current flex-shrink-0 mt-1" />
-                <div>
-                  <p className="font-semibold text-pink-900 mb-1">Keep Growing Your Bond! 💕</p>
-                  <p className="text-sm text-pink-800">
-                    You're doing great! Add 15 more minutes of playtime today to boost your Love Score to 90+
-                  </p>
-                  <div className="mt-3 flex gap-2">
-                    <Button 
-                      size="sm" 
-                      className="bg-pink-600 hover:bg-pink-700 text-white"
-                    >
-                      Log Activity
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      className="border-pink-400 text-pink-700 hover:bg-pink-50"
-                    >
-                      View History
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Weekly Streak */}
-            <div className="bg-white/70 rounded-lg p-4 border border-pink-200">
-              <div className="flex items-center justify-between mb-3">
-                <span className="font-semibold text-sm">Weekly Streak 🔥</span>
-                <span className="text-2xl font-bold text-pink-600">7 days</span>
-              </div>
-              <div className="flex justify-between gap-1">
-                {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-                  <div key={day} className="flex flex-col items-center gap-1">
-                    <div className="w-8 h-8 rounded-full bg-pink-500 flex items-center justify-center">
-                      <Heart className="w-4 h-4 text-white fill-current" />
-                    </div>
-                    <span className="text-xs text-muted-foreground">{day}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Smart Health Radar */}
-        <Card className="mb-8 border-2 border-pet-orange/20 shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="w-6 h-6 text-pet-orange" />
-              Smart Health Radar
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Health Alerts */}
-            {healthAlerts.map((alert) => (
-              <div
-                key={alert.id}
-                className="bg-orange-50 border-l-4 border-orange-500 rounded-lg p-4 flex gap-3 animate-fade-in"
-              >
-                <AlertTriangle className={`w-5 h-5 ${alert.color} flex-shrink-0 mt-0.5`} />
-                <div className="flex-1">
-                  <p className="font-semibold text-sm text-gray-900">{alert.title}</p>
-                  <p className="text-sm text-gray-700 mt-1">{alert.description}</p>
-                </div>
-              </div>
-            ))}
-
-            {/* Health Radar Chart */}
-            <div className="bg-white/50 rounded-lg p-4">
-              <ResponsiveContainer width="100%" height={300}>
-                <RadarChart data={healthMetrics}>
-                  <PolarGrid stroke="#f59e0b40" />
-                  <PolarAngleAxis 
-                    dataKey="metric" 
-                    tick={{ fill: '#f59e0b', fontSize: 12 }}
-                  />
-                  <PolarRadiusAxis 
-                    angle={90} 
-                    domain={[0, 100]}
-                    tick={{ fill: '#f59e0b80', fontSize: 10 }}
-                  />
-                  <Radar 
-                    name="Health" 
-                    dataKey="value" 
-                    stroke="#f59e0b" 
-                    fill="#f59e0b" 
-                    fillOpacity={0.6}
-                    strokeWidth={2}
-                  />
-                </RadarChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Individual Health Metrics */}
-            <div className="space-y-4">
-              <h3 className="font-semibold text-sm flex items-center gap-2">
-                <Heart className="w-4 h-4 text-pet-orange" />
-                Health Metrics
-              </h3>
-              {healthMetrics.map((metric) => (
-                <div key={metric.metric} className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium">{metric.metric}</span>
-                    <span className="text-pet-orange font-semibold">{metric.value}%</span>
-                  </div>
-                  <Progress value={metric.value} className="h-2" />
-                </div>
-              ))}
-            </div>
-
-            {/* Quick Health Tips */}
-            <div className="bg-pet-orange/10 rounded-lg p-4 border border-pet-orange/20">
-              <p className="text-sm font-semibold mb-2 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-pet-orange" />
-                AI Vet Tips
-              </p>
-              <ul className="text-sm space-y-1 text-muted-foreground">
-                <li>• Monitor water intake - aim for 8+ hours of activity daily</li>
-                <li>• Consider indoor play during peak heat hours</li>
-                <li>• Check for signs of dehydration (dry nose, lethargy)</li>
-              </ul>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Upload Section */}
-        <Card className="mb-8 border-2 border-pet-orange/20 shadow-lg">
-          <CardContent className="pt-6">
-            <div className="flex flex-col items-center justify-center space-y-4">
-              {previewUrl ? (
-                <div className="relative w-full max-w-md">
-                  <img 
-                    src={previewUrl} 
-                    alt="Pet preview" 
-                    className="w-full h-64 object-cover rounded-lg border-2 border-pet-orange/30"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="absolute top-2 right-2"
-                    onClick={() => {
-                      setPreviewUrl(null);
-                      setMoodResult(null);
-                    }}
-                  >
-                    Change
-                  </Button>
-                </div>
-              ) : (
-                <label className="cursor-pointer">
+        <Card className="border-2 border-primary/20 shadow-2xl mb-8 overflow-hidden">
+          <div className={`h-2 bg-gradient-to-r ${moodResult ? moodColors[moodResult.mood] : 'from-purple-500 to-pink-500'}`} />
+          <CardHeader className="text-center pb-4">
+            <CardTitle className="text-2xl flex items-center justify-center gap-2">
+              <Sparkles className="w-6 h-6 text-primary" />
+              {moodResult ? "Mood Detected!" : "Upload Your Pet's Photo"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Image Preview */}
+            {previewUrl && (
+              <div className="relative w-full aspect-video rounded-lg overflow-hidden border-4 border-primary/20 shadow-lg">
+                <img 
+                  src={previewUrl} 
+                  alt="Pet preview" 
+                  className="w-full h-full object-cover"
+                />
+                {isAnalyzing && (
+                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
+                    <div className="text-center text-white">
+                      <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                      <p className="text-xl font-semibold">Analyzing mood...</p>
+                      <p className="text-sm mt-2">AI is reading your pet's emotions 🤖</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Upload Button */}
+            {!isAnalyzing && (
+              <div className="flex flex-col items-center gap-4">
+                <label className="cursor-pointer group">
+                  <div className={`flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-semibold text-white transition-all shadow-lg hover:shadow-2xl hover:scale-105 ${
+                    previewUrl 
+                      ? 'bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600' 
+                      : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600'
+                  }`}>
+                    <Camera className="w-6 h-6" />
+                    {previewUrl ? "Scan Another Pet" : "Scan Your Pet's Face"}
+                  </div>
                   <input
                     type="file"
-                    accept="image/*,video/*"
-                    className="hidden"
+                    accept="image/jpeg,image/png,image/webp,image/jpg"
                     onChange={handleFileUpload}
-                    disabled={isAnalyzing}
+                    className="hidden"
                   />
-                  <div className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-pet-orange/40 rounded-lg hover:border-pet-orange transition-colors bg-white/50">
-                    <Upload className="w-16 h-16 text-pet-orange/60 mb-4" />
-                    <p className="text-lg font-semibold text-pet-orange mb-2">
-                      Upload Photo or Video
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Click to browse or drag and drop
-                    </p>
-                  </div>
                 </label>
-              )}
-
-              {isAnalyzing && (
-                <div className="flex items-center gap-2 text-pet-orange">
-                  <div className="w-5 h-5 border-2 border-pet-orange border-t-transparent rounded-full animate-spin" />
-                  <span className="font-medium">Analyzing your pet's mood...</span>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Mood Result */}
-        {moodResult && (
-          <Card className={`mb-8 border-2 ${moodColors[moodResult.mood]} shadow-lg animate-fade-in`}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-2xl">
-                <span className="text-4xl">{moodEmojis[moodResult.mood]}</span>
-                <span className="capitalize">{moodResult.mood}</span>
-                <span className="text-sm font-normal ml-auto">
-                  {Math.round(moodResult.confidence * 100)}% confident
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-white/60 rounded-lg p-4">
-                <p className="font-semibold mb-2 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" />
-                  What we noticed:
-                </p>
-                <p className="text-sm">{moodResult.details}</p>
+                {!previewUrl && (
+                  <p className="text-sm text-muted-foreground text-center">
+                    Upload a clear photo of your pet's face for best results
+                  </p>
+                )}
               </div>
-              <div className="bg-white/60 rounded-lg p-4">
-                <p className="font-semibold mb-2">💡 Suggestion:</p>
-                <p className="text-sm">{moodResult.advice}</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+            )}
 
-        {/* Daily Mood Tracker */}
-        <Card className="mb-8 border-2 border-pet-orange/20 shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-pet-orange" />
-              Daily Mood Tracker
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={mockMoodData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f59e0b20" />
-                <XAxis 
-                  dataKey="day" 
-                  stroke="#f59e0b"
-                  style={{ fontSize: '12px' }}
-                />
-                <YAxis 
-                  stroke="#f59e0b"
-                  domain={[0, 10]}
-                  style={{ fontSize: '12px' }}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'white',
-                    border: '2px solid #f59e0b40',
-                    borderRadius: '8px'
-                  }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="score" 
-                  stroke="#f59e0b" 
-                  strokeWidth={3}
-                  dot={{ fill: '#f59e0b', r: 5 }}
-                  activeDot={{ r: 7 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-            <p className="text-sm text-muted-foreground text-center mt-4">
-              Track your pet's happiness over time 📊
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Dream Journal */}
-        <Card className="border-2 border-purple-400/30 shadow-lg bg-gradient-to-br from-purple-50/50 to-blue-50/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-purple-700">
-              <Moon className="w-6 h-6" />
-              Dream Journal - AI Bedtime Stories
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Generate a personalized bedtime story for your pet 🌙
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="petName">Pet Name</Label>
-                <Input
-                  id="petName"
-                  placeholder="e.g., Bella"
-                  value={petName}
-                  onChange={(e) => setPetName(e.target.value)}
-                  disabled={isGeneratingStory}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="petBreed">Breed</Label>
-                <Input
-                  id="petBreed"
-                  placeholder="e.g., Golden Retriever"
-                  value={petBreed}
-                  onChange={(e) => setPetBreed(e.target.value)}
-                  disabled={isGeneratingStory}
-                />
-              </div>
-            </div>
-
-            <Button
-              onClick={handleGenerateStory}
-              disabled={isGeneratingStory || !petName.trim() || !petBreed.trim()}
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-            >
-              {isGeneratingStory ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                  Creating magical story...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Generate Bedtime Story
-                </>
-              )}
-            </Button>
-
-            {bedtimeStory && (
-              <div className="animate-fade-in space-y-4">
-                <div className="bg-white/70 rounded-lg p-6 border-2 border-purple-200">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-purple-700 flex items-center gap-2">
-                      <Moon className="w-5 h-5" />
-                      Tonight's Bedtime Story
-                    </h3>
-                    {!isPlayingAudio ? (
-                      <Button
-                        onClick={handlePlayStory}
-                        variant="outline"
-                        size="sm"
-                        className="border-purple-300 text-purple-700 hover:bg-purple-50"
-                      >
-                        <Volume2 className="w-4 h-4 mr-2" />
-                        Play Story
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={handleStopAudio}
-                        variant="outline"
-                        size="sm"
-                        className="border-red-300 text-red-700 hover:bg-red-50"
-                      >
-                        Stop
-                      </Button>
-                    )}
-                  </div>
-                  <div className="prose prose-sm max-w-none">
-                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                      {bedtimeStory}
+            {/* Mood Result */}
+            {moodResult && !isAnalyzing && (
+              <div className="space-y-6 animate-fade-in">
+                {/* Mood Display */}
+                <div className={`bg-gradient-to-br ${moodColors[moodResult.mood]} p-8 rounded-2xl text-white text-center shadow-2xl`}>
+                  <div className="text-8xl mb-4">{moodEmojis[moodResult.mood]}</div>
+                  <h3 className="text-3xl font-bold mb-2 capitalize">
+                    {moodResult.mood}
+                  </h3>
+                  <div className="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 inline-block">
+                    <p className="text-sm font-semibold">
+                      {Math.round(moodResult.confidence * 100)}% Confidence
                     </p>
                   </div>
                 </div>
-                <p className="text-xs text-center text-muted-foreground">
-                  💤 Perfect for bonding before bed • Generate a new story anytime
-                </p>
+
+                {/* AI Insights */}
+                <Card className="border-2 border-primary/20 bg-gradient-to-br from-white to-primary/5">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Sparkles className="w-5 h-5 text-primary" />
+                      AI Insights
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <h4 className="font-semibold text-sm text-muted-foreground mb-2">What We Observed:</h4>
+                      <p className="text-base leading-relaxed">{moodResult.details}</p>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-sm text-muted-foreground mb-2">💡 Care Advice:</h4>
+                      <p className="text-base leading-relaxed font-medium text-primary">
+                        {moodResult.advice}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Pet Music Mode */}
+                <Card className="border-2 border-purple-300 bg-gradient-to-br from-purple-50 to-pink-50 shadow-xl">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Music className="w-5 h-5 text-purple-600" />
+                      Pet Music Mode
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="bg-white/70 rounded-lg p-4 border-2 border-purple-200">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                          <Volume2 className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-sm text-purple-900">Now Playing</p>
+                          <p className="text-xs text-muted-foreground">{moodMusicNames[moodResult.mood]}</p>
+                        </div>
+                      </div>
+                      
+                      <Button
+                        onClick={toggleMusic}
+                        className={`w-full ${
+                          isPlaying 
+                            ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600' 
+                            : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600'
+                        }`}
+                        size="lg"
+                      >
+                        {isPlaying ? (
+                          <>
+                            <Pause className="w-5 h-5 mr-2" />
+                            Pause Music
+                          </>
+                        ) : (
+                          <>
+                            <Play className="w-5 h-5 mr-2" />
+                            Play Calming Music
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                    
+                    <div className="bg-purple-100 rounded-lg p-4 border border-purple-300">
+                      <p className="text-sm text-purple-900 leading-relaxed">
+                        <span className="font-semibold">🎵 Music matched to mood:</span> Based on your pet's {moodResult.mood} mood, 
+                        we've selected {moodResult.mood === "tired" ? "calming lullabies" : moodResult.mood === "excited" ? "high-energy tunes" : "soothing melodies"} to enhance their emotional state.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Example Text */}
+                <div className="text-center p-6 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-xl border-2 border-yellow-300 shadow-lg">
+                  <p className="text-lg font-semibold text-orange-900">
+                    Example: "Luna looks {moodResult.mood} — {moodResult.mood === "tired" ? "time for a calm playlist!" : moodResult.mood === "excited" ? "let's play together!" : "perfect time for some care!"}"
+                  </p>
+                </div>
               </div>
             )}
           </CardContent>
         </Card>
+
+        {/* How It Works */}
+        {!moodResult && (
+          <Card className="border-2 border-primary/10 bg-white/50 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="text-xl flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-primary" />
+                How It Works
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex gap-4 items-start">
+                <div className="w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center font-bold flex-shrink-0">1</div>
+                <div>
+                  <h4 className="font-semibold mb-1">Upload Photo</h4>
+                  <p className="text-sm text-muted-foreground">Take or upload a clear photo of your pet's face</p>
+                </div>
+              </div>
+              <div className="flex gap-4 items-start">
+                <div className="w-8 h-8 rounded-full bg-pink-500 text-white flex items-center justify-center font-bold flex-shrink-0">2</div>
+                <div>
+                  <h4 className="font-semibold mb-1">AI Analysis</h4>
+                  <p className="text-sm text-muted-foreground">Our AI scans facial expressions, body language, and energy levels</p>
+                </div>
+              </div>
+              <div className="flex gap-4 items-start">
+                <div className="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold flex-shrink-0">3</div>
+                <div>
+                  <h4 className="font-semibold mb-1">Get Results</h4>
+                  <p className="text-sm text-muted-foreground">Receive mood detection, care advice, and auto-play calming music</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

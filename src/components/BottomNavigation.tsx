@@ -9,7 +9,7 @@ interface BottomNavigationProps {
 
 const BottomNavigation = ({ activeTab, onTabChange }: BottomNavigationProps) => {
   const tabs = [
-    { id: "translate", icon: Home, label: "Home" },
+    { id: "home", icon: Home, label: "Home" },
     { id: "training", icon: GraduationCap, label: "Training" },
     { id: "album", icon: Plus, label: "Album" }, 
     { id: "chat", icon: MessageCircle, label: "Chat" },

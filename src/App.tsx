@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import BottomNavigation from "@/components/BottomNavigation";
+import Index from "@/pages/Index";
 import TranslatePage from "@/pages/TranslatePage";
 import AlbumPage from "@/pages/AlbumPage";
 import TrainingPage from "@/pages/TrainingPage";
@@ -16,7 +17,7 @@ import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [activeTab, setActiveTab] = useState("translate");
+  const [activeTab, setActiveTab] = useState("home");
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [showSubscriptionPlans, setShowSubscriptionPlans] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -58,6 +59,8 @@ const App = () => {
 
   const renderActivePage = () => {
     switch (activeTab) {
+      case "home":
+        return <Index onNavigate={setActiveTab} />;
       case "translate":
         return <TranslatePage />;
       case "album":
@@ -69,7 +72,7 @@ const App = () => {
       case "settings":
         return <SettingsPage />;
       default:
-        return <TranslatePage />;
+        return <Index onNavigate={setActiveTab} />;
     }
   };
 

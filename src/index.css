@@ -59,41 +59,66 @@
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
-/* PetParadise Design System - Playful & Vibrant Pet App Theme
-All colors MUST be HSL.
+/* PetParadise Design System - Professional Dog Training App Theme
+Based on the provided design system JSON
 */
+
+/* Subtle background pattern to reduce white appearance */
+.bg-pattern {
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(255, 107, 90, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(184, 167, 232, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(255, 224, 132, 0.03) 0%, transparent 50%);
+}
 
 @layer base {
   :root {
-    /* Brand Colors - Bright Orange & White Theme */
-    --pet-orange: 25 100% 60%; /* Bright warm orange */
-    --pet-orange-light: 25 100% 70%;
-    --pet-orange-dark: 25 100% 50%;
-    --pet-beige: 35 30% 92%; /* Subtle beige highlight */
-    --pet-gray-light: 0 0% 96%; /* Light gray highlight */
-    --pet-coral: 14 100% 64%;
-    --pet-coral-light: 14 100% 75%;
-    --pet-coral-dark: 14 100% 55%;
-    --pet-teal: 178 64% 45%;
-    --pet-teal-light: 178 64% 65%;
-    --pet-purple: 270 60% 70%;
-    --pet-yellow: 45 100% 70%;
+    /* Design System Color Palette */
+    --primary-coral: 6 100% 65%; /* #FF6B5A - Primary coral/salmon orange */
+    --secondary-navy: 210 50% 25%; /* #1A3B5C - Deep navy blue */
+    --accent-purple: 260 60% 75%; /* #B8A7E8 - Purple accent */
+    --accent-yellow: 45 100% 70%; /* #FFE084 - Yellow accent */
+    --accent-light-blue: 180 60% 80%; /* #A8E6E3 - Light blue accent */
     
-    /* Gradients */
-    --gradient-orange: linear-gradient(135deg, hsl(var(--pet-orange)) 0%, hsl(var(--pet-orange-light)) 100%);
-    --gradient-orange-warm: linear-gradient(135deg, hsl(var(--pet-orange-dark)) 0%, hsl(var(--pet-orange)) 100%);
-    --gradient-coral: linear-gradient(135deg, hsl(var(--pet-coral)) 0%, hsl(var(--pet-coral-light)) 100%);
-    --gradient-teal: linear-gradient(135deg, hsl(var(--pet-teal)) 0%, hsl(var(--pet-teal-light)) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(var(--pet-coral)) 0%, hsl(var(--pet-orange)) 100%);
+    /* Neutral Colors */
+    --neutral-white: 0 0% 100%; /* #FFFFFF */
+    --neutral-light-gray: 0 0% 96%; /* #F5F5F7 */
+    --neutral-medium-gray: 0 0% 91%; /* #E8E8E8 */
+    --neutral-dark-gray: 0 0% 20%; /* #333333 */
     
-    /* Shadows */
-    --shadow-soft: 0 2px 12px hsl(var(--pet-orange) / 0.1);
-    --shadow-orange: 0 4px 20px hsl(var(--pet-orange) / 0.2);
-    --shadow-floating: 0 6px 30px hsl(var(--pet-orange) / 0.15);
+    /* Semantic Colors */
+    --semantic-success: 120 60% 50%; /* #4CAF50 */
+    --semantic-error: 0 100% 60%; /* #FF5252 */
+    --semantic-warning: 45 100% 50%; /* #FFC107 */
+    
+    /* Design System Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary-coral)) 0%, hsl(var(--primary-coral) / 0.8) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary-navy)) 0%, hsl(var(--secondary-navy) / 0.9) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(var(--accent-purple)) 0%, hsl(var(--accent-yellow)) 100%);
+    
+    /* Design System Shadows */
+    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.16);
+    
+    /* Design System Spacing (8px base unit) */
+    --spacing-xs: 8px;
+    --spacing-sm: 12px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-xxl: 48px;
+    
+    /* Design System Border Radius */
+    --radius-small: 8px;
+    --radius-medium: 12px;
+    --radius-large: 16px;
+    --radius-xlarge: 24px;
+    --radius-pill: 999px;
     
     /* Animation */
-    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
@@ -103,11 +128,11 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: var(--pet-orange);
+    --primary: var(--primary-coral);
     --primary-foreground: 0 0% 100%;
 
-    --secondary: var(--pet-beige);
-    --secondary-foreground: 0 0% 20%;
+    --secondary: var(--secondary-navy);
+    --secondary-foreground: 0 0% 100%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;

@@ -973,33 +973,39 @@ const Index = ({ onNavigate }: IndexProps) => {
       <div className="container mx-auto px-4 py-4 pb-20 max-w-sm">
         
         {/* Header */}
-        <div className="flex items-center justify-between mb-8 animate-fade-in">
-          <div className="flex items-center gap-4">
-            <img 
-              src="/petparadise-logo.png" 
-              alt="PetParadise Logo" 
-              className="w-14 h-14 rounded-2xl shadow-lg"
-            />
-            <div>
-              <h1 className="text-2xl font-bold text-[#1A3B5C]">
-                PetParadise
-              </h1>
-              <p className="text-[#FF6B5A] text-sm font-semibold">AI Pet Companion</p>
+        <header className="bg-white border-b border-gray-200 mb-8 -mx-4 px-4 py-4 sticky top-12 z-10 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-14 h-14 bg-gradient-to-br from-orange-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg p-2">
+                <img src="/petparadise-logo.png" alt="PetParadise Logo" className="w-full h-full object-contain" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-[#1A3B5C]">PetParadise</h1>
+                <p className="text-sm font-medium text-[#FF6B5A]">AI Pet Companion</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="rounded-full w-12 h-12 bg-orange-300/50 hover:bg-orange-300/70 shadow-md"
+              >
+                <Camera className="w-5 h-5 text-orange-600" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="rounded-full w-12 h-12 bg-[#1A3B5C] hover:bg-[#1A3B5C]/90 shadow-md"
+              >
+                <User className="w-5 h-5 text-white" />
+              </Button>
+              <div className="flex items-center gap-2 bg-yellow-50 px-3 py-1.5 rounded-full border border-yellow-200 shadow-sm">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium text-[#1A3B5C]">AI Active</span>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#FF6B5A] flex items-center justify-center animate-pulse shadow-lg">
-              <Bot className="w-5 h-5 text-white" />
-            </div>
-            <div className="w-10 h-10 rounded-full bg-[#1A3B5C] flex items-center justify-center shadow-lg">
-              <User className="w-5 h-5 text-white" />
-            </div>
-            <div className="hidden md:flex items-center gap-2 bg-[#FF6B5A]/10 px-3 py-2 rounded-full border border-[#FF6B5A]/20">
-              <div className="w-2 h-2 bg-[#4CAF50] rounded-full animate-pulse"></div>
-              <span className="text-xs text-[#FF6B5A] font-semibold">AI Active</span>
-            </div>
-          </div>
-        </div>
+        </header>
 
         {/* AI PetMood Live */}
         <Card className="mb-8 border-0 shadow-lg bg-[#FF6B5A] text-white animate-slide-up rounded-3xl overflow-hidden">

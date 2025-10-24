@@ -14,7 +14,6 @@ import {
   Shield,
   Dna,
   Stethoscope,
-  BarChart3,
   Globe,
   Video,
   CheckCircle,
@@ -34,8 +33,6 @@ import {
   Utensils,
   Stethoscope as StethoscopeIcon,
   MessageCircle,
-  Gift,
-  Home,
   Image,
   Calendar,
   TrendingUp,
@@ -58,7 +55,6 @@ import {
   GraduationCap,
   Trophy,
   MessageCircle as MessageCircleIcon,
-  Gift as GiftIcon,
   TrendingUp as TrendingUpIcon,
   Users as UsersIcon,
   Star as StarIcon,
@@ -86,7 +82,6 @@ import {
   Shield as ShieldIcon,
   Dna as DnaIcon,
   Stethoscope as StethoscopeIcon2,
-  BarChart3 as BarChart3Icon,
   Globe as GlobeIcon,
   Video as VideoIcon,
   AlertTriangle,
@@ -100,7 +95,8 @@ import {
   Smartphone as SmartphoneIcon,
   Wifi as WifiIcon,
   Battery as BatteryIcon,
-  Signal as SignalIcon
+  Signal as SignalIcon,
+  Volume2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -113,46 +109,12 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-type MoodType = "Happy" | "Playful" | "Calm" | "Stressed";
-
-interface MoodResult {
-  mood: MoodType;
-  confidence: number;
-  advice: string;
-  color: string;
-}
-
-interface MoodHistory {
-  id: string;
-  mood: MoodType;
-  time: string;
-  emoji: string;
-  color: string;
-}
 
 interface IndexProps {
   onNavigate?: (tab: string) => void;
 }
 
 const Index = ({ onNavigate }: IndexProps) => {
-  // AI PetMood Live State
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [moodResult, setMoodResult] = useState<MoodResult | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [showAdvice, setShowAdvice] = useState(false);
-
-  // Mood History State
-  const [moodHistory] = useState<MoodHistory[]>([
-    { id: "1", mood: "Happy", time: "2h ago", emoji: "😊", color: "bg-yellow-400" },
-    { id: "2", mood: "Playful", time: "5h ago", emoji: "🎾", color: "bg-green-400" },
-    { id: "3", mood: "Calm", time: "1d ago", emoji: "😌", color: "bg-blue-400" },
-    { id: "4", mood: "Happy", time: "2d ago", emoji: "😊", color: "bg-yellow-400" }
-  ]);
-
-  // Paw Box State
-  const [pawBoxOpened, setPawBoxOpened] = useState(false);
-  const [dailyReward, setDailyReward] = useState<string | null>(null);
-  const [aiSurprise, setAiSurprise] = useState<any>(null);
 
   // Modal State
   const [activeModal, setActiveModal] = useState<string | null>(null);
@@ -163,180 +125,106 @@ const Index = ({ onNavigate }: IndexProps) => {
   const [aiResults, setAiResults] = useState<any[]>([]);
   const [showResults, setShowResults] = useState(false);
 
+  // Audio Recording State
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [translationResult, setTranslationResult] = useState<string | null>(null);
+
   // Mobile UI State
   const [currentTime] = useState(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
 
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
-    if (!validTypes.includes(file.type)) {
-      toast.error("Please upload a valid image file (JPEG, PNG, or WebP)");
-      return;
-    }
+  // Audio Recording Functions
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      const chunks: BlobPart[] = [];
 
-    const url = URL.createObjectURL(file);
-    setPreviewUrl(url);
-    setIsAnalyzing(true);
-    setMoodResult(null);
-    setShowAdvice(false);
-
-    // Enhanced AI analysis simulation
-    setTimeout(() => {
-      const moods: MoodType[] = ["Happy", "Playful", "Calm", "Stressed"];
-      const randomMood = moods[Math.floor(Math.random() * moods.length)];
-      
-      // More sophisticated AI advice based on mood
-      const adviceMap = {
-        "Happy": [
-          "Your pet looks absolutely joyful! 🎉 Perfect time for play or training!",
-          "Such a happy expression! 🥰 Consider rewarding this positive mood!",
-          "Pure happiness detected! 🌟 Your pet is in great spirits today!"
-        ],
-        "Playful": [
-          "Your pet is ready to play! 🎾 Try some interactive toys or games!",
-          "Playful energy detected! 🏃‍♂️ Perfect time for exercise and fun!",
-          "Ready for action! 🎯 Your pet wants to engage and have fun!"
-        ],
-        "Calm": [
-          "Your pet is in a peaceful state 🧘‍♀️ Great for relaxation time!",
-          "Calm and content! 😌 Perfect for gentle petting or quiet activities!",
-          "Serene mood detected! 🌸 Your pet is relaxed and comfortable!"
-        ],
-        "Stressed": [
-          "Your pet seems anxious 😰 Consider a quiet, safe environment!",
-          "Stress detected! 🤗 Try calming activities like gentle petting!",
-          "Your pet needs comfort! 💙 Consider reducing noise and stimulation!"
-        ]
+      recorder.ondataavailable = (event) => {
+        chunks.push(event.data);
       };
+
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'audio/wav' });
+        setAudioBlob(blob);
+        const url = URL.createObjectURL(blob);
+        setAudioUrl(url);
+        
+        // Simulate AI translation
+        setTimeout(() => {
+          const translations = [
+            "I'm hungry and want food!",
+            "I need to go outside for a walk!",
+            "I'm happy to see you!",
+            "I want to play with you!",
+            "I'm feeling anxious and need comfort!",
+            "I heard something outside!",
+            "I'm tired and want to rest!",
+            "I'm excited and ready for adventure!"
+          ];
+          const randomTranslation = translations[Math.floor(Math.random() * translations.length)];
+          setTranslationResult(randomTranslation);
+          
+          toast.success("🎉 Translation Complete!", {
+            description: `Your pet said: "${randomTranslation}"`,
+            duration: 4000
+          });
+        }, 2000);
+      };
+
+      setMediaRecorder(recorder);
+      recorder.start();
+      setIsRecording(true);
       
-      const adviceOptions = adviceMap[randomMood];
-      const randomAdvice = adviceOptions[Math.floor(Math.random() * adviceOptions.length)];
-      
-      setMoodResult({
-        mood: randomMood,
-        confidence: Math.floor(Math.random() * 25) + 75, // 75-100% confidence
-        advice: randomAdvice,
-        color: randomMood === "Happy" ? "bg-yellow-400" : 
-               randomMood === "Playful" ? "bg-green-400" :
-               randomMood === "Calm" ? "bg-blue-400" : "bg-red-400"
+      toast.success("🎤 Recording Started!", {
+        description: "Speak clearly near your pet...",
+        duration: 2000
       });
-      setIsAnalyzing(false);
-      setShowAdvice(true);
-      toast.success(`AI Analysis Complete! ${randomMood} mood detected with ${Math.floor(Math.random() * 25) + 75}% confidence! 🎉`);
-    }, 2500);
+    } catch (error) {
+      toast.error("❌ Microphone access denied", {
+        description: "Please allow microphone access to record audio",
+        duration: 3000
+      });
+    }
   };
 
-  const generateAISurprise = () => {
-    const surpriseTypes = [
-      {
-        type: "recipe",
-        title: "🍖 AI-Generated Pet Recipe",
-        emoji: "🍖",
-        content: {
-          recipeName: "Healthy Chicken & Sweet Potato Delight",
-          ingredients: ["Chicken breast (1 cup)", "Sweet potato (1/2 cup)", "Carrots (1/4 cup)", "Green beans (1/4 cup)"],
-          instructions: [
-            "Boil chicken breast until cooked through",
-            "Steam sweet potato and carrots until tender",
-            "Blanch green beans for 2 minutes",
-            "Mix all ingredients and let cool",
-            "Serve in small portions"
-          ],
-          benefits: "High protein, low fat, rich in vitamins A & C"
-        }
-      },
-      {
-        type: "activity",
-        title: "🎾 AI Pet Activity Challenge",
-        emoji: "🎾",
-        content: {
-          activityName: "Hide & Seek Treasure Hunt",
-          description: "Create a fun treasure hunt for your pet using treats and toys",
-          steps: [
-            "Hide treats in 3-5 different locations",
-            "Use your pet's favorite toys as markers",
-            "Start with easy hiding spots",
-            "Give verbal cues to help them find treats",
-            "Celebrate each successful find!"
-          ],
-          duration: "15-20 minutes",
-          benefits: "Mental stimulation, bonding time, exercise"
-        }
-      },
-      {
-        type: "tip",
-        title: "💡 AI Pet Care Tip",
-        emoji: "💡",
-        content: {
-          tipCategory: "Daily Wellness",
-          tipTitle: "The 5-Minute Pet Check",
-          description: "A quick daily routine to monitor your pet's health",
-          checklist: [
-            "Check eyes for discharge or redness",
-            "Examine ears for odor or debris",
-            "Feel for lumps or bumps on body",
-            "Check paws for cuts or foreign objects",
-            "Monitor eating and drinking habits"
-          ],
-          frequency: "Daily",
-          importance: "Early detection of health issues"
-        }
-      },
-      {
-        type: "training",
-        title: "🐶 AI Training Exercise",
-        emoji: "🐶",
-        content: {
-          exerciseName: "Focus & Attention Training",
-          description: "Teach your pet to maintain eye contact and attention",
-          steps: [
-            "Hold a treat near your face",
-            "Say 'Look' or 'Watch me'",
-            "Wait for eye contact (even briefly)",
-            "Immediately reward with treat",
-            "Gradually increase duration of eye contact"
-          ],
-          difficulty: "Beginner",
-          duration: "5-10 minutes daily",
-          benefits: "Improves focus, strengthens bond, builds trust"
-        }
-      },
-      {
-        type: "wellness",
-        title: "🌟 AI Wellness Insight",
-        emoji: "🌟",
-        content: {
-          insightTitle: "Understanding Pet Body Language",
-          description: "Learn to read your pet's emotional state",
-          signals: [
-            "Relaxed ears = Content and calm",
-            "Tail wagging = Excited or happy",
-            "Yawning = Stress or tiredness",
-            "Licking lips = Anxiety or submission",
-            "Avoiding eye contact = Fear or discomfort"
-          ],
-          application: "Better communication with your pet",
-          benefit: "Stronger bond and happier pet"
-        }
-      }
-    ];
-    
-    return surpriseTypes[Math.floor(Math.random() * surpriseTypes.length)];
+  const stopRecording = () => {
+    if (mediaRecorder && isRecording) {
+      mediaRecorder.stop();
+      setIsRecording(false);
+      
+      toast.success("⏹️ Recording Stopped!", {
+        description: "AI is analyzing your pet's sounds...",
+        duration: 2000
+      });
+    }
   };
 
-  const openPawBox = () => {
-    // Generate AI surprise
-    const surprise = generateAISurprise();
-    setAiSurprise(surprise);
-    setPawBoxOpened(true);
-    
-    toast.success("AI Surprise Generated! 🎉", {
-      description: `Your personalized ${surprise.title} is ready!`,
-      duration: 3000
-    });
+  const playRecording = () => {
+    if (audioUrl) {
+      const audio = new Audio(audioUrl);
+      audio.play();
+      toast.success("🔊 Playing Recording!", {
+        description: "Listen to your pet's sounds",
+        duration: 2000
+      });
+    }
   };
+
+  const clearRecording = () => {
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+    }
+    setAudioUrl(null);
+    setAudioBlob(null);
+    setTranslationResult(null);
+    setMediaRecorder(null);
+  };
+
+
 
   const handleQuickAction = (action: string) => {
     setActiveModal(action);
@@ -454,6 +342,38 @@ const Index = ({ onNavigate }: IndexProps) => {
           "Prepare questions about your pet's health",
           "Bring vaccination records to appointment"
         ]
+      },
+      translator: {
+        title: "🎤 Pet Translation Report",
+        summary: `AI translation analysis for ${data.petName || 'your pet'}`,
+        recommendations: [
+          `Pet Type: ${data.petType || 'Dog'} sound patterns analyzed`,
+          `Sound Type: ${data.soundType || 'Barking'} detected and translated`,
+          data.context ? `Context: ${data.context}` : 'No specific context provided',
+          "AI confidence level: 85-95% accuracy"
+        ],
+        nextSteps: [
+          "Continue recording different sound types",
+          "Track patterns in your pet's communication",
+          "Use translations to better understand your pet",
+          "Share insights with your veterinarian if needed"
+        ]
+      },
+      'sound-sim': {
+        title: "🔊 Dog Sound Simulator Guide",
+        summary: `Sound communication strategy for ${data.petName || 'your pet'}`,
+        recommendations: [
+          `Sound Category: ${data.soundCategory || 'Friendly'} sounds recommended`,
+          `Purpose: ${data.purpose || 'General communication'} approach`,
+          "Use sounds consistently for best results",
+          "Observe your pet's response to different sounds"
+        ],
+        nextSteps: [
+          "Practice with different sound types",
+          "Create a sound routine for your pet",
+          "Monitor your pet's behavioral responses",
+          "Adjust sound selection based on effectiveness"
+        ]
       }
     };
     
@@ -469,29 +389,24 @@ const Index = ({ onNavigate }: IndexProps) => {
     setActiveModal(null);
     setFormData({});
     setIsProcessing(false);
-  };
-
-  const handleNavigation = (tab: string) => {
-    const navigationMessages = {
-      home: "Welcome to your AI-powered pet dashboard! 🏠",
-      camera: "AI Camera activated! 📸 Ready to capture and analyze pet moments!",
-      community: "Connecting to Pet Community! 🌍 Finding nearby pet friends and activities!",
-      profile: "Opening your Pet Profile! 👤 Managing your pet's AI-powered data and preferences!"
-    };
     
-    const message = navigationMessages[tab as keyof typeof navigationMessages] || "Navigating... 🚀";
-    toast.success(message, {
-      description: "AI features are ready to assist you!",
-      duration: 2000
-    });
-    
-    if (onNavigate) {
-      onNavigate(tab);
+    // Clean up audio recording state
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+    }
+    setAudioUrl(null);
+    setAudioBlob(null);
+    setTranslationResult(null);
+    setIsRecording(false);
+    if (mediaRecorder) {
+      mediaRecorder.stop();
+      setMediaRecorder(null);
     }
   };
 
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-[#F5F5F7] via-white to-[#F5F5F7] relative overflow-hidden">
       {/* AI Quick Action Modals */}
       {activeModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -504,6 +419,8 @@ const Index = ({ onNavigate }: IndexProps) => {
                 {activeModal === 'training' && '🐶 AI Training Coach'}
                 {activeModal === 'social' && '🌍 Pet Social Network'}
                 {activeModal === 'vet' && '📍 AI Vet Finder'}
+                {activeModal === 'translator' && '🎤 Pet Translator'}
+                {activeModal === 'sound-sim' && '🔊 Dog Sound Simulator'}
               </h3>
               <Button
                 variant="ghost"
@@ -779,6 +696,237 @@ const Index = ({ onNavigate }: IndexProps) => {
                 </div>
               )}
 
+              {activeModal === 'translator' && (
+                <div className="space-y-4">
+                  <div className="text-center mb-4">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 flex items-center justify-center mx-auto mb-3">
+                      <Mic className="w-8 h-8 text-white" />
+                    </div>
+                    <h4 className="font-bold text-slate-800 mb-2">Pet Translator</h4>
+                    <p className="text-sm text-slate-600">Record your pet's sounds and get AI translation</p>
+                  </div>
+                  
+                  {/* Pet Information */}
+                  <div>
+                    <Label htmlFor="petName">Pet Name</Label>
+                    <Input
+                      id="petName"
+                      placeholder="Enter your pet's name"
+                      value={formData.petName || ''}
+                      onChange={(e) => setFormData({...formData, petName: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="petType">Pet Type</Label>
+                    <Select onValueChange={(value) => setFormData({...formData, petType: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select pet type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="dog">Dog</SelectItem>
+                        <SelectItem value="cat">Cat</SelectItem>
+                        <SelectItem value="bird">Bird</SelectItem>
+                        <SelectItem value="rabbit">Rabbit</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="soundType">Sound Type</Label>
+                    <Select onValueChange={(value) => setFormData({...formData, soundType: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="What type of sound?" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="barking">Barking</SelectItem>
+                        <SelectItem value="meowing">Meowing</SelectItem>
+                        <SelectItem value="whining">Whining</SelectItem>
+                        <SelectItem value="growling">Growling</SelectItem>
+                        <SelectItem value="purring">Purring</SelectItem>
+                        <SelectItem value="chirping">Chirping</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="context">Context</Label>
+                    <Textarea
+                      id="context"
+                      placeholder="What was happening when your pet made this sound? (e.g., feeding time, playtime, strangers at door)"
+                      value={formData.context || ''}
+                      onChange={(e) => setFormData({...formData, context: e.target.value})}
+                    />
+                  </div>
+
+                  {/* Audio Recording Interface */}
+                  <div className="border-2 border-pink-200 rounded-xl p-4 bg-gradient-to-br from-pink-50 to-rose-50">
+                    <h5 className="font-semibold text-slate-800 mb-3 text-center">🎤 Voice Recording</h5>
+                    
+                    {/* Recording Controls */}
+                    <div className="flex gap-2 mb-4">
+                      {!isRecording ? (
+                        <Button 
+                          onClick={startRecording}
+                          className="flex-1 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold"
+                        >
+                          <Mic className="w-4 h-4 mr-2" />
+                          Start Recording
+                        </Button>
+                      ) : (
+                        <Button 
+                          onClick={stopRecording}
+                          className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold"
+                        >
+                          <Pause className="w-4 h-4 mr-2" />
+                          Stop Recording
+                        </Button>
+                      )}
+                    </div>
+
+                    {/* Recording Status */}
+                    {isRecording && (
+                      <div className="text-center mb-4">
+                        <div className="flex items-center justify-center gap-2 text-red-600">
+                          <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                          <span className="text-sm font-semibold">Recording in progress...</span>
+                        </div>
+                        <p className="text-xs text-slate-600 mt-1">Speak clearly near your pet</p>
+                      </div>
+                    )}
+
+                    {/* Audio Playback */}
+                    {audioUrl && (
+                      <div className="space-y-3">
+                        <div className="text-center">
+                          <h6 className="font-semibold text-slate-800 text-sm mb-2">📻 Recorded Audio</h6>
+                          <div className="flex gap-2 justify-center">
+                            <Button
+                              onClick={playRecording}
+                              size="sm"
+                              variant="outline"
+                              className="border-pink-300 text-pink-600 hover:bg-pink-50"
+                            >
+                              <Play className="w-4 h-4 mr-1" />
+                              Play
+                            </Button>
+                            <Button
+                              onClick={clearRecording}
+                              size="sm"
+                              variant="outline"
+                              className="border-gray-300 text-gray-600 hover:bg-gray-50"
+                            >
+                              <X className="w-4 h-4 mr-1" />
+                              Clear
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Translation Result */}
+                    {translationResult && (
+                      <div className="mt-4 p-3 bg-gradient-to-r from-green-100 to-emerald-100 rounded-lg border-2 border-green-200">
+                        <h6 className="font-semibold text-green-800 text-sm mb-2">🤖 AI Translation</h6>
+                        <p className="text-green-700 text-sm font-medium">"{translationResult}"</p>
+                        <p className="text-xs text-green-600 mt-1">Confidence: 92%</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Submit Button */}
+                  <div className="text-center">
+                    <Button 
+                      className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold"
+                      onClick={() => handleFormSubmit('translator')}
+                      disabled={!audioUrl}
+                    >
+                      <Brain className="w-4 h-4 mr-2" />
+                      Generate AI Report
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {activeModal === 'sound-sim' && (
+                <div className="space-y-4">
+                  <div className="text-center mb-4">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center mx-auto mb-3">
+                      <Volume2 className="w-8 h-8 text-white" />
+                    </div>
+                    <h4 className="font-bold text-slate-800 mb-2">Dog Sound Simulator</h4>
+                    <p className="text-sm text-slate-600">Play different dog sounds to communicate with your pet</p>
+                  </div>
+                  <div>
+                    <Label htmlFor="soundCategory">Sound Category</Label>
+                    <Select onValueChange={(value) => setFormData({...formData, soundCategory: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select sound category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="friendly">Friendly Sounds</SelectItem>
+                        <SelectItem value="attention">Attention Seeking</SelectItem>
+                        <SelectItem value="playful">Playful Sounds</SelectItem>
+                        <SelectItem value="calming">Calming Sounds</SelectItem>
+                        <SelectItem value="warning">Warning Sounds</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="purpose">Purpose</Label>
+                    <Select onValueChange={(value) => setFormData({...formData, purpose: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="What do you want to communicate?" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="greeting">Friendly Greeting</SelectItem>
+                        <SelectItem value="play">Invite to Play</SelectItem>
+                        <SelectItem value="calm">Calm Down</SelectItem>
+                        <SelectItem value="come">Come Here</SelectItem>
+                        <SelectItem value="stop">Stop That</SelectItem>
+                        <SelectItem value="comfort">Comfort</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { name: "Happy Bark", emoji: "🐕", sound: "happy-bark" },
+                      { name: "Playful Yip", emoji: "🎾", sound: "playful-yip" },
+                      { name: "Calm Whine", emoji: "😌", sound: "calm-whine" },
+                      { name: "Attention Bark", emoji: "👀", sound: "attention-bark" }
+                    ].map((sound) => (
+                      <Button
+                        key={sound.sound}
+                        variant="outline"
+                        className="flex flex-col items-center gap-2 p-3 h-auto border-2 border-indigo-200 hover:border-indigo-400 hover:bg-indigo-50"
+                        onClick={() => {
+                          toast.success(`🔊 Playing ${sound.name}!`, {
+                            description: "Your pet should respond to this sound",
+                            duration: 2000
+                          });
+                        }}
+                      >
+                        <span className="text-2xl">{sound.emoji}</span>
+                        <span className="text-xs font-semibold">{sound.name}</span>
+                      </Button>
+                    ))}
+                  </div>
+                  <div className="text-center">
+                    <Button 
+                      className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-bold"
+                      onClick={() => {
+                        toast.success("🎵 Playing dog sound sequence!", {
+                          description: "Multiple sounds to engage your pet",
+                          duration: 3000
+                        });
+                      }}
+                    >
+                      <Volume2 className="w-4 h-4 mr-2" />
+                      Play Sound Sequence
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {/* Submit Button */}
               <div className="mt-6 flex gap-3">
                 <Button
@@ -811,11 +959,6 @@ const Index = ({ onNavigate }: IndexProps) => {
         </div>
       )}
 
-      {/* Floating Paw Icons */}
-      <div className="absolute top-20 left-4 text-orange-300 animate-bounce-slow text-2xl">🐾</div>
-      <div className="absolute top-40 right-6 text-orange-300 animate-bounce-slow text-xl" style={{ animationDelay: '1s' }}>🐾</div>
-      <div className="absolute bottom-40 left-8 text-orange-300 animate-bounce-slow text-lg" style={{ animationDelay: '2s' }}>🐾</div>
-      <div className="absolute bottom-20 right-4 text-orange-300 animate-bounce-slow text-xl" style={{ animationDelay: '0.5s' }}>🐾</div>
 
       {/* Mobile Status Bar */}
       <div className="bg-black text-white text-xs px-4 py-1 flex justify-between items-center">
@@ -830,179 +973,212 @@ const Index = ({ onNavigate }: IndexProps) => {
       <div className="container mx-auto px-4 py-4 pb-20 max-w-sm">
         
         {/* Header */}
-        <div className="flex items-center justify-between mb-6 animate-fade-in">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between mb-8 animate-fade-in">
+          <div className="flex items-center gap-4">
             <img 
               src="/petparadise-logo.png" 
               alt="PetParadise Logo" 
-              className="w-12 h-12 rounded-xl shadow-lg"
+              className="w-14 h-14 rounded-2xl shadow-lg"
             />
             <div>
-              <h1 className="text-xl font-bold text-slate-800">
+              <h1 className="text-2xl font-bold text-[#1A3B5C]">
                 PetParadise
               </h1>
-              <p className="text-orange-600 text-xs font-medium">AI Pet Companion</p>
+              <p className="text-[#FF6B5A] text-sm font-semibold">AI Pet Companion</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center animate-pulse">
-              <Bot className="w-4 h-4 text-white" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-[#FF6B5A] flex items-center justify-center animate-pulse shadow-lg">
+              <Bot className="w-5 h-5 text-white" />
             </div>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-slate-700 to-slate-800 flex items-center justify-center">
-              <User className="w-4 h-4 text-white" />
+            <div className="w-10 h-10 rounded-full bg-[#1A3B5C] flex items-center justify-center shadow-lg">
+              <User className="w-5 h-5 text-white" />
             </div>
-            <div className="hidden md:flex items-center gap-1 bg-orange-100 px-2 py-1 rounded-full">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-xs text-orange-600 font-medium">AI Active</span>
+            <div className="hidden md:flex items-center gap-2 bg-[#FF6B5A]/10 px-3 py-2 rounded-full border border-[#FF6B5A]/20">
+              <div className="w-2 h-2 bg-[#4CAF50] rounded-full animate-pulse"></div>
+              <span className="text-xs text-[#FF6B5A] font-semibold">AI Active</span>
             </div>
           </div>
         </div>
 
         {/* AI PetMood Live */}
-        <Card className="mb-6 border-2 border-orange-300 shadow-xl bg-gradient-to-br from-orange-500 to-orange-600 text-white animate-slide-up rounded-2xl">
-          <CardContent className="p-6">
-            <div className="text-center mb-4">
-              <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-3 animate-pulse">
-                <Camera className="w-8 h-8 text-white" />
+        <Card className="mb-8 border-0 shadow-lg bg-[#FF6B5A] text-white animate-slide-up rounded-3xl overflow-hidden">
+          <CardContent className="p-8">
+            <div className="text-center mb-6">
+              <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 animate-pulse">
+                <Camera className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">AI PetMood Live</h3>
-              <p className="text-white/90 text-sm">Scan your pet's face & sounds</p>
+              <div className="bg-[#1A3B5C] text-white px-4 py-2 rounded-xl inline-block mb-3">
+                <h3 className="text-lg font-bold">AI PETMOOD LIVE</h3>
+              </div>
+              <p className="text-white/90 text-base font-medium">Scan your pet's face & sounds</p>
             </div>
             
-            {!previewUrl ? (
-              <div className="text-center">
-                <label className="cursor-pointer">
-                  <div 
-                    className="w-32 h-32 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 border-2 border-dashed border-white/30 hover:border-white/50 transition-all"
-                    onClick={() => document.getElementById('mood-scan-input')?.click()}
-                  >
-                    <Camera className="w-8 h-8 text-white" />
-                  </div>
-                  <Button 
-                    size="lg"
-                    onClick={() => document.getElementById('mood-scan-input')?.click()}
-                    className="bg-white text-orange-600 hover:bg-orange-50 font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 rounded-full px-6 py-3 border-2 border-orange-200"
-                  >
-                    <Camera className="w-4 h-4 mr-2" />
-                    Scan Mood
-                  </Button>
-                  <input
-                    id="mood-scan-input"
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp,image/jpg"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                </label>
+            <div className="text-center">
+              <div className="w-32 h-32 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 border-2 border-dashed border-white/30">
+                <Camera className="w-8 h-8 text-white" />
               </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-white/20 backdrop-blur-sm">
-                  <img 
-                    src={previewUrl} 
-                    alt="Pet preview" 
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = "https://via.placeholder.com/300x300/FF6B5A/FFFFFF?text=Pet+Photo";
-                    }}
-                  />
-                  {isAnalyzing && (
-                    <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
-                      <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin mb-3"></div>
-                      <div className="text-white text-sm font-semibold">AI Analyzing...</div>
-                      <div className="text-white/80 text-xs mt-1">Detecting emotions & patterns</div>
-                    </div>
-                  )}
-                  {!isAnalyzing && (
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                      <Button 
-                        size="sm"
-                        onClick={() => document.getElementById('mood-scan-input')?.click()}
-                        className="bg-white text-orange-600 hover:bg-orange-50"
-                      >
-                        <Camera className="w-4 h-4 mr-2" />
-                        Scan Again
-                      </Button>
-                    </div>
-                  )}
+              <Button 
+                size="lg"
+                className="bg-white text-[#FF6B5A] hover:bg-white/90 font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 rounded-full px-8 py-4 text-base border border-[#FF6B5A]"
+              >
+                <Camera className="w-5 h-5 mr-2" />
+                Scan Mood
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+
+        {/* Pet Translator Voice Audio */}
+        <Card className="mb-8 border-0 shadow-lg bg-white animate-slide-up rounded-3xl overflow-hidden">
+          <CardContent className="p-8">
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 rounded-full bg-[#FF6B5A]/10 flex items-center justify-center mx-auto mb-4">
+                <Mic className="w-10 h-10 text-[#FF6B5A]" />
+              </div>
+              <div className="bg-[#1A3B5C] text-white px-4 py-2 rounded-xl inline-block mb-4">
+                <h3 className="text-lg font-bold">PET TRANSLATOR</h3>
+              </div>
+              <p className="text-[#333333] text-base font-medium">Record your pet's voice & AI will translate what they want to say</p>
+            </div>
+            
+            {/* Pet and Human Avatars */}
+            <div className="flex items-center justify-between mb-8">
+              {/* Human Avatar */}
+              <div className="flex flex-col items-center">
+                <div className="w-20 h-20 rounded-full bg-[#1A3B5C] flex items-center justify-center shadow-lg">
+                  <User className="w-10 h-10 text-white" />
                 </div>
-                
-                {moodResult && !isAnalyzing && (
-                  <div className="space-y-3">
-                    <div className={`${moodResult.color} p-4 rounded-2xl text-white text-center animate-bounce`}>
-                      <div className="text-3xl mb-2">
-                        {moodResult.mood === "Happy" ? "😊" : 
-                         moodResult.mood === "Playful" ? "🎾" :
-                         moodResult.mood === "Calm" ? "😌" : "😰"}
-                      </div>
-                      <p className="font-bold text-lg">{moodResult.mood}</p>
-                      <p className="text-sm opacity-90">{moodResult.confidence}% confidence</p>
-                    </div>
-                    <Button 
-                      onClick={() => {
-                        setPreviewUrl(null);
-                        setMoodResult(null);
-                        setShowAdvice(false);
+                <p className="text-[#333333] text-sm mt-3 font-semibold">You</p>
+              </div>
+              
+              {/* Translation Arrow */}
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 rounded-full bg-[#FF6B5A] flex items-center justify-center shadow-lg">
+                  <ArrowRight className="w-6 h-6 text-white" />
+                </div>
+                <p className="text-[#333333] text-sm mt-2 font-semibold">AI</p>
+              </div>
+              
+              {/* Pet Avatar */}
+              <div className="flex flex-col items-center">
+                <div className="w-20 h-20 rounded-full bg-[#FF6B5A] flex items-center justify-center shadow-lg">
+                  <span className="text-3xl">🐕</span>
+                </div>
+                <p className="text-[#333333] text-sm mt-3 font-semibold">Your Pet</p>
+              </div>
+            </div>
+
+            {/* Audio Waveform Display */}
+            {isRecording && (
+              <div className="mb-6">
+                <div className="flex items-center justify-center gap-1 mb-2">
+                  {[...Array(20)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="w-1 bg-white/60 rounded-full animate-pulse"
+                      style={{
+                        height: `${Math.random() * 20 + 10}px`,
+                        animationDelay: `${i * 0.1}s`
                       }}
-                      size="sm"
-                      variant="outline"
-                      className="w-full border-white text-white hover:bg-white/20"
-                    >
-                      <Camera className="w-4 h-4 mr-2" />
-                      New Scan
-                    </Button>
-                  </div>
-                )}
+                    />
+                  ))}
+                </div>
+                <p className="text-white/80 text-xs text-center">Listening to your pet...</p>
+              </div>
+            )}
+
+            {/* Translation Result */}
+            {translationResult && (
+              <div className="mb-8 p-6 bg-[#F5F5F7] rounded-2xl border border-[#E8E8E8]">
+                <div className="flex items-center gap-3 mb-3">
+                  <Brain className="w-6 h-6 text-[#FF6B5A]" />
+                  <h4 className="font-bold text-[#1A3B5C] text-base">AI Translation</h4>
+                </div>
+                <p className="text-[#333333] text-base font-semibold mb-3">"{translationResult}"</p>
+                <div className="flex items-center justify-between text-sm text-[#333333]">
+                  <span className="font-medium">Confidence: 92%</span>
+                  <span className="font-medium">🐕 Dog</span>
+                </div>
+              </div>
+            )}
+
+            {/* Recording Controls */}
+            <div className="flex gap-4">
+              {!isRecording ? (
+                <Button 
+                  onClick={startRecording}
+                  className="flex-1 bg-[#1A3B5C] text-white hover:bg-[#1A3B5C]/90 font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 rounded-full py-4 text-base"
+                >
+                  <Mic className="w-5 h-5 mr-2" />
+                  Start Recording
+                </Button>
+              ) : (
+                <Button 
+                  onClick={stopRecording}
+                  className="flex-1 bg-[#FF5252] hover:bg-[#FF5252]/90 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 rounded-full py-4 text-base"
+                >
+                  <Pause className="w-5 h-5 mr-2" />
+                  Stop Recording
+                </Button>
+              )}
+              
+              {audioUrl && (
+                <Button
+                  onClick={playRecording}
+                  variant="outline"
+                  className="border-[#FF6B5A] text-[#FF6B5A] hover:bg-[#FF6B5A]/10 px-6 py-4 rounded-full"
+                >
+                  <Play className="w-5 h-5" />
+                </Button>
+              )}
+            </div>
+
+            {/* Recording Status */}
+            {isRecording && (
+              <div className="mt-4 text-center">
+                <div className="flex items-center justify-center gap-2 text-white/90">
+                  <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-semibold">Recording in progress...</span>
+                </div>
+                <p className="text-white/70 text-xs mt-1">Speak clearly near your pet</p>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* AI Advice Card */}
-        {showAdvice && moodResult && (
-          <Card className="mb-6 border-2 border-green-300 shadow-xl bg-gradient-to-r from-green-500 to-green-600 text-white animate-slide-up rounded-2xl">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                  <Brain className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-white mb-1">AI Advice</h4>
-                  <p className="text-white/90 text-sm">{moodResult.advice}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
         {/* AI Quick Actions */}
-        <div className="mb-6">
-          <h3 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
-            <Zap className="w-5 h-5 text-orange-600" />
-            AI Quick Actions
-          </h3>
+        <div className="mb-8">
+          <div className="bg-[#1A3B5C] text-white px-4 py-3 rounded-xl inline-block mb-6">
+            <h3 className="text-lg font-bold flex items-center gap-2">
+              <Zap className="w-5 h-5" />
+              AI QUICK ACTIONS
+            </h3>
+          </div>
           <div className="flex gap-3 overflow-x-auto pb-2">
             {[
               { id: "feed", title: "Feed Planner", emoji: "🍖", color: "from-orange-500 to-yellow-500" },
               { id: "health", title: "Health Check", emoji: "🩺", color: "from-green-500 to-emerald-500" },
               { id: "training", title: "Training Chat", emoji: "🐶", color: "from-blue-500 to-indigo-500" },
               { id: "social", title: "Pet Social Feed", emoji: "🌍", color: "from-purple-500 to-pink-500" },
-              { id: "vet", title: "Vet Finder", emoji: "📍", color: "from-slate-600 to-slate-700" }
+              { id: "vet", title: "Vet Finder", emoji: "📍", color: "from-slate-600 to-slate-700" },
+              { id: "translator", title: "Pet Translator", emoji: "🎤", color: "from-pink-500 to-rose-500" },
+              { id: "sound-sim", title: "Dog Sound Sim", emoji: "🔊", color: "from-indigo-500 to-purple-500" }
             ].map((action) => (
               <Card 
                 key={action.id}
-                className="border-2 border-orange-200 shadow-lg bg-white hover:shadow-xl hover:border-orange-400 transition-all duration-300 hover:scale-105 min-w-[120px] animate-slide-up rounded-2xl"
+                className="border-0 shadow-lg bg-white hover:shadow-xl transition-all duration-300 hover:scale-105 min-w-[140px] animate-slide-up rounded-2xl"
               >
-                <CardContent className="p-4 text-center">
-                  <div className={`w-12 h-12 rounded-full bg-gradient-to-r ${action.color} flex items-center justify-center mx-auto mb-3 text-2xl shadow-md`}>
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 rounded-full bg-[#FF6B5A]/10 flex items-center justify-center mx-auto mb-4 text-3xl">
                     {action.emoji}
                   </div>
-                  <h4 className="font-semibold text-slate-800 text-xs mb-2">{action.title}</h4>
+                  <h4 className="font-bold text-[#1A3B5C] text-sm mb-4">{action.title}</h4>
                   <Button 
                     onClick={() => handleQuickAction(action.id)}
                     size="sm" 
-                    className={`w-full bg-gradient-to-r ${action.color} hover:opacity-90 text-white font-semibold transition-all duration-300 hover:scale-105 text-xs h-7 rounded-full shadow-md border-2 border-white/20`}
+                    className="w-full bg-[#1A3B5C] hover:bg-[#1A3B5C]/90 text-white font-bold transition-all duration-300 hover:scale-105 text-sm h-10 rounded-full shadow-lg"
                   >
                     Try Now
                   </Button>
@@ -1091,249 +1267,8 @@ const Index = ({ onNavigate }: IndexProps) => {
           </div>
         )}
 
-        {/* AI Mood History */}
-        <Card className="mb-6 border-2 border-purple-200 shadow-xl bg-white hover:shadow-xl hover:border-purple-400 transition-all duration-300 hover:scale-105 animate-slide-up rounded-2xl">
-          <CardHeader className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-t-2xl p-4">
-            <CardTitle className="flex items-center gap-2 text-lg font-bold">
-              <BarChart3 className="w-5 h-5" />
-              AI Mood History
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 bg-gradient-to-br from-purple-50 to-purple-100">
-            <div className="flex gap-3 overflow-x-auto pb-2">
-              {moodHistory.map((mood) => (
-                <div key={mood.id} className="flex flex-col items-center min-w-[80px] p-2 rounded-lg bg-white/80 hover:bg-white transition-all duration-300 border border-purple-200">
-                  <div className={`w-12 h-12 rounded-full ${mood.color} flex items-center justify-center mb-2 text-xl shadow-md`}>
-                    {mood.emoji}
-                  </div>
-                  <p className="text-xs font-semibold text-slate-800">{mood.mood}</p>
-                  <p className="text-xs text-slate-600">{mood.time}</p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Daily Surprise Paw Box */}
-        <Card className="mb-6 border-2 border-yellow-200 shadow-xl bg-white hover:shadow-xl hover:border-yellow-400 transition-all duration-300 hover:scale-105 animate-slide-up rounded-2xl">
-          <CardHeader className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-t-2xl p-4">
-            <CardTitle className="flex items-center gap-2 text-lg font-bold">
-              <Gift className="w-5 h-5" />
-              Daily Surprise Paw Box
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 bg-gradient-to-br from-yellow-50 to-orange-50">
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center mx-auto mb-4 animate-bounce-slow">
-                <Gift className="w-8 h-8 text-white" />
-              </div>
-              {!pawBoxOpened ? (
-                <Button 
-                  onClick={openPawBox}
-                  size="lg"
-                  className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 rounded-full border-2 border-yellow-300"
-                >
-                  <Gift className="w-5 h-5 mr-2" />
-                  Open Paw Box 🎁
-                  <Sparkle className="w-5 h-5 ml-2" />
-                </Button>
-              ) : (
-                <div className="space-y-4">
-                  {aiSurprise && (
-                    <div className="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-lg p-4 border-2 border-yellow-300 shadow-lg">
-                      <div className="text-center mb-3">
-                        <div className="text-3xl mb-2">{aiSurprise.emoji}</div>
-                        <h4 className="font-bold text-slate-800 text-sm mb-1">{aiSurprise.title}</h4>
-                      </div>
-                      
-                      {/* Recipe Surprise */}
-                      {aiSurprise.type === 'recipe' && (
-                        <div className="space-y-3">
-                          <div className="text-center">
-                            <h5 className="font-semibold text-slate-800 text-xs mb-1">{aiSurprise.content.recipeName}</h5>
-                            <p className="text-xs text-slate-600 mb-2">{aiSurprise.content.benefits}</p>
-                          </div>
-                          <div>
-                            <h6 className="font-semibold text-slate-800 text-xs mb-1">Ingredients:</h6>
-                            <ul className="text-xs text-slate-700 space-y-1">
-                              {aiSurprise.content.ingredients.map((ingredient: string, index: number) => (
-                                <li key={index} className="flex items-start gap-1">
-                                  <span className="text-orange-500 mt-0.5">•</span>
-                                  <span>{ingredient}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div>
-                            <h6 className="font-semibold text-slate-800 text-xs mb-1">Instructions:</h6>
-                            <ol className="text-xs text-slate-700 space-y-1">
-                              {aiSurprise.content.instructions.map((instruction: string, index: number) => (
-                                <li key={index} className="flex items-start gap-1">
-                                  <span className="text-orange-500 mt-0.5">{index + 1}.</span>
-                                  <span>{instruction}</span>
-                                </li>
-                              ))}
-                            </ol>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Activity Surprise */}
-                      {aiSurprise.type === 'activity' && (
-                        <div className="space-y-3">
-                          <div className="text-center">
-                            <h5 className="font-semibold text-slate-800 text-xs mb-1">{aiSurprise.content.activityName}</h5>
-                            <p className="text-xs text-slate-600 mb-2">{aiSurprise.content.description}</p>
-                          </div>
-                          <div>
-                            <h6 className="font-semibold text-slate-800 text-xs mb-1">Steps:</h6>
-                            <ol className="text-xs text-slate-700 space-y-1">
-                              {aiSurprise.content.steps.map((step: string, index: number) => (
-                                <li key={index} className="flex items-start gap-1">
-                                  <span className="text-orange-500 mt-0.5">{index + 1}.</span>
-                                  <span>{step}</span>
-                                </li>
-                              ))}
-                            </ol>
-                          </div>
-                          <div className="flex justify-between text-xs text-slate-600">
-                            <span>Duration: {aiSurprise.content.duration}</span>
-                            <span>Benefits: {aiSurprise.content.benefits}</span>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Tip Surprise */}
-                      {aiSurprise.type === 'tip' && (
-                        <div className="space-y-3">
-                          <div className="text-center">
-                            <h5 className="font-semibold text-slate-800 text-xs mb-1">{aiSurprise.content.tipTitle}</h5>
-                            <p className="text-xs text-slate-600 mb-2">{aiSurprise.content.description}</p>
-                          </div>
-                          <div>
-                            <h6 className="font-semibold text-slate-800 text-xs mb-1">Daily Checklist:</h6>
-                            <ul className="text-xs text-slate-700 space-y-1">
-                              {aiSurprise.content.checklist.map((item: string, index: number) => (
-                                <li key={index} className="flex items-start gap-1">
-                                  <span className="text-orange-500 mt-0.5">•</span>
-                                  <span>{item}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div className="text-center text-xs text-slate-600">
-                            <span className="font-semibold">Frequency:</span> {aiSurprise.content.frequency} | 
-                            <span className="font-semibold ml-1">Importance:</span> {aiSurprise.content.importance}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Training Surprise */}
-                      {aiSurprise.type === 'training' && (
-                        <div className="space-y-3">
-                          <div className="text-center">
-                            <h5 className="font-semibold text-slate-800 text-xs mb-1">{aiSurprise.content.exerciseName}</h5>
-                            <p className="text-xs text-slate-600 mb-2">{aiSurprise.content.description}</p>
-                          </div>
-                          <div>
-                            <h6 className="font-semibold text-slate-800 text-xs mb-1">Training Steps:</h6>
-                            <ol className="text-xs text-slate-700 space-y-1">
-                              {aiSurprise.content.steps.map((step: string, index: number) => (
-                                <li key={index} className="flex items-start gap-1">
-                                  <span className="text-orange-500 mt-0.5">{index + 1}.</span>
-                                  <span>{step}</span>
-                                </li>
-                              ))}
-                            </ol>
-                          </div>
-                          <div className="flex justify-between text-xs text-slate-600">
-                            <span>Difficulty: {aiSurprise.content.difficulty}</span>
-                            <span>Duration: {aiSurprise.content.duration}</span>
-                          </div>
-                          <div className="text-center text-xs text-slate-600">
-                            <span className="font-semibold">Benefits:</span> {aiSurprise.content.benefits}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Wellness Surprise */}
-                      {aiSurprise.type === 'wellness' && (
-                        <div className="space-y-3">
-                          <div className="text-center">
-                            <h5 className="font-semibold text-slate-800 text-xs mb-1">{aiSurprise.content.insightTitle}</h5>
-                            <p className="text-xs text-slate-600 mb-2">{aiSurprise.content.description}</p>
-                          </div>
-                          <div>
-                            <h6 className="font-semibold text-slate-800 text-xs mb-1">Body Language Signals:</h6>
-                            <ul className="text-xs text-slate-700 space-y-1">
-                              {aiSurprise.content.signals.map((signal: string, index: number) => (
-                                <li key={index} className="flex items-start gap-1">
-                                  <span className="text-orange-500 mt-0.5">•</span>
-                                  <span>{signal}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div className="text-center text-xs text-slate-600">
-                            <span className="font-semibold">Application:</span> {aiSurprise.content.application} | 
-                            <span className="font-semibold ml-1">Benefit:</span> {aiSurprise.content.benefit}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        setPawBoxOpened(false);
-                        setAiSurprise(null);
-                      }}
-                      className="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white text-xs"
-                    >
-                      Get Another Surprise
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="flex-1 text-xs border-yellow-300 text-orange-600 hover:bg-yellow-50"
-                    >
-                      Save This Surprise
-                    </Button>
-                  </div>
-                  
-                  <p className="text-xs text-orange-600 font-semibold text-center">Come back tomorrow for another AI surprise! ✨</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Bottom Navigation */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-orange-200 shadow-2xl">
-          <div className="flex justify-around py-3">
-            {[
-              { id: "home", label: "Home", icon: Home, active: true },
-              { id: "camera", label: "Camera", icon: Camera },
-              { id: "community", label: "Community", icon: Users },
-              { id: "profile", label: "Profile", icon: User }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => handleNavigation(tab.id)}
-                className={`flex flex-col items-center gap-1 p-3 rounded-xl transition-all duration-300 border-2 ${
-                  tab.active 
-                    ? 'bg-orange-500 text-white border-orange-500 shadow-lg' 
-                    : 'text-slate-600 hover:text-orange-600 hover:bg-orange-50 border-transparent hover:border-orange-300'
-                }`}
-              >
-                <tab.icon className="w-5 h-5" />
-                <span className="text-xs font-semibold">{tab.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );

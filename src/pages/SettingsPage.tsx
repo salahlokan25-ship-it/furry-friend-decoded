@@ -392,29 +392,59 @@ Made with ❤️ for pets and their humans
   };
 
   return (
-    <div className="min-h-screen bg-white pb-24">
-      {/* Header with Paw Icon */}
-      <div className="bg-gradient-to-r from-pet-orange to-pet-orange-light text-white py-8 px-6 rounded-b-3xl shadow-orange mb-6">
-        <div className="max-w-md mx-auto text-center">
+    <div className="min-h-screen bg-gradient-to-br from-[#F5F5F7] via-white to-[#F5F5F7] pb-24">
+      {/* Enhanced Header with Better Logo */}
+      <div className="bg-[#FF6B5A] text-white py-12 px-6 rounded-b-3xl shadow-2xl mb-8 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-4 left-4 text-6xl">🐾</div>
+          <div className="absolute top-8 right-8 text-4xl">🐕</div>
+          <div className="absolute bottom-4 left-8 text-5xl">🐱</div>
+          <div className="absolute bottom-6 right-4 text-3xl">🐾</div>
+        </div>
+        
+        <div className="max-w-md mx-auto text-center relative z-10">
+          {/* Enhanced Logo */}
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
+              <img 
+                src={petLogo} 
+                alt="PetParadise Logo" 
+                className="w-12 h-12 rounded-full"
+              />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-white">PetParadise</h1>
+              <p className="text-white/90 text-sm font-medium">AI Pet Companion</p>
+            </div>
+          </div>
+          
           <div className="flex items-center justify-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold">Settings</h1>
-            <span className="text-4xl animate-pulse">🐾</span>
+            <h2 className="text-2xl font-bold">Settings</h2>
+            <span className="text-3xl animate-bounce">⚙️</span>
           </div>
           <p className="text-white/90 text-sm">Manage your pet companion account</p>
         </div>
       </div>
 
       <div className="max-w-md mx-auto px-6 space-y-6">
-        {/* Profile Section 🐶 */}
-        <Card className="border-2 border-pet-beige shadow-soft rounded-2xl overflow-hidden">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-2xl">🐶</span>
-              <h2 className="text-xl font-bold text-pet-orange">Profile</h2>
+        {/* Enhanced Profile Section 🐶 */}
+        <Card className="border-0 shadow-lg bg-white rounded-3xl overflow-hidden hover:shadow-xl transition-all duration-300">
+          <CardContent className="p-8">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="w-16 h-16 rounded-full bg-[#FF6B5A] flex items-center justify-center shadow-lg">
+                <span className="text-3xl">🐶</span>
+              </div>
+              <div>
+                <div className="bg-[#1A3B5C] text-white px-4 py-2 rounded-xl inline-block mb-2">
+                  <h2 className="text-lg font-bold">PROFILE</h2>
+                </div>
+                <p className="text-sm text-[#333333] font-medium">Manage your account details</p>
+              </div>
             </div>
             
-            <div className="flex items-center gap-4 mb-6">
-              {/* Circular Avatar with Upload */}
+            <div className="flex items-center gap-6 mb-8">
+              {/* Enhanced Avatar with Better Camera Button */}
               <div className="relative group">
                 <input
                   ref={fileInputRef}
@@ -424,82 +454,103 @@ Made with ❤️ for pets and their humans
                   className="hidden"
                 />
                 {profile.avatar ? (
-                  <img 
-                    src={profile.avatar} 
-                    alt="Profile" 
-                    className="w-20 h-20 rounded-full object-cover shadow-orange"
-                  />
+                  <div className="relative">
+                    <img 
+                      src={profile.avatar} 
+                      alt="Profile" 
+                      className="w-28 h-28 rounded-full object-cover shadow-xl"
+                    />
+                    <div className="absolute inset-0 rounded-full bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <Camera size={24} className="text-white" />
+                    </div>
+                  </div>
                 ) : (
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pet-orange-light to-pet-orange flex items-center justify-center shadow-orange">
-                    <User size={32} className="text-white" />
+                  <div className="w-28 h-28 rounded-full bg-[#FF6B5A] flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform">
+                    <User size={48} className="text-white" />
                   </div>
                 )}
+                
+                {/* Enhanced Camera Button */}
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading}
-                  className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-pet-orange text-white flex items-center justify-center shadow-lg hover:bg-pet-orange-light transition-all disabled:opacity-50"
+                  className="absolute -bottom-2 -right-2 w-12 h-12 rounded-full bg-[#1A3B5C] text-white flex items-center justify-center shadow-lg hover:bg-[#1A3B5C]/90 transition-all disabled:opacity-50 hover:scale-110"
                 >
                   {isUploading ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
-                    <Camera size={16} />
+                    <Camera size={20} />
                   )}
                 </button>
               </div>
               
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <User size={16} className="text-pet-orange" />
-                  <p className="font-semibold text-gray-800">{profile.name}</p>
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-[#1A3B5C] flex items-center justify-center">
+                    <User size={20} className="text-white" />
+                  </div>
+                  <p className="font-bold text-[#1A3B5C] text-xl">{profile.name}</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Mail size={16} className="text-pet-orange" />
-                  <p className="text-sm text-gray-600">{profile.email}</p>
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-[#4CAF50] flex items-center justify-center">
+                    <Mail size={20} className="text-white" />
+                  </div>
+                  <p className="text-base text-[#333333] font-semibold">{profile.email}</p>
                 </div>
               </div>
             </div>
 
             <Button 
               onClick={handleEditProfile}
-              variant="outline" 
-              className="w-full rounded-full border-2 border-pet-orange text-pet-orange hover:bg-pet-orange hover:text-white transition-all"
+              className="w-full rounded-full bg-[#1A3B5C] hover:bg-[#1A3B5C]/90 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 py-4 text-base"
             >
+              <User className="w-5 h-5 mr-2" />
               Edit Profile
             </Button>
           </CardContent>
         </Card>
 
-        {/* Account Management */}
-        <Card className="border-2 border-pet-beige shadow-soft rounded-2xl overflow-hidden">
-          <CardContent className="p-6">
-            <h2 className="text-xl font-bold text-pet-orange mb-4">Account Management</h2>
+        {/* Enhanced Account Management */}
+        <Card className="border-0 shadow-lg bg-white rounded-3xl overflow-hidden hover:shadow-xl transition-all duration-300">
+          <CardContent className="p-8">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="w-16 h-16 rounded-full bg-[#1A3B5C] flex items-center justify-center shadow-lg">
+                <span className="text-3xl">⚙️</span>
+              </div>
+              <div>
+                <div className="bg-[#1A3B5C] text-white px-4 py-2 rounded-xl inline-block mb-2">
+                  <h2 className="text-lg font-bold">ACCOUNT MANAGEMENT</h2>
+                </div>
+                <p className="text-sm text-[#333333] font-medium">Manage your account settings</p>
+              </div>
+            </div>
             
-            <div className="space-y-3">
+            <div className="space-y-6">
               {/* Change Password */}
               <button
                 onClick={handleChangePassword}
-                className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-pet-beige transition-all group"
+                className="w-full flex items-center justify-between p-6 rounded-2xl bg-[#F5F5F7] hover:bg-[#F5F5F7]/80 transition-all group border border-[#E8E8E8] hover:border-[#4CAF50]"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-pet-orange/10 flex items-center justify-center group-hover:bg-pet-orange/20 transition-all">
-                    <Lock size={20} className="text-pet-orange" />
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-full bg-[#4CAF50] flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
+                    <Lock size={24} className="text-white" />
                   </div>
-                  <span className="font-medium text-gray-800">Change Password</span>
+                  <span className="font-bold text-[#1A3B5C] text-base">Change Password</span>
                 </div>
-                <ChevronRight size={20} className="text-gray-400 group-hover:text-pet-orange transition-colors" />
+                <ChevronRight size={24} className="text-[#4CAF50] group-hover:text-[#4CAF50]/80 transition-colors" />
               </button>
 
               {/* Delete Account */}
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <button className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-red-50 transition-all group">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-all">
-                        <Trash2 size={20} className="text-red-500" />
+                  <button className="w-full flex items-center justify-between p-6 rounded-2xl bg-[#F5F5F7] hover:bg-[#F5F5F7]/80 transition-all group border border-[#E8E8E8] hover:border-[#FF5252]">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-full bg-[#FF5252] flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
+                        <Trash2 size={24} className="text-white" />
                       </div>
-                      <span className="font-medium text-red-500">Delete Account</span>
+                      <span className="font-bold text-[#1A3B5C] text-base">Delete Account</span>
                     </div>
-                    <ChevronRight size={20} className="text-gray-400 group-hover:text-red-500 transition-colors" />
+                    <ChevronRight size={24} className="text-[#FF5252] group-hover:text-[#FF5252]/80 transition-colors" />
                   </button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -618,13 +669,65 @@ Made with ❤️ for pets and their humans
           </CardContent>
         </Card>
 
-        {/* App Info Footer */}
-        <div className="text-center py-6 space-y-2">
-          <img src={petLogo} alt="Pet Paradise" className="w-12 h-12 mx-auto mb-2" />
-          <p className="text-sm font-medium text-gray-600">Pet Paradise</p>
-          <p className="text-xs text-gray-500">Version 1.0.0</p>
-          <p className="text-xs text-gray-400">Made with ❤️ for pet lovers everywhere</p>
-        </div>
+        {/* Enhanced App Info Footer */}
+        <Card className="border-2 border-purple-200 shadow-xl bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300">
+          <CardContent className="p-8">
+            <div className="text-center space-y-6">
+              {/* Gift Box Icon */}
+              <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-xl border-4 border-white">
+                <Gift size={32} className="text-white" />
+              </div>
+              
+              {/* App Logo and Info */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-center gap-4">
+                  <img 
+                    src={petLogo} 
+                    alt="Pet Paradise" 
+                    className="w-16 h-16 rounded-2xl shadow-lg border-4 border-white"
+                  />
+                  <div className="text-left">
+                    <h3 className="text-2xl font-bold text-slate-800">Pet Paradise</h3>
+                    <p className="text-sm text-slate-600 font-medium">AI Pet Companion</p>
+                  </div>
+                </div>
+                
+                {/* Version Badge */}
+                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded-full shadow-lg">
+                  <span className="text-sm font-semibold">Version 1.0.0</span>
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                </div>
+                
+                {/* Tagline */}
+                <div className="flex items-center justify-center gap-2 text-slate-600">
+                  <span className="text-sm font-medium">Made with</span>
+                  <span className="text-red-500 text-lg animate-pulse">❤️</span>
+                  <span className="text-sm font-medium">for pet lovers everywhere</span>
+                </div>
+              </div>
+              
+              {/* Feature Highlights */}
+              <div className="grid grid-cols-2 gap-3 mt-6">
+                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-purple-200">
+                  <div className="text-2xl mb-1">🎤</div>
+                  <p className="text-xs font-semibold text-slate-700">AI Translation</p>
+                </div>
+                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-purple-200">
+                  <div className="text-2xl mb-1">🐶</div>
+                  <p className="text-xs font-semibold text-slate-700">Pet Training</p>
+                </div>
+                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-purple-200">
+                  <div className="text-2xl mb-1">📸</div>
+                  <p className="text-xs font-semibold text-slate-700">Mood Detection</p>
+                </div>
+                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-purple-200">
+                  <div className="text-2xl mb-1">🌟</div>
+                  <p className="text-xs font-semibold text-slate-700">AI Insights</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Legal Document Dialog */}

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +35,25 @@ const AlbumPage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
+  // Load existing photos from localStorage on mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("petparadise-album-photos");
+      if (raw) {
+        const parsed = JSON.parse(raw) as Array<{ id: string; url: string; petType: "cat" | "dog"; timestamp: string }>;
+        const restored = parsed.map(p => ({ ...p, timestamp: new Date(p.timestamp) }));
+        setPhotos(restored);
+      }
+    } catch (e) {
+      // ignore parse errors
+    }
+  }, []);
+
+  const savePhotos = (arr: Photo[]) => {
+    const serializable = arr.map(p => ({ ...p, timestamp: p.timestamp.toISOString() }));
+    localStorage.setItem("petparadise-album-photos", JSON.stringify(serializable));
+  };
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files) return;
@@ -49,7 +68,11 @@ const AlbumPage = () => {
             petType: selectedPetType === "all" ? "dog" : selectedPetType,
             timestamp: new Date(),
           };
-          setPhotos(prev => [newPhoto, ...prev]);
+          setPhotos(prev => {
+            const next = [newPhoto, ...prev];
+            savePhotos(next);
+            return next;
+          });
           toast({
             title: "Photo Added!",
             description: "Your pet photo has been added to the album.",
@@ -61,7 +84,11 @@ const AlbumPage = () => {
   };
 
   const deletePhoto = (photoId: string) => {
-    setPhotos(prev => prev.filter(photo => photo.id !== photoId));
+    setPhotos(prev => {
+      const next = prev.filter(photo => photo.id !== photoId);
+      savePhotos(next);
+      return next;
+    });
     toast({
       title: "Photo Deleted",
       description: "Photo removed from album.",

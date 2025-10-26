@@ -135,6 +135,106 @@ const Index = ({ onNavigate }: IndexProps) => {
   // Mobile UI State
   const [currentTime] = useState(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
 
+  // Camera Scan State
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [moodResult, setMoodResult] = useState<string | null>(null);
+  useEffect(() => {
+    if (activeModal === 'camera') {
+      startCamera();
+    }
+    return () => {
+      if (activeModal === 'camera') {
+        stopCamera();
+      }
+    };
+  }, [activeModal]);
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      setCameraStream(stream);
+      setCameraError(null);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream as any;
+        await videoRef.current.play();
+      }
+      toast.success("📷 Camera Started", { description: "Point your camera at your pet", duration: 2000 });
+    } catch (err) {
+      setCameraError("Unable to access camera. Please allow camera permissions.");
+      toast.error("❌ Camera access denied", { description: "Enable camera permissions to scan mood", duration: 3000 });
+    }
+  };
+
+  const triggerUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target?.result as string;
+      if (dataUrl) {
+        setCapturedImage(dataUrl);
+        setMoodResult(null);
+        stopCamera();
+        toast.success("🖼️ Photo Uploaded", { description: "Ready to analyze mood.", duration: 1500 });
+      }
+    };
+    reader.readAsDataURL(file);
+    // reset input value so same file can be re-selected
+    e.target.value = '';
+  };
+
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(t => t.stop());
+      setCameraStream(null);
+    }
+  };
+
+  const capturePhoto = () => {
+    if (!videoRef.current) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current || document.createElement('canvas');
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/png');
+      setCapturedImage(dataUrl);
+      setMoodResult(null);
+      toast.success("📸 Photo Captured", { description: "Analyzing your pet's mood...", duration: 1500 });
+    }
+  };
+
+  const analyzeMoodFromImage = async () => {
+    if (!capturedImage) return;
+    setIsAnalyzing(true);
+    // Simulate AI image analysis
+    setTimeout(() => {
+      const moods = [
+        "Happy & Relaxed",
+        "Alert & Curious",
+        "Playful & Excited",
+        "Anxious & Nervous",
+        "Tired & Sleepy"
+      ];
+      const guess = moods[Math.floor(Math.random() * moods.length)];
+      setMoodResult(guess);
+      setIsAnalyzing(false);
+      toast.success("🎯 Mood Detected", { description: `Your pet seems: ${guess}`, duration: 3000 });
+    }, 1800);
+  };
+
 
   // Audio Recording Functions
   const startRecording = async () => {
@@ -402,6 +502,11 @@ const Index = ({ onNavigate }: IndexProps) => {
       mediaRecorder.stop();
       setMediaRecorder(null);
     }
+    // Clean up camera state
+    stopCamera();
+    setCapturedImage(null);
+    setMoodResult(null);
+    setCameraError(null);
   };
 
 
@@ -419,6 +524,7 @@ const Index = ({ onNavigate }: IndexProps) => {
                 {activeModal === 'training' && '🐶 AI Training Coach'}
                 {activeModal === 'social' && '🌍 Pet Social Network'}
                 {activeModal === 'vet' && '📍 AI Vet Finder'}
+                {activeModal === 'camera' && '📷 Mood Scanner'}
                 {activeModal === 'translator' && '🎤 Pet Translator'}
                 {activeModal === 'sound-sim' && '🔊 Dog Sound Simulator'}
               </h3>
@@ -434,6 +540,74 @@ const Index = ({ onNavigate }: IndexProps) => {
 
             {/* Modal Content */}
             <div className="p-4">
+              {activeModal === 'camera' && (
+                <div className="space-y-4">
+                  <div className="flex flex-col items-center gap-3">
+                    {!capturedImage ? (
+                      <div className="w-full aspect-video bg-black rounded-xl overflow-hidden">
+                        <video ref={videoRef} className="w-full h-full object-cover" playsInline muted />
+                      </div>
+                    ) : (
+                      <div className="w-full aspect-video rounded-xl overflow-hidden border">
+                        <img src={capturedImage} alt="Captured" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                    {cameraError && (
+                      <p className="text-sm text-red-600">{cameraError}</p>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    {!capturedImage ? (
+                      <>
+                        <Button onClick={capturePhoto} className="flex-1 bg-[#FF6B5A] text-white">
+                          <Camera className="w-4 h-4 mr-2" />
+                          Capture
+                        </Button>
+                        <Button variant="secondary" onClick={startCamera} className="flex-1">
+                          <ScanLineIcon className="w-4 h-4 mr-2" />
+                          Restart Camera
+                        </Button>
+                        <Button variant="outline" onClick={triggerUpload} className="flex-1">
+                          <Image className="w-4 h-4 mr-2" />
+                          Upload Photo
+                        </Button>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleFileChange}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <Button onClick={() => { setCapturedImage(null); setMoodResult(null); }} variant="secondary" className="flex-1">
+                          Retake
+                        </Button>
+                        <Button onClick={analyzeMoodFromImage} disabled={isAnalyzing} className="flex-1 bg-[#1A3B5C] text-white">
+                          {isAnalyzing ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Analyzing
+                            </>
+                          ) : (
+                            <>
+                              <Brain className="w-4 h-4 mr-2" />
+                              Analyze
+                            </>
+                          )}
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                  {moodResult && (
+                    <div className="rounded-xl border p-4">
+                      <h4 className="font-semibold mb-1">Detected Mood</h4>
+                      <p className="text-sm text-foreground">{moodResult}</p>
+                    </div>
+                  )}
+                </div>
+              )}
               {activeModal === 'feed' && (
                 <div className="space-y-4">
                   <div>
@@ -1026,6 +1200,7 @@ const Index = ({ onNavigate }: IndexProps) => {
               </div>
               <Button 
                 size="lg"
+                onClick={() => setActiveModal('camera')}
                 className="bg-white text-[#FF6B5A] hover:bg-white/90 font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 rounded-full px-8 py-4 text-base border border-[#FF6B5A]"
               >
                 <Camera className="w-5 h-5 mr-2" />

@@ -8,8 +8,10 @@ import Index from "@/pages/Index";
 import TranslatePage from "@/pages/TranslatePage";
 import AlbumPage from "@/pages/AlbumPage";
 import TrainingPage from "@/pages/TrainingPage";
+import MemoriesPage from "@/pages/MemoriesPage";
 import ChatPage from "@/pages/ChatPage";
 import SettingsPage from "@/pages/SettingsPage";
+import CommunityPage from "@/pages/CommunityPage";
 import OnboardingQuiz, { QuizResults } from "@/components/OnboardingQuiz";
 import SubscriptionPlans from "@/components/SubscriptionPlans";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
@@ -67,8 +69,12 @@ const App = () => {
         return <AlbumPage />;
       case "training":
         return <TrainingPage />;
+      case "memories":
+        return <MemoriesPage />;
       case "chat":
         return <ChatPage />;
+      case "community":
+        return <CommunityPage />;
       case "settings":
         return <SettingsPage />;
       default:

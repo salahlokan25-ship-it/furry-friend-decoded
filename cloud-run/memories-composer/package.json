@@ -1,0 +1,19 @@
+{
+  "name": "memories-composer",
+  "version": "0.1.0",
+  "description": "Cloud Run service to compose weekly pet memories video from images + TTS narration",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@google-cloud/text-to-speech": "^5.2.0",
+    "@google-cloud/vertexai": "^1.6.0",
+    "express": "^4.19.2",
+    "ffmpeg-static": "^5.2.0",
+    "ffprobe-static": "^3.1.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "node-fetch": "^3.3.2"
+  }
+}

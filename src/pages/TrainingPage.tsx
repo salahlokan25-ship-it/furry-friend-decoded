@@ -2629,9 +2629,9 @@ const TrainingPage = () => {
             </div>
             
             <div className="space-y-3">
-              {courses.filter(course => course.petType === "dog").map((course) => (
+              {courses.filter(course => course.petType === "dog").map((course, index) => (
                 <Card 
-                  key={course.id}
+                  key={`${course.id}-${index}`}
                   className="border-0 shadow-soft cursor-pointer hover:shadow-lg transition-shadow"
                   onClick={() => setSelectedCourse(course)}
                 >
@@ -2688,9 +2688,9 @@ const TrainingPage = () => {
             </div>
             
             <div className="space-y-3">
-              {courses.filter(course => course.petType === "cat").map((course) => (
+              {courses.filter(course => course.petType === "cat").map((course, index) => (
                 <Card 
-                  key={course.id}
+                  key={`${course.id}-${index}`}
                   className="border-0 shadow-soft cursor-pointer hover:shadow-lg transition-shadow"
                   onClick={() => setSelectedCourse(course)}
                 >

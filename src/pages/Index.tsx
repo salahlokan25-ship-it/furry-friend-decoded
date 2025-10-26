@@ -1147,38 +1147,8 @@ const Index = ({ onNavigate }: IndexProps) => {
       <div className="container mx-auto px-4 py-4 pb-20 max-w-sm">
         
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 mb-8 -mx-4 px-4 py-4 sticky top-12 z-10 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-14 h-14 bg-gradient-to-br from-orange-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg p-2">
-                <img src="/petparadise-logo.png" alt="PetParadise Logo" className="w-full h-full object-contain" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-[#1A3B5C]">PetParadise</h1>
-                <p className="text-sm font-medium text-[#FF6B5A]">AI Pet Companion</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="rounded-full w-12 h-12 bg-orange-300/50 hover:bg-orange-300/70 shadow-md"
-              >
-                <Camera className="w-5 h-5 text-orange-600" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="rounded-full w-12 h-12 bg-[#1A3B5C] hover:bg-[#1A3B5C]/90 shadow-md"
-              >
-                <User className="w-5 h-5 text-white" />
-              </Button>
-              <div className="flex items-center gap-2 bg-yellow-50 px-3 py-1.5 rounded-full border border-yellow-200 shadow-sm">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm font-medium text-[#1A3B5C]">AI Active</span>
-              </div>
-            </div>
-          </div>
+        <header className="bg-white border-b border-gray-200 mb-8 -mx-4 px-4 py-3 sticky top-12 z-10 shadow-sm">
+          <img src="/header-design.png" alt="PetParadise Header" className="w-full h-auto" />
         </header>
 
         {/* AI PetMood Live */}

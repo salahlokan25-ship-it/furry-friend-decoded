@@ -404,6 +404,7 @@ const AlbumPage = () => {
               variant="coral" 
               size="sm"
               onClick={() => fileInputRef.current?.click()}
+              className="bg-orange-500 text-white hover:bg-orange-600 border-0"
             >
               <Plus size={16} />
               Add
@@ -439,16 +440,17 @@ const AlbumPage = () => {
 
         {/* Upload Area */}
         {photos.length === 0 && (
-          <Card className="border-2 border-dashed border-primary/30 bg-primary/5">
+          <Card className="border-2 border-dashed border-orange-300/80 bg-orange-50">
             <CardContent className="p-8 text-center">
-              <Camera size={48} className="mx-auto text-primary/60 mb-4" />
-              <h3 className="font-semibold text-lg mb-2">No Photos Yet</h3>
-              <p className="text-muted-foreground mb-4">
+              <Camera size={48} className="mx-auto text-orange-500 mb-4" />
+              <h3 className="font-semibold text-lg mb-2 text-slate-900">No Photos Yet</h3>
+              <p className="mb-4 text-slate-600">
                 Start building your pet's album by adding some photos!
               </p>
               <Button 
-                variant="playful"
+                variant="coral"
                 onClick={() => fileInputRef.current?.click()}
+                className="px-4 bg-orange-500 text-white hover:bg-orange-600 border-0"
               >
                 <Upload size={18} />
                 Upload Photos

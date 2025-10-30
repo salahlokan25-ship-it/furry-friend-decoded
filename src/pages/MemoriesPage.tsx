@@ -16,6 +16,7 @@ const MemoriesPage = () => {
   const [audioLoading, setAudioLoading] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [videoLoading, setVideoLoading] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
   const composerUrl = (import.meta as any).env.VITE_MEMORIES_COMPOSER_URL as string | undefined;
 
   useEffect(() => {
@@ -43,6 +44,42 @@ const MemoriesPage = () => {
     [isGenerating]
   );
 
+  // Compress a data URL image to JPEG (max 720px, quality 0.7). If it's not a data URL, return as is.
+  async function compressDataUrl(url: string): Promise<string> {
+    try {
+      if (!url.startsWith("data:")) return url;
+      const img = new Image();
+      // Ensure crossOrigin to avoid canvas taint when possible
+      img.crossOrigin = "anonymous";
+      const loaded: HTMLImageElement = await new Promise((resolve, reject) => {
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = url;
+      });
+      const maxSide = 720;
+      const { width, height } = loaded;
+      const scale = Math.min(1, maxSide / Math.max(width, height));
+      const w = Math.max(1, Math.round(width * scale));
+      const h = Math.max(1, Math.round(height * scale));
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return url;
+      ctx.drawImage(loaded, 0, 0, w, h);
+      const out = canvas.toDataURL("image/jpeg", 0.7);
+      return out || url;
+    } catch {
+      return url;
+    }
+  }
+
+  async function compressAll(urls: string[]): Promise<string[]> {
+    const out: string[] = [];
+    for (const u of urls) out.push(await compressDataUrl(u));
+    return out;
+  }
+
   const handleGenerate = async () => {
     if (isGenerating) return;
     if (selectedIds.length === 0 && albumPhotos.length > 0) {
@@ -50,8 +87,10 @@ const MemoriesPage = () => {
       return;
     }
     setIsGenerating(true);
+    setServerError(null);
     await new Promise((r) => setTimeout(r, 1400));
-    const chosen = albumPhotos.filter(p => selectedIds.includes(p.id)).map(p => p.url);
+    const raw = albumPhotos.filter(p => selectedIds.includes(p.id)).map(p => p.url);
+    const chosen = await compressAll(raw);
     const count = chosen.length;
     const txt = count > 0
       ? `This week, Luna’s happiest moments were captured in ${count} memories. She played, rested, and shared gentle cuddles — each frame full of warmth 💕.`
@@ -62,6 +101,7 @@ const MemoriesPage = () => {
     if (composerUrl && chosen.length > 0) {
       try {
         setVideoLoading(true);
+        console.log("composerUrl", composerUrl);
         const resp = await fetch(`${composerUrl}/compose`, {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -72,10 +112,15 @@ const MemoriesPage = () => {
             petName: "Luna",
             // you can remove story to force generation; keeping as hint
             story: txt,
+            maxDurationSeconds: 20,
             musicUrl: "https://cdn.pixabay.com/download/audio/2021/10/26/audio_b4f2e2c1b2.mp3?filename=calm-ambient-113288.mp3"
           })
         });
-        if (!resp.ok) throw new Error(`compose failed: ${resp.status}`);
+        if (!resp.ok) {
+          const errTxt = await resp.text().catch(() => "");
+          console.error("/compose failed", resp.status, errTxt);
+          throw new Error(`compose failed: ${resp.status} ${errTxt}`);
+        }
         const blob = await resp.blob();
         const obj = URL.createObjectURL(blob);
         setVideoUrl(obj);
@@ -86,6 +131,8 @@ const MemoriesPage = () => {
           const url = await generateTTS(txt);
           setAudioUrl(url);
         } catch {}
+        const msg = e instanceof Error ? e.message : String(e);
+        setServerError(msg);
       } finally {
         setVideoLoading(false);
         setIsGenerating(false);
@@ -193,6 +240,11 @@ const MemoriesPage = () => {
                 <p className="text-sm leading-relaxed text-gray-700">
                   {story ?? "Your weekly story will appear here with a warm, emotional tone."}
                 </p>
+                {serverError && (
+                  <div className="mt-2 text-xs text-red-600 break-words">
+                    {serverError}
+                  </div>
+                )}
                 {videoUrl && (
                   <div className="mt-3">
                     <video controls className="w-full rounded-lg" src={videoUrl} />

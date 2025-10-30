@@ -1,19 +1,20 @@
-# Cloud Run container for memories-composer
-FROM gcr.io/distroless/nodejs20-debian12
-
-# Distroless needs node_modules built beforehand; use a builder stage
+# Build stage: install dependencies
 FROM node:20-bookworm AS builder
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm ci --omit=dev
-COPY index.js ./
+RUN npm install --omit=dev --no-audit --no-fund
+COPY . .
 
-# Final image
-FROM gcr.io/distroless/nodejs20-debian12
-ENV NODE_ENV=production
+# Final stage: use full Node image (not slim or distroless)
+FROM node:20-bookworm
 WORKDIR /app
 COPY --from=builder /app /app
-# ffmpeg-static provides a binary; ensure it's available in PATH within distroless runtime
+ENV NODE_ENV=production
 ENV PATH="/app/node_modules/.bin:${PATH}"
+
+# ffmpeg needs shared libs; full image includes them
 EXPOSE 8080
-CMD ["/app/index.js"]
+CMD ["node", "index.js"]
+
+
+

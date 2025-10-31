@@ -439,15 +439,17 @@ const AlbumPage = () => {
 
         {/* Upload Area */}
         {photos.length === 0 && (
-          <Card className="border-2 border-dashed border-primary/30 bg-primary/5">
+          <Card className="border-2 border-dashed border-orange-300 bg-gradient-to-br from-orange-50 to-orange-100">
             <CardContent className="p-8 text-center">
-              <Camera size={48} className="mx-auto text-primary/60 mb-4" />
-              <h3 className="font-semibold text-lg mb-2">No Photos Yet</h3>
-              <p className="text-muted-foreground mb-4">
+              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
+                <Camera size={40} className="text-white" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2 text-orange-900">No Photos Yet</h3>
+              <p className="text-orange-700 mb-4">
                 Start building your pet's album by adding some photos!
               </p>
-              <Button 
-                variant="playful"
+              <Button
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg"
                 onClick={() => fileInputRef.current?.click()}
               >
                 <Upload size={18} />

@@ -92,10 +92,12 @@ const MemoriesPage = () => {
     const raw = albumPhotos.filter(p => selectedIds.includes(p.id)).map(p => p.url);
     const chosen = await compressAll(raw);
     const count = chosen.length;
-    const txt = count > 0
+    const userTxtRaw = (story ?? "").trim();
+    const fallbackTxt = count > 0
       ? `This week, Luna’s happiest moments were captured in ${count} memories. She played, rested, and shared gentle cuddles — each frame full of warmth 💕.`
       : "This week, Luna played 4 times, slept peacefully for 18 hours, and met 2 new friends 💕.";
-    setStory(txt);
+    const txt = userTxtRaw.length > 0 ? userTxtRaw : fallbackTxt;
+    if (userTxtRaw.length === 0) setStory(txt);
     setGeneratedManifest({ story: txt, images: chosen });
     // If Cloud Run composer configured, render full video with Google TTS there
     if (composerUrl && chosen.length > 0) {
@@ -107,13 +109,16 @@ const MemoriesPage = () => {
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
             images: chosen,
-            // request Vertex AI generation on the server
-            generateStory: true,
+            // always use provided prompt or local fallback; don't call server LLMs
+            generateStory: false,
             petName: "Luna",
             // you can remove story to force generation; keeping as hint
             story: txt,
             maxDurationSeconds: 20,
-            musicUrl: "https://cdn.pixabay.com/download/audio/2021/10/26/audio_b4f2e2c1b2.mp3?filename=calm-ambient-113288.mp3"
+            useVeo: true,
+            visualPrompt: txt,
+            // permissive sample URL to avoid 403s from Cloud Run
+            musicUrl: "https://filesamples.com/samples/audio/mp3/sample3.mp3"
           })
         });
         if (!resp.ok) {
@@ -237,9 +242,16 @@ const MemoriesPage = () => {
                   (isGenerating ? "scale-[1.01] shadow-md" : "")
                 }
               >
-                <p className="text-sm leading-relaxed text-gray-700">
-                  {story ?? "Your weekly story will appear here with a warm, emotional tone."}
-                </p>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Narration prompt</label>
+                  <textarea
+                    className="w-full rounded-md border border-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-400 px-3 py-2 text-sm"
+                    placeholder="Write the voice-over prompt (optional). If left empty, the AI will draft a short, warm story."
+                    rows={3}
+                    value={story ?? ""}
+                    onChange={(e) => setStory(e.target.value)}
+                  />
+                </div>
                 {serverError && (
                   <div className="mt-2 text-xs text-red-600 break-words">
                     {serverError}

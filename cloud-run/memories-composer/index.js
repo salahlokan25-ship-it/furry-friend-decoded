@@ -10,6 +10,7 @@ import ffprobeStatic from "ffprobe-static";
 import textToSpeech from "@google-cloud/text-to-speech";
 import { VertexAI } from "@google-cloud/vertexai";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleAuth } from "google-auth-library";
 
 // Defensive init with logs so startup never crashes
 try {
@@ -19,6 +20,28 @@ try {
   } else {
     console.warn("ffmpeg-static not found");
   }
+
+// Compose a list of existing video clips (no Ken Burns) with crossfades
+async function composeVideoClipsWithCrossfades({ clipPaths, outPath, secondsPerClip, fadeSec = 0.4 }) {
+  if (!Array.isArray(clipPaths) || clipPaths.length === 0) throw new Error("clipPaths required");
+  if (clipPaths.length === 1) return clipPaths[0];
+  const dir = dirname(outPath);
+  let current = clipPaths[0];
+  for (let i = 1; i < clipPaths.length; i++) {
+    const next = clipPaths[i];
+    const tmpOut = join(dir, `xfclip_${i}.mp4`);
+    await crossfadeTwo({ aPath: current, bPath: next, outputPath: tmpOut, secondsPerClip, fadeSec });
+    current = tmpOut;
+  }
+  return current;
+}
+
+function getAuth() {
+  if (!googleAuth) {
+    googleAuth = new GoogleAuth({ scopes: ["https://www.googleapis.com/auth/cloud-platform"] });
+  }
+  return googleAuth;
+}
   if (ffprobeStatic?.path) {
     ffmpeg.setFfprobePath(ffprobeStatic.path);
     console.log("ffprobe path set:", ffprobeStatic.path);
@@ -44,6 +67,7 @@ app.use((req, res, next) => {
 let ttsClient = null;
 let vertexAI = null;
 let aiStudioClient = null;
+let googleAuth = null;
 function getTTS() {
   if (!ttsClient) ttsClient = new textToSpeech.TextToSpeechClient();
   return ttsClient;
@@ -296,7 +320,7 @@ app.post("/compose", async (req, res) => {
   } catch {}
 
   try {
-    const { images, story, musicUrl, petName, generateStory, maxDurationSeconds } = req.body || {};
+    const { images, story, musicUrl, petName, generateStory, maxDurationSeconds, useVeo, visualPrompt } = req.body || {};
     if (!images || !Array.isArray(images) || images.length === 0) {
       return res.status(400).json({ error: "images[] required" });
     }
@@ -323,13 +347,40 @@ app.post("/compose", async (req, res) => {
       return res.status(400).json({ error: "no valid images" });
     }
 
-    // Build slideshow with Ken Burns + crossfades
+    // Build slideshow: prefer Veo per-image clips if requested, else Ken Burns
     const videoOnly = join(tmp, "slideshow.mp4");
-    const kbResult = await composeKenBurnsWithCrossfades({ imagePaths: imgPaths, outPath: videoOnly, secondsPerImage: perImageSeconds, w: 480, h: 480, fr: 24, fadeSec: 0.4 });
-    // If pipeline returned a different path, copy to videoOnly for consistency
-    if (kbResult !== videoOnly) {
-      await fs.promises.copyFile(kbResult, videoOnly);
+    let composedPath = videoOnly;
+    let motionSeconds = perImageSeconds;
+    if (useVeo) {
+      try {
+        const clips = [];
+        for (let i = 0; i < imgPaths.length; i++) {
+          const p = visualPrompt && String(visualPrompt).trim().length > 0 ? `${visualPrompt}` : `Create a gentle, warm short motion clip inspired by this pet moment.`;
+          const clipOut = join(tmp, `veo_${i}.mp4`);
+          try {
+            // Note: current Veo text-only; include image context in prompt implicitly
+            await createVeoClip({ prompt: p, seconds: motionSeconds, outPath: clipOut, aspectRatio: "1:1", resolution: "480p" });
+            clips.push(clipOut);
+          } catch (perErr) {
+            console.warn("Veo per-image failed, using Ken Burns for index", i, perErr?.message || perErr);
+            const kbPath = join(tmp, `kb_fallback_${i}.mp4`);
+            await createKenBurnsClip({ imagePath: imgPaths[i], outputPath: kbPath, seconds: motionSeconds, w: 480, h: 480, fr: 24 });
+            clips.push(kbPath);
+          }
+        }
+        // Crossfade pre-made video clips
+        const cf = await composeVideoClipsWithCrossfades({ clipPaths: clips, outPath: videoOnly, secondsPerClip: motionSeconds, fadeSec: 0.4 });
+        composedPath = cf;
+      } catch (veoErr) {
+        console.warn("Veo failed, falling back to Ken Burns:", veoErr?.message || veoErr);
+        const kbResult = await composeKenBurnsWithCrossfades({ imagePaths: imgPaths, outPath: videoOnly, secondsPerImage: perImageSeconds, w: 480, h: 480, fr: 24, fadeSec: 0.4 });
+        composedPath = kbResult;
+      }
+    } else {
+      const kbResult = await composeKenBurnsWithCrossfades({ imagePaths: imgPaths, outPath: videoOnly, secondsPerImage: perImageSeconds, w: 480, h: 480, fr: 24, fadeSec: 0.4 });
+      composedPath = kbResult;
     }
+    if (composedPath !== videoOnly) await fs.promises.copyFile(composedPath, videoOnly);
 
     // Story: use provided, or generate via Vertex AI / AI Studio if requested/absent
     let storyText = story;

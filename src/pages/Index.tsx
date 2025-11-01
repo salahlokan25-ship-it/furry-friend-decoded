@@ -511,14 +511,14 @@ const Index = ({ onNavigate }: IndexProps) => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5F5F7] via-white to-[#F5F5F7] relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-[#0c1426] dark:via-[#0c1426] dark:to-[#0c1426] relative overflow-hidden font-[Poppins,sans-serif]">
       {/* AI Quick Action Modals */}
       {activeModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-[#182c50] rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <h3 className="text-lg font-bold text-slate-800">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700">
+              <h3 className="text-lg font-bold text-slate-800 dark:text-white">
                 {activeModal === 'feed' && '🍖 AI Feed Planner'}
                 {activeModal === 'health' && '🩺 AI Health Check'}
                 {activeModal === 'training' && '🐶 AI Training Coach'}
@@ -532,7 +532,7 @@ const Index = ({ onNavigate }: IndexProps) => {
                 variant="ghost"
                 size="sm"
                 onClick={closeModal}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -1134,289 +1134,148 @@ const Index = ({ onNavigate }: IndexProps) => {
       )}
 
 
-      {/* Mobile Status Bar */}
-      <div className="bg-black text-white text-xs px-4 py-1 flex justify-between items-center">
-        <span className="font-semibold">{currentTime}</span>
-        <div className="flex items-center gap-1">
-          <Signal className="w-3 h-3" />
-          <Wifi className="w-3 h-3" />
-          <Battery className="w-4 h-3" />
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-4 pb-20 max-w-sm">
+      <div className="container mx-auto px-0 py-0 pb-28 max-w-md">
         
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 mb-8 -mx-4 px-4 py-3 sticky top-12 z-10 shadow-sm">
-          <img src="/header-design.png" alt="PetParadise Header" className="w-full h-auto" />
+        <header className="p-4 flex items-center justify-between bg-white dark:bg-[#0c1426]">
+          <div className="flex items-center space-x-3">
+            <img alt="Pet Paradise app logo" className="w-12 h-12 rounded-xl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGMsrlcvL6ppCdiRlD3TBAeseSzdf8SGJIzXESXU8EwSvNEBOYRSSt-2FIVlT6rTwt7xkYNItXycZ1ehgZFev-8N8NC8tPx-Gmpg7I7tKU1A9LkQpnugmxO9T6iFtKwsYEJpqBR9oEiYW968K13ml9WvMPjTb63LP8JVRMQmt1XqADxk0Isa2eivS6weyDWVzVVvenHg2Q6PRb1GrjWrkUBY5caBBXDdxTJ8R2M4JU3HggM3_GaiWnqpzq4D0TvjpqGCY-a3deQnc" />
+            <div>
+              <h1 className="font-bold text-lg text-slate-900 dark:text-white">PetParadise</h1>
+              <p className="text-xs text-slate-600 dark:text-slate-400">Your AI Pet Companion</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3">
+            <button className="w-10 h-10 flex items-center justify-center bg-blue-100 dark:bg-[#182c50] rounded-full">
+              <Bell className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+            </button>
+            <button className="w-10 h-10 flex items-center justify-center bg-blue-500 dark:bg-blue-600 rounded-full">
+              <User className="w-5 h-5 text-white" />
+            </button>
+          </div>
         </header>
 
-        {/* AI PetMood Live */}
-        <Card className="mb-8 border-0 shadow-lg bg-[#FF6B5A] text-white animate-slide-up rounded-3xl overflow-hidden">
-          <CardContent className="p-8">
-            <div className="text-center mb-6">
-              <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 animate-pulse">
-                <Camera className="w-10 h-10 text-white" />
+        <main className="p-4 space-y-8">
+          {/* Hero Section with AI PetMood and Pet Translator */}
+          <section className="grid grid-cols-5 gap-4">
+            {/* AI PetMood Card - Large */}
+            <div className="col-span-3 bg-gradient-to-br from-blue-500 to-indigo-600 p-6 rounded-3xl text-white flex flex-col justify-between h-56 relative overflow-hidden animate-gradient-bg">
+              <div>
+                <h2 className="text-lg font-bold">AI PetMood</h2>
+                <p className="text-xs opacity-80">Live face & sound scan</p>
               </div>
-              <div className="bg-[#1A3B5C] text-white px-4 py-2 rounded-xl inline-block mb-3">
-                <h3 className="text-lg font-bold">AI PETMOOD LIVE</h3>
-              </div>
-              <p className="text-white/90 text-base font-medium">Scan your pet's face & sounds</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-32 h-32 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 border-2 border-dashed border-white/30">
-                <Camera className="w-8 h-8 text-white" />
-              </div>
-              <Button 
-                size="lg"
+              <button 
                 onClick={() => setActiveModal('camera')}
-                className="bg-white text-[#FF6B5A] hover:bg-white/90 font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 rounded-full px-8 py-4 text-base border border-[#FF6B5A]"
+                className="w-full bg-white/20 backdrop-blur-sm text-white font-bold py-3 rounded-full flex items-center justify-center space-x-2 border border-white/30 transition-transform hover:scale-105 active:scale-95"
               >
-                <Camera className="w-5 h-5 mr-2" />
-                Scan Mood
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-
-        {/* Pet Translator Voice Audio */}
-        <Card className="mb-8 border-0 shadow-lg bg-white animate-slide-up rounded-3xl overflow-hidden">
-          <CardContent className="p-8">
-            <div className="text-center mb-8">
-              <div className="w-20 h-20 rounded-full bg-[#FF6B5A]/10 flex items-center justify-center mx-auto mb-4">
-                <Mic className="w-10 h-10 text-[#FF6B5A]" />
-              </div>
-              <div className="bg-[#1A3B5C] text-white px-4 py-2 rounded-xl inline-block mb-4">
-                <h3 className="text-lg font-bold">PET TRANSLATOR</h3>
-              </div>
-              <p className="text-[#333333] text-base font-medium">Record your pet's voice & AI will translate what they want to say</p>
-            </div>
-            
-            {/* Pet and Human Avatars */}
-            <div className="flex items-center justify-between mb-8">
-              {/* Human Avatar */}
-              <div className="flex flex-col items-center">
-                <div className="w-20 h-20 rounded-full bg-[#1A3B5C] flex items-center justify-center shadow-lg">
-                  <User className="w-10 h-10 text-white" />
-                </div>
-                <p className="text-[#333333] text-sm mt-3 font-semibold">You</p>
-              </div>
-              
-              {/* Translation Arrow */}
-              <div className="flex flex-col items-center">
-                <div className="w-12 h-12 rounded-full bg-[#FF6B5A] flex items-center justify-center shadow-lg">
-                  <ArrowRight className="w-6 h-6 text-white" />
-                </div>
-                <p className="text-[#333333] text-sm mt-2 font-semibold">AI</p>
-              </div>
-              
-              {/* Pet Avatar */}
-              <div className="flex flex-col items-center">
-                <div className="w-20 h-20 rounded-full bg-[#FF6B5A] flex items-center justify-center shadow-lg">
-                  <span className="text-3xl">🐕</span>
-                </div>
-                <p className="text-[#333333] text-sm mt-3 font-semibold">Your Pet</p>
-              </div>
+                <Camera className="w-5 h-5" />
+                <span>Scan Now</span>
+              </button>
             </div>
 
-            {/* Audio Waveform Display */}
-            {isRecording && (
-              <div className="mb-6">
-                <div className="flex items-center justify-center gap-1 mb-2">
-                  {[...Array(20)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="w-1 bg-white/60 rounded-full animate-pulse"
-                      style={{
-                        height: `${Math.random() * 20 + 10}px`,
-                        animationDelay: `${i * 0.1}s`
-                      }}
-                    />
-                  ))}
-                </div>
-                <p className="text-white/80 text-xs text-center">Listening to your pet...</p>
-              </div>
-            )}
-
-            {/* Translation Result */}
-            {translationResult && (
-              <div className="mb-8 p-6 bg-[#F5F5F7] rounded-2xl border border-[#E8E8E8]">
-                <div className="flex items-center gap-3 mb-3">
-                  <Brain className="w-6 h-6 text-[#FF6B5A]" />
-                  <h4 className="font-bold text-[#1A3B5C] text-base">AI Translation</h4>
-                </div>
-                <p className="text-[#333333] text-base font-semibold mb-3">"{translationResult}"</p>
-                <div className="flex items-center justify-between text-sm text-[#333333]">
-                  <span className="font-medium">Confidence: 92%</span>
-                  <span className="font-medium">🐕 Dog</span>
+            {/* Pet Translator Card - Small */}
+            <div 
+              onClick={() => setActiveModal('translator')}
+              className="col-span-2 bg-slate-900 dark:bg-[#182c50] p-4 rounded-3xl text-white flex flex-col items-center justify-center space-y-4 text-center h-56 relative overflow-hidden cursor-pointer hover:scale-105 transition-transform"
+            >
+              <div className="relative w-24 h-24 flex items-center justify-center">
+                <div className="absolute inset-0 bg-orange-400/20 rounded-full animate-pulse"></div>
+                <div className="w-20 h-20 bg-orange-500 rounded-full flex items-center justify-center">
+                  <Volume2 className="w-10 h-10 text-white" />
                 </div>
               </div>
-            )}
-
-            {/* Recording Controls */}
-            <div className="flex gap-4">
-              {!isRecording ? (
-                <Button 
-                  onClick={startRecording}
-                  className="flex-1 bg-[#1A3B5C] text-white hover:bg-[#1A3B5C]/90 font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 rounded-full py-4 text-base"
-                >
-                  <Mic className="w-5 h-5 mr-2" />
-                  Start Recording
-                </Button>
-              ) : (
-                <Button 
-                  onClick={stopRecording}
-                  className="flex-1 bg-[#FF5252] hover:bg-[#FF5252]/90 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 rounded-full py-4 text-base"
-                >
-                  <Pause className="w-5 h-5 mr-2" />
-                  Stop Recording
-                </Button>
-              )}
-              
-              {audioUrl && (
-                <Button
-                  onClick={playRecording}
-                  variant="outline"
-                  className="border-[#FF6B5A] text-[#FF6B5A] hover:bg-[#FF6B5A]/10 px-6 py-4 rounded-full"
-                >
-                  <Play className="w-5 h-5" />
-                </Button>
-              )}
+              <h3 className="font-semibold text-sm">Pet Translator</h3>
             </div>
+          </section>
 
-            {/* Recording Status */}
-            {isRecording && (
-              <div className="mt-4 text-center">
-                <div className="flex items-center justify-center gap-2 text-white/90">
-                  <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-semibold">Recording in progress...</span>
-                </div>
-                <p className="text-white/70 text-xs mt-1">Speak clearly near your pet</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* AI Quick Actions */}
-        <div className="mb-8">
-          <div className="bg-[#1A3B5C] text-white px-4 py-3 rounded-xl inline-block mb-6">
-            <h3 className="text-lg font-bold flex items-center gap-2">
-              <Zap className="w-5 h-5" />
-              AI QUICK ACTIONS
-            </h3>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-2">
-            {[
-              { id: "feed", title: "Feed Planner", emoji: "🍖", color: "from-orange-500 to-yellow-500" },
-              { id: "health", title: "Health Check", emoji: "🩺", color: "from-green-500 to-emerald-500" },
-              { id: "training", title: "Training Chat", emoji: "🐶", color: "from-blue-500 to-indigo-500" },
-              { id: "social", title: "Pet Social Feed", emoji: "🌍", color: "from-purple-500 to-pink-500" },
-              { id: "vet", title: "Vet Finder", emoji: "📍", color: "from-slate-600 to-slate-700" },
-              { id: "translator", title: "Pet Translator", emoji: "🎤", color: "from-pink-500 to-rose-500" },
-              { id: "sound-sim", title: "Dog Sound Sim", emoji: "🔊", color: "from-indigo-500 to-purple-500" }
-            ].map((action) => (
-              <Card 
-                key={action.id}
-                className="border-0 shadow-lg bg-white hover:shadow-xl transition-all duration-300 hover:scale-105 min-w-[140px] animate-slide-up rounded-2xl"
+          {/* AI Quick Actions */}
+          <section>
+            <div className="flex items-center space-x-2 mb-4">
+              <Zap className="text-orange-500 dark:text-orange-400 text-2xl" />
+              <h2 className="text-base font-bold tracking-wide text-slate-900 dark:text-white">AI Quick Actions</h2>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div 
+                onClick={() => handleQuickAction('feed')}
+                className="bg-white dark:bg-[#182c50] p-4 rounded-2xl text-center flex flex-col items-center justify-between space-y-3 shadow-lg shadow-blue-100/50 dark:shadow-black/20 relative overflow-hidden cursor-pointer hover:scale-105 transition-transform"
               >
-                <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 rounded-full bg-[#FF6B5A]/10 flex items-center justify-center mx-auto mb-4 text-3xl">
-                    {action.emoji}
-                  </div>
-                  <h4 className="font-bold text-[#1A3B5C] text-sm mb-4">{action.title}</h4>
-                  <Button 
-                    onClick={() => handleQuickAction(action.id)}
-                    size="sm" 
-                    className="w-full bg-[#1A3B5C] hover:bg-[#1A3B5C]/90 text-white font-bold transition-all duration-300 hover:scale-105 text-sm h-10 rounded-full shadow-lg"
-                  >
-                    Try Now
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
+                <div className="bg-blue-100 dark:bg-blue-500/10 p-3 rounded-full">
+                  <span className="text-3xl">🥥</span>
+                </div>
+                <h3 className="font-bold text-sm text-slate-900 dark:text-white">Feed Planner</h3>
+                <button className="w-full bg-slate-800 dark:bg-slate-700 text-white font-semibold py-2.5 rounded-full text-sm transition-transform hover:scale-105 active:scale-95">Try Now</button>
+              </div>
 
-        {/* AI Results Section */}
-        {showResults && aiResults.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
-              <Brain className="w-5 h-5 text-orange-600" />
-              AI Reports & Plans
-            </h3>
-            <div className="space-y-4">
-              {aiResults.map((result) => (
-                <Card key={result.id} className="border-2 border-orange-200 shadow-xl bg-white hover:shadow-xl hover:border-orange-400 transition-all duration-300 animate-slide-up rounded-2xl">
-                  <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-t-2xl p-4">
-                    <CardTitle className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg font-bold">{result.report.title}</span>
-                      </div>
-                      <div className="text-xs opacity-80">
-                        {result.timestamp}
-                      </div>
-                    </CardTitle>
-                    <p className="text-sm opacity-90 mt-1">{result.report.summary}</p>
-                  </CardHeader>
-                  <CardContent className="p-4 bg-gradient-to-br from-orange-50 to-orange-100">
-                    <div className="space-y-4">
-                      {/* Recommendations */}
-                      <div>
-                        <h4 className="font-semibold text-slate-800 mb-2 flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4 text-green-600" />
-                          Recommendations
-                        </h4>
-                        <ul className="space-y-1">
-                          {result.report.recommendations.map((rec: string, index: number) => (
-                            <li key={index} className="text-sm text-slate-700 flex items-start gap-2">
-                              <span className="text-orange-500 mt-1">•</span>
-                              <span>{rec}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      
-                      {/* Next Steps */}
-                      <div>
-                        <h4 className="font-semibold text-slate-800 mb-2 flex items-center gap-2">
-                          <ArrowRight className="w-4 h-4 text-blue-600" />
-                          Next Steps
-                        </h4>
-                        <ul className="space-y-1">
-                          {result.report.nextSteps.map((step: string, index: number) => (
-                            <li key={index} className="text-sm text-slate-700 flex items-start gap-2">
-                              <span className="text-blue-500 mt-1">•</span>
-                              <span>{step}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      
-                      {/* Action Buttons */}
-                      <div className="flex gap-2 pt-2">
-                        <Button
-                          size="sm"
-                          className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs"
-                        >
-                          Save Plan
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="flex-1 text-xs border-orange-300 text-orange-600 hover:bg-orange-50"
-                        >
-                          Share Report
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              <div 
+                onClick={() => handleQuickAction('health')}
+                className="bg-white dark:bg-[#182c50] p-4 rounded-2xl text-center flex flex-col items-center justify-between space-y-3 shadow-lg shadow-blue-100/50 dark:shadow-black/20 relative overflow-hidden cursor-pointer hover:scale-105 transition-transform"
+              >
+                <div className="bg-indigo-100 dark:bg-indigo-500/10 p-3 rounded-full">
+                  <span className="text-3xl">🩺</span>
+                </div>
+                <h3 className="font-bold text-sm text-slate-900 dark:text-white">Health Check</h3>
+                <button className="w-full bg-slate-800 dark:bg-slate-700 text-white font-semibold py-2.5 rounded-full text-sm transition-transform hover:scale-105 active:scale-95">Try Now</button>
+              </div>
+
+              <div 
+                onClick={() => handleQuickAction('training')}
+                className="bg-white dark:bg-[#182c50] p-4 rounded-2xl text-center flex flex-col items-center justify-between space-y-3 shadow-lg shadow-blue-100/50 dark:shadow-black/20 relative overflow-hidden cursor-pointer hover:scale-105 transition-transform"
+              >
+                <div className="bg-green-100 dark:bg-green-500/10 p-3 rounded-full">
+                  <span className="text-3xl">🎓</span>
+                </div>
+                <h3 className="font-bold text-sm text-slate-900 dark:text-white">AI Training</h3>
+                <button className="w-full bg-slate-800 dark:bg-slate-700 text-white font-semibold py-2.5 rounded-full text-sm transition-transform hover:scale-105 active:scale-95">Start</button>
+              </div>
+
+              <div 
+                onClick={() => handleQuickAction('social')}
+                className="bg-white dark:bg-[#182c50] p-4 rounded-2xl text-center flex flex-col items-center justify-between space-y-3 shadow-lg shadow-blue-100/50 dark:shadow-black/20 relative overflow-hidden cursor-pointer hover:scale-105 transition-transform"
+              >
+                <div className="bg-rose-100 dark:bg-rose-500/10 p-3 rounded-full">
+                  <span className="text-3xl">❤️</span>
+                </div>
+                <h3 className="font-bold text-sm text-slate-900 dark:text-white">Pet Match</h3>
+                <button className="w-full bg-slate-800 dark:bg-slate-700 text-white font-semibold py-2.5 rounded-full text-sm transition-transform hover:scale-105 active:scale-95">Discover</button>
+              </div>
             </div>
+          </section>
+        </main>
+
+        {/* Bottom Navigation */}
+        <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/70 dark:bg-[#0c1426]/70 backdrop-blur-xl border-t border-gray-200/80 dark:border-slate-800/80 rounded-t-3xl h-24">
+          <div className="flex justify-around items-center h-full px-2">
+            <a className="flex flex-col items-center text-center text-blue-500 dark:text-blue-400 space-y-1" href="#">
+              <span className="material-symbols-outlined">home</span>
+              <span className="text-[10px] font-bold">Home</span>
+            </a>
+            <a className="flex flex-col items-center text-center text-gray-400 dark:text-gray-500 space-y-1" href="#" onClick={(e) => { e.preventDefault(); onNavigate?.('training'); }}>
+              <span className="material-symbols-outlined">school</span>
+              <span className="text-[10px] font-medium">Training</span>
+            </a>
+            <a className="flex flex-col items-center text-center text-gray-400 dark:text-gray-500 space-y-1" href="#" onClick={(e) => { e.preventDefault(); onNavigate?.('memories'); }}>
+              <span className="material-symbols-outlined">photo_library</span>
+              <span className="text-[10px] font-medium">Memories</span>
+            </a>
+            <a className="flex flex-col items-center text-center" href="#" onClick={(e) => { e.preventDefault(); setActiveModal('camera'); }}>
+              <div className="w-16 h-16 -translate-y-8 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white shadow-lg shadow-orange-500/30 dark:shadow-orange-400/20 transition-transform hover:rotate-12 hover:scale-110">
+                <ScanLine className="w-8 h-8" />
+              </div>
+            </a>
+            <a className="flex flex-col items-center text-center text-gray-400 dark:text-gray-500 space-y-1" href="#" onClick={(e) => { e.preventDefault(); onNavigate?.('chat'); }}>
+              <span className="material-symbols-outlined">chat_bubble</span>
+              <span className="text-[10px] font-medium">Chat</span>
+            </a>
+            <a className="flex flex-col items-center text-center text-gray-400 dark:text-gray-500 space-y-1" href="#" onClick={(e) => { e.preventDefault(); onNavigate?.('community'); }}>
+              <span className="material-symbols-outlined">groups</span>
+              <span className="text-[10px] font-medium">Community</span>
+            </a>
+            <a className="flex flex-col items-center text-center text-gray-400 dark:text-gray-500 space-y-1" href="#" onClick={(e) => { e.preventDefault(); onNavigate?.('settings'); }}>
+              <span className="material-symbols-outlined">settings</span>
+              <span className="text-[10px] font-medium">Settings</span>
+            </a>
           </div>
-        )}
+        </nav>
 
 
 

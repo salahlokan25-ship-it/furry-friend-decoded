@@ -43,6 +43,12 @@
   }
 }
 
+@keyframes gradient-bg {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 .animate-fade-in {
   animation: fade-in 0.6s ease-out;
 }
@@ -57,6 +63,11 @@
 
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-gradient-bg {
+  background-size: 200% 200%;
+  animation: gradient-bg 8s ease infinite;
 }
 
 /* PetParadise Design System - Professional Dog Training App Theme

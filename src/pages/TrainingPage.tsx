@@ -31,6 +31,7 @@ interface Lesson {
 const TrainingPage = () => {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+  const [petFilter, setPetFilter] = useState<"dog" | "cat">("dog");
 
   const courses: Course[] = [
     // Dog Courses
@@ -2422,6 +2423,9 @@ const TrainingPage = () => {
     },
   ];
 
+  const filteredCourses = courses.filter(course => course.petType === petFilter);
+  const displayedCourses = filteredCourses.slice(0, 3);
+
   const goBackToCourses = () => {
     setSelectedCourse(null);
     setSelectedLesson(null);
@@ -2577,188 +2581,123 @@ const TrainingPage = () => {
 
   // Render main courses view
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-green-50/30 to-blue-50/30 pb-20">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-md mx-auto px-4 py-4">
-          <div className="flex items-center space-x-3">
-            <img src={petLogo} alt="Pet Paradise" className="w-10 h-10" />
-            <div>
-              <h1 className="text-xl font-bold text-foreground">Pet Training</h1>
-              <Badge variant="secondary" className="text-xs">Learn & Grow</Badge>
-            </div>
+    <div className="min-h-screen bg-[#f8f7f5] dark:bg-[#221910] pb-32">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-50 flex items-center justify-between bg-[#f8f7f5]/80 dark:bg-[#221910]/80 p-4 pb-2 backdrop-blur-sm">
+        <div className="flex size-12 shrink-0 items-center justify-start text-[#f48c25]">
+          <span className="material-symbols-outlined text-4xl">pets</span>
+        </div>
+        <h2 className="text-xl font-bold leading-tight tracking-tight flex-1 text-center text-slate-900 dark:text-slate-50 font-['Spline_Sans']">
+          PetTraining
+        </h2>
+        <div className="flex w-12 items-center justify-end">
+          <button className="flex cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 w-10 bg-transparent text-slate-900 dark:text-slate-50">
+            <span className="material-symbols-outlined text-2xl">person</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Hero Banner */}
+      <div className="px-4 pt-2 pb-3">
+        <div 
+          className="bg-cover bg-center flex flex-col justify-between items-center overflow-hidden rounded-xl min-h-80"
+          style={{
+            backgroundImage: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.6) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuD6O3foL3vNpxucrNW-tLHhoBZ9n2AwfH60vvPIxLanla9IZeexSdBsJFFgEMH4f3CNZTkfcTAe58DvgxBD1wR-JnG7_9QBFYkLU9CJ26x2bURszfO3fld_LCS3vmKV8TAlc1pShfv0jCc0XVugmySRLf7eJOtiHBr-yE8w3asAHCMGT2MTQridRDbmQPJwBNXyFmvdFIq7eE4lIt7NUi9TDOki-xelD8hFeufPQyp26D0Dv9r9GMXGUhmnGZYjexZWBRhZ0LuRads")`
+          }}
+        >
+          <div className="flex-1 p-6 text-center">
+            <p className="text-white text-[32px] font-bold leading-tight tracking-tight drop-shadow-md font-['Spline_Sans']">
+              Unlock Your Pet's Potential
+            </p>
+          </div>
+          <div className="w-full p-4 pt-0">
+            <Button
+              className="w-full flex cursor-pointer items-center justify-center overflow-hidden rounded-xl h-14 px-6 bg-[#f48c25] hover:bg-[#f48c25]/90 text-white text-lg font-bold leading-normal shadow-lg shadow-[#f48c25]/30 transition-transform active:scale-95"
+              onClick={() => setSelectedCourse(courses.find(c => c.petType === petFilter) || courses[0])}
+            >
+              Start Courses
+            </Button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-md mx-auto px-4 py-6 space-y-6">
-        {/* Featured Course */}
-        <Card className="border-0 shadow-soft bg-gradient-to-br from-primary/10 to-secondary/10">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3 mb-4">
-              <Award className="text-primary" size={24} />
-              <div>
-                <h2 className="font-semibold text-lg">Daily Recommend</h2>
-                <p className="text-sm text-muted-foreground">Good Behavior Training</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                  <span className="text-lg">0%</span>
-                </div>
-              </div>
-              <Button 
-                variant="coral" 
-                size="sm"
-                onClick={() => setSelectedCourse(courses[0])}
-              >
-                Start Now
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Course Categories */}
-        <div className="space-y-6">
-          {/* Dog Courses Section */}
-          <div>
-            <div className="flex items-center space-x-3 mb-4">
-              <img src={happyDog} alt="Dog" className="w-8 h-8" />
-              <h3 className="font-semibold text-lg text-foreground">Dog Training Courses</h3>
-            </div>
-            
-            <div className="space-y-3">
-              {courses.filter(course => course.petType === "dog").map((course, index) => (
-                <Card 
-                  key={`${course.id}-${index}`}
-                  className="border-0 shadow-soft cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => setSelectedCourse(course)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
-                        <img 
-                          src={happyDog} 
-                          alt="dog" 
-                          className="w-10 h-10"
-                        />
-                      </div>
-                      
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <h4 className="font-medium">{course.title}</h4>
-                          <ChevronRight size={20} className="text-muted-foreground" />
-                        </div>
-                        
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {course.description}
-                        </p>
-                        
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4">
-                            <Badge variant="outline" className="text-xs">
-                              {course.difficulty}
-                            </Badge>
-                            <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-                              <Clock size={12} />
-                              <span>{course.duration}</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Progress value={course.progress} className="w-16 h-2" />
-                            <span className="text-xs text-muted-foreground">
-                              {course.progress}%
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          {/* Cat Courses Section */}
-          <div>
-            <div className="flex items-center space-x-3 mb-4">
-              <img src={cuteCat} alt="Cat" className="w-8 h-8" />
-              <h3 className="font-semibold text-lg text-foreground">Cat Training Courses</h3>
-            </div>
-            
-            <div className="space-y-3">
-              {courses.filter(course => course.petType === "cat").map((course, index) => (
-                <Card 
-                  key={`${course.id}-${index}`}
-                  className="border-0 shadow-soft cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => setSelectedCourse(course)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
-                        <img 
-                          src={cuteCat} 
-                          alt="cat" 
-                          className="w-10 h-10"
-                        />
-                      </div>
-                      
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <h4 className="font-medium">{course.title}</h4>
-                          <ChevronRight size={20} className="text-muted-foreground" />
-                        </div>
-                        
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {course.description}
-                        </p>
-                        
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4">
-                            <Badge variant="outline" className="text-xs">
-                              {course.difficulty}
-                            </Badge>
-                            <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-                              <Clock size={12} />
-                              <span>{course.duration}</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Progress value={course.progress} className="w-16 h-2" />
-                            <span className="text-xs text-muted-foreground">
-                              {course.progress}%
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
+      {/* Pet Selector Toggle */}
+      <div className="flex px-4 py-3">
+        <div className="flex h-12 flex-1 items-center justify-center rounded-xl bg-slate-200 dark:bg-slate-800 p-1.5">
+          <button
+            className={`flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 text-sm font-medium leading-normal transition-all duration-200 ${
+              petFilter === "dog"
+                ? "bg-white dark:bg-slate-700 shadow-md text-slate-900 dark:text-slate-50"
+                : "text-slate-500 dark:text-slate-400"
+            }`}
+            onClick={() => setPetFilter("dog")}
+          >
+            <span className="truncate">Dog Courses</span>
+          </button>
+          <button
+            className={`flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 text-sm font-medium leading-normal transition-all duration-200 ${
+              petFilter === "cat"
+                ? "bg-white dark:bg-slate-700 shadow-md text-slate-900 dark:text-slate-50"
+                : "text-slate-500 dark:text-slate-400"
+            }`}
+            onClick={() => setPetFilter("cat")}
+          >
+            <span className="truncate">Cat Courses</span>
+          </button>
         </div>
+      </div>
 
-        {/* Quick Tips */}
-        <Card className="border-0 shadow-soft">
-          <CardContent className="p-6">
-            <h3 className="font-semibold mb-4">Quick Training Tips</h3>
-            <div className="space-y-3">
-              {[
-                { tip: "Keep training sessions short (5-15 minutes)", icon: "⏰" },
-                { tip: "Always end on a positive note", icon: "✨" },
-                { tip: "Be consistent with commands", icon: "🎯" },
-                { tip: "Reward immediately after good behavior", icon: "🎉" },
-              ].map((item, index) => (
-                <div key={index} className="flex items-center space-x-3">
-                  <span className="text-xl">{item.icon}</span>
-                  <p className="text-sm text-foreground">{item.tip}</p>
+      {/* Course Cards */}
+      <div className="space-y-4 px-4">
+        {displayedCourses.map((course) => (
+          <div
+            key={course.id}
+            className="flex flex-col items-stretch justify-start rounded-xl bg-white dark:bg-slate-800 shadow-sm overflow-hidden"
+          >
+            <div
+              className="w-full bg-center bg-no-repeat aspect-[16/7] bg-cover"
+              style={{
+                backgroundImage: course.petType === "dog"
+                  ? 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuAr_tjCxstrsAEEfSWVSgAJyg1lnpJsQDQ8VUbQUiFvFVAg6vzBCsQ_VrUbFQ1afxSNpwVz1bdkjf074H8l_TIccOXDQ_BsuRmD8DzMWpZLfuCYFM1tryMPjt9jBNzqaz03ldvK46wW_5e41ZpY6vFjrfOcYBBcfh44jCVDj6dJ-x6AcOjN9kIkWoD3Iexzz3IL6Hb78-utTbWxjmdIA0aErfBgWNxSYHLseDFBwLpGZSnKobfCmp9U3kqb7goFAa9ktrnBA7Vg82s")'
+                  : 'url("https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=800")'
+              }}
+            />
+            <div className="flex w-full grow flex-col items-stretch justify-center gap-2 p-4">
+              <p className="text-slate-900 dark:text-slate-50 text-xl font-bold leading-tight tracking-tight font-['Spline_Sans']">
+                {course.title}
+              </p>
+              <div className="flex items-end gap-3 justify-between">
+                <div className="flex flex-col gap-1">
+                  <p className="text-slate-500 dark:text-slate-400 text-base font-normal leading-normal">
+                    {course.description}
+                  </p>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal">
+                    {course.difficulty}
+                  </p>
                 </div>
-              ))}
+                <Button
+                  className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-5 bg-[#f48c25] hover:bg-[#f48c25]/90 text-white text-sm font-bold leading-normal"
+                  onClick={() => setSelectedCourse(course)}
+                >
+                  <span className="truncate">View</span>
+                </Button>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        ))}
+      </div>
+
+      {/* Sticky Bottom Button */}
+      <div className="fixed bottom-20 left-0 right-0 bg-[#f8f7f5]/80 dark:bg-[#221910]/80 p-4 backdrop-blur-sm max-w-md mx-auto">
+        <Button
+          className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl h-14 px-4 bg-[#f48c25] hover:bg-[#f48c25]/90 text-white text-base font-bold leading-normal shadow-lg shadow-[#f48c25]/30"
+          onClick={() => {
+            // Show all courses or navigate to full course list
+            console.log("Explore all courses");
+          }}
+        >
+          Explore All Courses
+        </Button>
       </div>
     </div>
   );

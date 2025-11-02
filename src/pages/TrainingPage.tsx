@@ -637,42 +637,10 @@ const TrainingPage = () => {
           completed: false,
         },
         {
-          id: "comfort-care",
-          title: "Enhancing Quality of Life",
-          content: "Maintain predictable routines seniors find comforting. Keep food, water, and litter boxes easily accessible. Provide gentle grooming assistance. Continue play but adjust intensity. Give extra patience and affection.",
-          duration: "16 min",
-          completed: false,
-        },
-      ],
-    },
-    {
-      id: "cat-aggression",
-      title: "Cat Aggression Management",
-      description: "Understanding and reducing aggressive behaviors",
-      petType: "cat",
-      progress: 0,
-      duration: "5 weeks",
-      difficulty: "Advanced",
-      lessons: [
-        {
-          id: "aggression-types",
-          title: "Identifying Aggression Types",
-          content: "Learn to recognize different types: play aggression, fear aggression, territorial, redirected, and pain-induced. Understanding the cause is key to addressing the behavior. Watch for warning signs like dilated pupils, flattened ears, tail lashing.",
-          duration: "25 min",
-          completed: false,
-        },
-        {
-          id: "fear-based-aggression",
-          title: "Addressing Fear-Based Aggression",
-          content: "Never punish fearful aggression. Identify triggers and reduce exposure gradually. Create safe spaces and escape routes. Build positive associations with scary stimuli using treats. Never corner or force interaction with fearful cats.",
-          duration: "30 min",
-          completed: false,
-        },
-        {
-          id: "redirection-techniques",
-          title: "Redirected Aggression Solutions",
-          content: "Occurs when cat can't reach trigger (outdoor cat) and attacks nearby target. Separate cats immediately during episodes. Reintroduce gradually after calming. Address original trigger if possible. Use pheromone diffusers to reduce tension.",
-          duration: "28 min",
+          id: "cognitive-stimulation",
+          title: "Maintaining Mental Sharpness",
+          content: "Provide age-appropriate puzzle feeders and gentle interactive play. Maintain routines while accommodating changing needs. Watch for signs of cognitive dysfunction: disorientation, excessive vocalization, or changes in sleep patterns.",
+          duration: "18 min",
           completed: false,
         },
       ],
@@ -2412,19 +2380,11 @@ const TrainingPage = () => {
           duration: "28 min",
           completed: false,
         },
-        {
-          id: "health-monitoring",
-          title: "Senior Health Monitoring",
-          content: "Learn to recognize early signs of common senior conditions: arthritis, kidney disease, hyperthyroidism, and dental disease. Establish regular vet checkup schedules and maintain detailed health records. Adjust diet and activity levels as needed.",
-          duration: "30 min",
-          completed: false,
-        },
       ],
     },
   ];
 
-  const filteredCourses = courses.filter(course => course.petType === petFilter);
-  const displayedCourses = filteredCourses.slice(0, 3);
+  const displayedCourses = courses.filter(c => c.petType === petFilter);
 
   const goBackToCourses = () => {
     setSelectedCourse(null);
@@ -2437,7 +2397,7 @@ const TrainingPage = () => {
 
   const toggleLessonComplete = (lessonId: string) => {
     if (!selectedCourse) return;
-    
+
     const updatedCourse = {
       ...selectedCourse,
       lessons: selectedCourse.lessons.map(lesson =>
@@ -2446,10 +2406,9 @@ const TrainingPage = () => {
           : lesson
       )
     };
-    
+
     setSelectedCourse(updatedCourse);
-    
-    // Update selected lesson state if it's the current lesson being toggled
+
     if (selectedLesson && selectedLesson.id === lessonId) {
       setSelectedLesson({
         ...selectedLesson,
@@ -2458,8 +2417,8 @@ const TrainingPage = () => {
     }
   };
 
-  // Render individual lesson view
-  if (selectedLesson && selectedCourse) {
+  // Render lesson view
+  if (selectedLesson) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-green-50/30 to-blue-50/30 pb-20">
         <div className="bg-white shadow-sm border-b">
@@ -2649,9 +2608,9 @@ const TrainingPage = () => {
 
       {/* Course Cards */}
       <div className="space-y-4 px-4">
-        {displayedCourses.map((course) => (
+        {displayedCourses.map((course, index) => (
           <div
-            key={course.id}
+            key={`${course.id}-${index}-${course.petType}-${course.title}`}
             className="flex flex-col items-stretch justify-start rounded-xl bg-white dark:bg-slate-800 shadow-sm overflow-hidden"
           >
             <div
@@ -2687,18 +2646,7 @@ const TrainingPage = () => {
         ))}
       </div>
 
-      {/* Sticky Bottom Button */}
-      <div className="fixed bottom-20 left-0 right-0 bg-[#f8f7f5]/80 dark:bg-[#221910]/80 p-4 backdrop-blur-sm max-w-md mx-auto">
-        <Button
-          className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl h-14 px-4 bg-[#f48c25] hover:bg-[#f48c25]/90 text-white text-base font-bold leading-normal shadow-lg shadow-[#f48c25]/30"
-          onClick={() => {
-            // Show all courses or navigate to full course list
-            console.log("Explore all courses");
-          }}
-        >
-          Explore All Courses
-        </Button>
-      </div>
+      
     </div>
   );
 };

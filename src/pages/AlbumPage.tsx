@@ -32,6 +32,8 @@ const AlbumPage = () => {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [selectedPetType, setSelectedPetType] = useState<"cat" | "dog" | "all">("all");
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
+  const [activitiesPage, setActivitiesPage] = useState(0);
+  const ACTIVITIES_PAGE_SIZE = 6;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -48,6 +50,10 @@ const AlbumPage = () => {
       // ignore parse errors
     }
   }, []);
+
+  useEffect(() => {
+    setActivitiesPage(0);
+  }, [selectedPetType]);
 
   const savePhotos = (arr: Photo[]) => {
     const serializable = arr.map(p => ({ ...p, timestamp: p.timestamp.toISOString() }));
@@ -512,49 +518,90 @@ const AlbumPage = () => {
               <Badge variant="secondary" className="text-xs">{activities.length} Activities</Badge>
             </h3>
             <div className="space-y-3">
-              {activities
-                .filter(activity => 
+              {(() => {
+                const list = activities.filter(activity => 
                   selectedPetType === "all" || 
                   activity.petTypes.includes("both") || 
                   activity.petTypes.includes(selectedPetType)
-                )
-                .map((activity) => (
-                <div
-                  key={activity.id}
-                  onClick={() => setSelectedActivity(activity)}
-                  className="flex items-center space-x-4 p-4 rounded-lg bg-gradient-to-r from-primary/5 to-secondary/5 hover:from-primary/10 hover:to-secondary/10 transition-all cursor-pointer border hover:border-primary/20"
-                >
-                  <span className="text-3xl">{activity.icon}</span>
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <h4 className="font-semibold">{activity.title}</h4>
-                      <Badge variant="outline" className="text-xs">
-                        {activity.difficulty}
-                      </Badge>
+                );
+                const totalPages = Math.max(1, Math.ceil(list.length / ACTIVITIES_PAGE_SIZE));
+                const clampedPage = Math.min(activitiesPage, totalPages - 1);
+                const start = clampedPage * ACTIVITIES_PAGE_SIZE;
+                const end = start + ACTIVITIES_PAGE_SIZE;
+                const pageItems = list.slice(start, end);
+                return pageItems.map((activity) => (
+                  <div
+                    key={activity.id}
+                    onClick={() => setSelectedActivity(activity)}
+                    className="flex items-center space-x-4 p-4 rounded-lg bg-gradient-to-r from-primary/5 to-secondary/5 hover:from-primary/10 hover:to-secondary/10 transition-all cursor-pointer border hover:border-primary/20"
+                  >
+                    <span className="text-3xl">{activity.icon}</span>
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <h4 className="font-semibold">{activity.title}</h4>
+                        <Badge variant="outline" className="text-xs">
+                          {activity.difficulty}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {activity.description}
+                      </p>
+                      <div className="flex items-center space-x-4 text-xs text-muted-foreground">
+                        <span className="flex items-center">
+                          <Clock size={12} className="mr-1" />
+                          {activity.duration}
+                        </span>
+                        <span className="flex items-center">
+                          <MapPin size={12} className="mr-1" />
+                          {activity.location}
+                        </span>
+                        <span className="flex items-center">
+                          <Users size={12} className="mr-1" />
+                          {activity.petTypes.includes("both") ? "All Pets" : 
+                           activity.petTypes.includes("cat") ? "Cats" : "Dogs"}
+                        </span>
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {activity.description}
-                    </p>
-                    <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                      <span className="flex items-center">
-                        <Clock size={12} className="mr-1" />
-                        {activity.duration}
-                      </span>
-                      <span className="flex items-center">
-                        <MapPin size={12} className="mr-1" />
-                        {activity.location}
-                      </span>
-                      <span className="flex items-center">
-                        <Users size={12} className="mr-1" />
-                        {activity.petTypes.includes("both") ? "All Pets" : 
-                         activity.petTypes.includes("cat") ? "Cats" : "Dogs"}
-                      </span>
-                    </div>
+                    <ChevronRight size={20} className="text-muted-foreground" />
                   </div>
-                  <ChevronRight size={20} className="text-muted-foreground" />
-                </div>
-              ))}
+                ));
+              })()}
             </div>
+
+            {(() => {
+              const list = activities.filter(activity => 
+                selectedPetType === "all" || 
+                activity.petTypes.includes("both") || 
+                activity.petTypes.includes(selectedPetType)
+              );
+              const totalPages = Math.max(1, Math.ceil(list.length / ACTIVITIES_PAGE_SIZE));
+              if (totalPages <= 1) return null;
+              return (
+                <div className="flex items-center justify-between mt-4">
+                  <span className="text-xs text-muted-foreground">
+                    Page {activitiesPage + 1} of {totalPages}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={activitiesPage === 0}
+                      onClick={() => setActivitiesPage(p => Math.max(0, p - 1))}
+                    >
+                      Prev
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={activitiesPage >= totalPages - 1}
+                      onClick={() => setActivitiesPage(p => Math.min(totalPages - 1, p + 1))}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              );
+            })()}
           </CardContent>
         </Card>
       </div>

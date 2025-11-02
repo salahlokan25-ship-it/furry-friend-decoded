@@ -1,1 +1,31 @@
 project_id = "rhwjwjzvgjwwywssjizn"
+
+[functions.check-subscription]
+verify_jwt = false
+
+[functions.create-checkout]
+verify_jwt = false
+
+[functions.customer-portal]
+verify_jwt = false
+
+[functions.pet-chat]
+verify_jwt = false
+
+[functions.pet-translate]
+verify_jwt = false
+
+[functions.pet-mood-detection]
+verify_jwt = false
+
+[functions.pet-bedtime-story]
+verify_jwt = false
+
+[functions.generate-memory-story]
+verify_jwt = false
+
+[functions.generate-memory-image]
+verify_jwt = false
+
+[functions.generate-video-veo3]
+verify_jwt = false

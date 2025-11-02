@@ -22,7 +22,7 @@ const MemoriesPage = () => {
   const ffmpegRef = useRef<FFmpeg | null>(null);
   const [isFFmpegReady, setIsFFmpegReady] = useState(false);
 
-  const canMakeVideo = useMemo(() => story && imageUrl && audioUrl, [story, imageUrl, audioUrl]);
+  const canMakeVideo = useMemo(() => story && imageUrl, [story, imageUrl]);
 
   useEffect(() => {
     // Warm-up animation pulse control via step
@@ -125,11 +125,46 @@ const MemoriesPage = () => {
     }
   }
 
+  async function generateVideoVeo3() {
+    try {
+      setErrorMsg(null);
+      setStep("video");
+      if (!canMakeVideo) throw new Error("Generate story and image first");
+      
+      const videoPrompt = story || prompt.trim() || "A heartwarming pet memory video";
+      
+      const { data, error } = await supabase.functions.invoke('generate-video-veo3', {
+        body: { 
+          prompt: videoPrompt,
+          imageUrl: imageUrl
+        }
+      });
+      
+      if (error) throw new Error(error.message);
+      if (!data?.videoUrl) throw new Error("No video URL returned");
+      
+      // Convert base64 to blob URL for display
+      const base64Data = data.videoUrl;
+      if (base64Data.startsWith('data:video')) {
+        const blob = await (await fetch(base64Data)).blob();
+        const objectUrl = URL.createObjectURL(blob);
+        if (videoUrl) URL.revokeObjectURL(videoUrl);
+        setVideoUrl(objectUrl);
+      } else {
+        setVideoUrl(base64Data);
+      }
+    } catch (e: any) {
+      setErrorMsg(e?.message || "Failed to generate video");
+    } finally {
+      setStep("idle");
+    }
+  }
+
   async function makeVideo5s() {
     try {
       setErrorMsg(null);
       setStep("video");
-      if (!canMakeVideo) throw new Error("Generate story, image, and voice first");
+      if (!story || !imageUrl || !audioUrl) throw new Error("Generate story, image, and voice first");
       const ffmpeg = await ensureFFmpeg();
       // fetch assets
       const imgBlob = await (await fetch(imageUrl!)).blob();
@@ -203,10 +238,16 @@ const MemoriesPage = () => {
               <Button variant="outline" onClick={generateVoice} disabled={step!=="idle"}>
                 <Play className="mr-2" size={16}/> Generate Voice (English)
               </Button>
-              <Button variant="coral" onClick={makeVideo5s} disabled={step!=="idle" || !canMakeVideo}>
-                Create 5s Video
+              <Button variant="coral" onClick={generateVideoVeo3} disabled={step!=="idle" || !canMakeVideo}>
+                Generate Video (Veo 3)
               </Button>
             </div>
+
+            {audioUrl && (
+              <Button variant="outline" onClick={makeVideo5s} disabled={step!=="idle" || !story || !imageUrl || !audioUrl} className="w-full">
+                Create 5s Video (FFmpeg)
+              </Button>
+            )}
 
             {errorMsg && (
               <div className="text-sm text-orange-700 bg-orange-50 border border-orange-200 rounded-md p-3">{errorMsg}</div>

@@ -5,10 +5,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Download, Image as ImageIcon, Play, Wand2 } from "lucide-react";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
+import { supabase } from "@/integrations/supabase/client";
 
 type GenStep = "idle" | "story" | "image" | "voice" | "video";
-
-const OPENAI_BASE = "https://api.openai.com/v1";
 
 const MemoriesPage = () => {
   const [prompt, setPrompt] = useState("");
@@ -52,29 +51,13 @@ const MemoriesPage = () => {
     try {
       setErrorMsg(null);
       setStep("story");
-      const apiKey = requireOpenAIKey();
       const content = prompt.trim() || "A cozy weekly memory about my pet's sweetest moments.";
-      const res = await fetch(`${OPENAI_BASE}/chat/completions`, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [
-            { role: "system", content: "You craft short, heartwarming pet memory narratives in under 60 words." },
-            { role: "user", content },
-          ],
-          temperature: 0.7,
-          max_tokens: 150,
-        }),
+      const { data, error } = await supabase.functions.invoke('generate-memory-story', {
+        body: { prompt: content }
       });
-      if (!res.ok) throw new Error(`Story failed: ${res.status}`);
-      const data = await res.json();
-      const txt = data.choices?.[0]?.message?.content?.trim();
-      if (!txt) throw new Error("No story returned");
-      setStory(txt);
+      if (error) throw new Error(error.message);
+      if (!data?.story) throw new Error("No story returned");
+      setStory(data.story);
     } catch (e: any) {
       setErrorMsg(e?.message || "Failed to generate story");
     } finally {
@@ -86,30 +69,22 @@ const MemoriesPage = () => {
     try {
       setErrorMsg(null);
       setStep("image");
-      const apiKey = requireOpenAIKey();
       const basePrompt = prompt.trim() || "adorable pet memory, soft lighting, cozy, cinematic, 4k";
-      const res = await fetch(`${OPENAI_BASE}/images/generations`, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-image-1",
-          prompt: basePrompt,
-          size: "1024x1024",
-          quality: "high",
-        }),
+      const { data, error } = await supabase.functions.invoke('generate-memory-image', {
+        body: { prompt: basePrompt }
       });
-      if (!res.ok) throw new Error(`Image failed: ${res.status}`);
-      const data = await res.json();
-      const url = data.data?.[0]?.url as string | undefined;
-      if (!url) throw new Error("No image URL returned");
-      // cache-bust by refetching into blob URL (CORS permitting)
-      const blob = await (await fetch(url)).blob();
-      const objectUrl = URL.createObjectURL(blob);
-      if (imageUrl) URL.revokeObjectURL(imageUrl);
-      setImageUrl(objectUrl);
+      if (error) throw new Error(error.message);
+      if (!data?.imageUrl) throw new Error("No image URL returned");
+      // Convert base64 to blob URL for display
+      const base64Data = data.imageUrl;
+      if (base64Data.startsWith('data:image')) {
+        const blob = await (await fetch(base64Data)).blob();
+        const objectUrl = URL.createObjectURL(blob);
+        if (imageUrl) URL.revokeObjectURL(imageUrl);
+        setImageUrl(objectUrl);
+      } else {
+        setImageUrl(base64Data);
+      }
     } catch (e: any) {
       setErrorMsg(e?.message || "Failed to generate image");
     } finally {
@@ -121,10 +96,10 @@ const MemoriesPage = () => {
     try {
       setErrorMsg(null);
       setStep("voice");
-      const apiKey = requireOpenAIKey();
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY as string | undefined;
+      if (!apiKey?.trim()) throw new Error("OpenAI API key not configured for TTS. Set VITE_OPENAI_API_KEY in .env");
       if (!story) throw new Error("Generate a story first");
-      // Use OpenAI TTS with an English voice. While accent options are limited, we set voice and style hints.
-      const res = await fetch(`${OPENAI_BASE}/audio/speech`, {
+      const res = await fetch("https://api.openai.com/v1/audio/speech", {
         method: "POST",
         headers: {
           "content-type": "application/json",
@@ -197,7 +172,7 @@ const MemoriesPage = () => {
             <span>🎬</span>
           </div>
           <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-400 bg-clip-text text-transparent">
-            AI Story Memories (OpenAI)
+            AI Story Memories
           </h1>
         </div>
 

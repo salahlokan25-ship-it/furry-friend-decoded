@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Download, Image as ImageIcon, Play, Wand2 } from "lucide-react";
+import { Download, Image as ImageIcon, Play, Wand2, Video } from "lucide-react";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
 import { supabase } from "@/integrations/supabase/client";
@@ -197,8 +197,13 @@ const MemoriesPage = () => {
               </Button>
             </div>
 
-            <Button variant="coral" onClick={generateVideoVeo3} disabled={step!=="idle" || !canMakeVideo} className="w-full">
-              Generate Video (Veo 3)
+            <Button 
+              variant="coral" 
+              onClick={generateVideoVeo3} 
+              disabled={step!=="idle" || !canMakeVideo} 
+              className="w-full"
+            >
+              <Video className="mr-2" size={16}/> Generate Video (Veo 3)
             </Button>
 
             {errorMsg && (

@@ -7,7 +7,7 @@ import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
 import { supabase } from "@/integrations/supabase/client";
 
-type GenStep = "idle" | "story" | "image" | "voice" | "video";
+type GenStep = "idle" | "story" | "image" | "video";
 
 const MemoriesPage = () => {
   const [prompt, setPrompt] = useState("");
@@ -16,7 +16,6 @@ const MemoriesPage = () => {
 
   const [story, setStory] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
   const ffmpegRef = useRef<FFmpeg | null>(null);
@@ -92,38 +91,6 @@ const MemoriesPage = () => {
     }
   }
 
-  async function generateVoice() {
-    try {
-      setErrorMsg(null);
-      setStep("voice");
-      const apiKey = import.meta.env.VITE_OPENAI_API_KEY as string | undefined;
-      if (!apiKey?.trim()) throw new Error("OpenAI API key not configured for TTS. Set VITE_OPENAI_API_KEY in .env");
-      if (!story) throw new Error("Generate a story first");
-      const res = await fetch("https://api.openai.com/v1/audio/speech", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "tts-1",
-          voice: "alloy",
-          input: story,
-          format: "mp3",
-        }),
-      });
-      if (!res.ok) throw new Error(`TTS failed: ${res.status}`);
-      const buf = await res.arrayBuffer();
-      const blob = new Blob([buf], { type: "audio/mpeg" });
-      const url = URL.createObjectURL(blob);
-      if (audioUrl) URL.revokeObjectURL(audioUrl);
-      setAudioUrl(url);
-    } catch (e: any) {
-      setErrorMsg(e?.message || "Failed to generate voice");
-    } finally {
-      setStep("idle");
-    }
-  }
 
   async function generateVideoVeo3() {
     try {
@@ -164,21 +131,17 @@ const MemoriesPage = () => {
     try {
       setErrorMsg(null);
       setStep("video");
-      if (!story || !imageUrl || !audioUrl) throw new Error("Generate story, image, and voice first");
+      if (!story || !imageUrl) throw new Error("Generate story and image first");
       const ffmpeg = await ensureFFmpeg();
       // fetch assets
       const imgBlob = await (await fetch(imageUrl!)).blob();
-      const audBlob = await (await fetch(audioUrl!)).blob();
       await ffmpeg.writeFile("bg.jpg", await fetchFile(imgBlob));
-      await ffmpeg.writeFile("audio.mp3", await fetchFile(audBlob));
       await ffmpeg.exec([
         "-loop", "1",
         "-t", "5",
         "-i", "bg.jpg",
-        "-i", "audio.mp3",
         "-vf", "scale=720:-2,format=yuv420p",
         "-c:v", "libvpx-vp9",
-        "-c:a", "libopus",
         "-shortest",
         "out.webm",
       ]);
@@ -234,20 +197,9 @@ const MemoriesPage = () => {
               </Button>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" onClick={generateVoice} disabled={step!=="idle"}>
-                <Play className="mr-2" size={16}/> Generate Voice (English)
-              </Button>
-              <Button variant="coral" onClick={generateVideoVeo3} disabled={step!=="idle" || !canMakeVideo}>
-                Generate Video (Veo 3)
-              </Button>
-            </div>
-
-            {audioUrl && (
-              <Button variant="outline" onClick={makeVideo5s} disabled={step!=="idle" || !story || !imageUrl || !audioUrl} className="w-full">
-                Create 5s Video (FFmpeg)
-              </Button>
-            )}
+            <Button variant="coral" onClick={generateVideoVeo3} disabled={step!=="idle" || !canMakeVideo} className="w-full">
+              Generate Video (Veo 3)
+            </Button>
 
             {errorMsg && (
               <div className="text-sm text-orange-700 bg-orange-50 border border-orange-200 rounded-md p-3">{errorMsg}</div>
@@ -265,24 +217,12 @@ const MemoriesPage = () => {
               </div>
             )}
 
-            {audioUrl && (
-              <div className="rounded-xl p-3 bg-white border">
-                <audio controls src={audioUrl} />
-              </div>
-            )}
-
             {videoUrl && (
               <div className="space-y-2">
                 <video src={videoUrl} controls className="w-full rounded-lg border" />
-                <a href={videoUrl} download="memory.webm">
+                <a href={videoUrl} download="memory.mp4">
                   <Button variant="outline" size="sm"><Download className="mr-1" size={16}/>Download</Button>
                 </a>
-              </div>
-            )}
-
-            {!isFFmpegReady && (
-              <div className="pt-2">
-                <Button variant="outline" onClick={ensureFFmpeg} disabled={step!=="idle"}>Load Video Engine</Button>
               </div>
             )}
           </CardContent>

@@ -197,16 +197,15 @@ const MemoriesPage = () => {
               </Button>
             </div>
 
-            {canMakeVideo && (
-              <Button 
-                variant="coral" 
-                onClick={generateVideoVeo3} 
-                disabled={step!=="idle"} 
-                className="w-full"
-              >
-                <Video className="mr-2" size={16}/> Generate Video with AI
-              </Button>
-            )}
+            <Button 
+              variant="coral" 
+              onClick={generateVideoVeo3} 
+              disabled={step!=="idle" || !canMakeVideo} 
+              className="w-full"
+            >
+              <Video className="mr-2" size={16}/> 
+              {canMakeVideo ? "Generate Video with AI" : "Generate Story & Image First"}
+            </Button>
 
             {errorMsg && (
               <div className="text-sm text-orange-700 bg-orange-50 border border-orange-200 rounded-md p-3">{errorMsg}</div>

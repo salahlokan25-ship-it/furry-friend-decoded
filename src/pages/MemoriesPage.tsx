@@ -21,7 +21,7 @@ const MemoriesPage = () => {
   const ffmpegRef = useRef<FFmpeg | null>(null);
   const [isFFmpegReady, setIsFFmpegReady] = useState(false);
 
-  const canMakeVideo = useMemo(() => story && imageUrl, [story, imageUrl]);
+  const canMakeVideo = useMemo(() => !!imageUrl, [imageUrl]);
 
   useEffect(() => {
     // Warm-up animation pulse control via step
@@ -98,12 +98,13 @@ const MemoriesPage = () => {
       setStep("video");
       if (!canMakeVideo) throw new Error("Generate story and image first");
       
-      const videoPrompt = story || prompt.trim() || "A heartwarming pet memory video";
+      const videoPrompt = (story || prompt.trim() || "Create a cohesive 5-second cinematic pet memory video");
       
       const { data, error } = await supabase.functions.invoke('generate-video-veo3', {
         body: { 
           prompt: videoPrompt,
-          imageUrl: imageUrl
+          imageUrl: imageUrl,
+          duration: 5
         }
       });
       
@@ -199,7 +200,7 @@ const MemoriesPage = () => {
               className="w-full"
             >
               <Video className="mr-2" size={16}/> 
-              {canMakeVideo ? "Generate Video with AI" : "Generate Story & Image First"}
+              {canMakeVideo ? "Generate 5s Video (Veo 3)" : "Generate Image First"}
             </Button>
 
             <Button variant="outline" onClick={generateImage} disabled={step!=="idle"} className="w-full">

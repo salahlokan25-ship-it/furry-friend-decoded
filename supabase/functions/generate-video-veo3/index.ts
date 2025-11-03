@@ -21,9 +21,8 @@ serve(async (req) => {
     console.log("Generating video with Veo 3 model...");
 
     // Vertex AI Imagen Video (Veo 3) endpoint
-    // Note: Replace PROJECT_ID and REGION with your actual values
     const response = await fetch(
-      "https://us-central1-aiplatform.googleapis.com/v1/projects/YOUR_PROJECT_ID/locations/us-central1/publishers/google/models/veo-003:predict",
+      "https://us-central1-aiplatform.googleapis.com/v1/projects/petparadise-476315/locations/us-central1/publishers/google/models/veo-003:predict",
       {
         method: "POST",
         headers: {

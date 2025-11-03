@@ -188,14 +188,9 @@ const MemoriesPage = () => {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <Button onClick={generateStory} disabled={step!=="idle"}>
-                <Wand2 className="mr-2" size={16}/> Generate Story
-              </Button>
-              <Button variant="outline" onClick={generateImage} disabled={step!=="idle"}>
-                <ImageIcon className="mr-2" size={16}/> Generate Image
-              </Button>
-            </div>
+            <Button onClick={generateStory} disabled={step!=="idle"} className="w-full">
+              <Wand2 className="mr-2" size={16}/> Generate Story
+            </Button>
 
             <Button 
               variant="coral" 
@@ -205,6 +200,10 @@ const MemoriesPage = () => {
             >
               <Video className="mr-2" size={16}/> 
               {canMakeVideo ? "Generate Video with AI" : "Generate Story & Image First"}
+            </Button>
+
+            <Button variant="outline" onClick={generateImage} disabled={step!=="idle"} className="w-full">
+              <ImageIcon className="mr-2" size={16}/> Generate Image
             </Button>
 
             {errorMsg && (

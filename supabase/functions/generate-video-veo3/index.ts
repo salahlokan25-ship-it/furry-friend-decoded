@@ -20,34 +20,42 @@ serve(async (req) => {
 
     console.log("Generating video with Veo 3 model...");
 
-    // Vertex AI Imagen Video (Veo 3) endpoint
-    const response = await fetch(
-      "https://us-central1-aiplatform.googleapis.com/v1/projects/petparadise-476315/locations/us-central1/publishers/google/models/veo-003:predict",
-      {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${GOOGLE_CLOUD_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          instances: [
-            {
-              prompt: prompt,
-              image: {
-                bytesBase64Encoded: imageUrl.includes('base64,') 
-                  ? imageUrl.split('base64,')[1] 
-                  : imageUrl
-              }
+    // Convert image to base64 if it's a blob URL
+    let base64Image = imageUrl;
+    if (imageUrl.startsWith('blob:') || imageUrl.startsWith('http')) {
+      const imgResponse = await fetch(imageUrl);
+      const imgBlob = await imgResponse.blob();
+      const arrayBuffer = await imgBlob.arrayBuffer();
+      const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+      base64Image = base64;
+    } else if (imageUrl.includes('base64,')) {
+      base64Image = imageUrl.split('base64,')[1];
+    }
+
+    // Vertex AI Imagen Video (Veo 3) endpoint with API key
+    const apiUrl = `https://us-central1-aiplatform.googleapis.com/v1/projects/petparadise-476315/locations/us-central1/publishers/google/models/veo-003:predict?key=${GOOGLE_CLOUD_API_KEY}`;
+    
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        instances: [
+          {
+            prompt: prompt,
+            image: {
+              bytesBase64Encoded: base64Image
             }
-          ],
-          parameters: {
-            sampleCount: 1,
-            aspectRatio: "16:9",
-            personGeneration: "allow_adult",
           }
-        }),
-      }
-    );
+        ],
+        parameters: {
+          sampleCount: 1,
+          aspectRatio: "16:9",
+          personGeneration: "allow_adult",
+        }
+      }),
+    });
 
     if (!response.ok) {
       if (response.status === 429) {

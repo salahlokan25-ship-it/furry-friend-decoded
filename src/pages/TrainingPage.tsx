@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ChevronRight, Clock, Award, BookOpen, Play } from "lucide-react";
+import { ChevronRight, Clock, Award, BookOpen, Play, Menu, Search } from "lucide-react";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import petLogo from "@/assets/pet-paradise-logo.png";
 import happyDog from "@/assets/happy-dog.png";
 import cuteCat from "@/assets/cute-cat.png";
@@ -2539,114 +2540,183 @@ const TrainingPage = () => {
   }
 
   // Render main courses view
+  const featuredCourses = displayedCourses.slice(0, 3);
+  const inProgressCourses = displayedCourses.filter(c => c.progress > 0 && c.progress < 100).slice(0, 2);
+  const foundationalCourses = displayedCourses.filter(c => c.difficulty === "Beginner").slice(0, 2);
+
   return (
-    <div className="min-h-screen bg-[#f8f7f5] dark:bg-[#221910] pb-32">
+    <div className="relative w-full flex-col overflow-x-hidden min-h-screen bg-[#F9F9F9] dark:bg-[#111827] pb-32">
       {/* Sticky Header */}
-      <div className="sticky top-0 z-50 flex items-center justify-between bg-[#f8f7f5]/80 dark:bg-[#221910]/80 p-4 pb-2 backdrop-blur-sm">
-        <div className="flex size-12 shrink-0 items-center justify-start text-[#f48c25]">
-          <span className="material-symbols-outlined text-4xl">pets</span>
-        </div>
-        <h2 className="text-xl font-bold leading-tight tracking-tight flex-1 text-center text-slate-900 dark:text-slate-50 font-['Spline_Sans']">
-          PetTraining
-        </h2>
-        <div className="flex w-12 items-center justify-end">
-          <button className="flex cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 w-10 bg-transparent text-slate-900 dark:text-slate-50">
-            <span className="material-symbols-outlined text-2xl">person</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Hero Banner */}
-      <div className="px-4 pt-2 pb-3">
-        <div 
-          className="bg-cover bg-center flex flex-col justify-between items-center overflow-hidden rounded-xl min-h-80"
-          style={{
-            backgroundImage: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.6) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuD6O3foL3vNpxucrNW-tLHhoBZ9n2AwfH60vvPIxLanla9IZeexSdBsJFFgEMH4f3CNZTkfcTAe58DvgxBD1wR-JnG7_9QBFYkLU9CJ26x2bURszfO3fld_LCS3vmKV8TAlc1pShfv0jCc0XVugmySRLf7eJOtiHBr-yE8w3asAHCMGT2MTQridRDbmQPJwBNXyFmvdFIq7eE4lIt7NUi9TDOki-xelD8hFeufPQyp26D0Dv9r9GMXGUhmnGZYjexZWBRhZ0LuRads")`
-          }}
-        >
-          <div className="flex-1 p-6 text-center">
-            <p className="text-white text-[32px] font-bold leading-tight tracking-tight drop-shadow-md font-['Spline_Sans']">
-              Unlock Your Pet's Potential
-            </p>
+      <div className="sticky top-0 z-10 bg-[#F9F9F9]/80 dark:bg-[#111827]/80 backdrop-blur-sm pb-2">
+        {/* Top App Bar */}
+        <div className="flex items-center px-4 pt-4 pb-2 justify-between">
+          <div className="flex size-12 shrink-0 items-center justify-start">
+            <Menu className="text-[#2A3D45] dark:text-[#E5E7EB]" size={24} />
           </div>
-          <div className="w-full p-4 pt-0">
-            <Button
-              className="w-full flex cursor-pointer items-center justify-center overflow-hidden rounded-xl h-14 px-6 bg-[#f48c25] hover:bg-[#f48c25]/90 text-white text-lg font-bold leading-normal shadow-lg shadow-[#f48c25]/30 transition-transform active:scale-95"
-              onClick={() => setSelectedCourse(courses.find(c => c.petType === petFilter) || courses[0])}
+          <h1 className="text-[#2A3D45] dark:text-[#E5E7EB] text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">
+            Training Hub
+          </h1>
+          <div className="flex w-12 items-center justify-end">
+            <button className="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 bg-transparent text-[#2A3D45] dark:text-[#E5E7EB] gap-2 text-base font-bold leading-normal tracking-[0.015em] min-w-0 p-0">
+              <Search size={24} />
+            </button>
+          </div>
+        </div>
+
+        {/* Segmented Buttons */}
+        <div className="flex px-4 py-3">
+          <div className="flex h-10 flex-1 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-800 p-1">
+            <button
+              className={`flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-full px-2 text-sm font-bold leading-normal transition-colors ${
+                petFilter === "dog"
+                  ? "bg-[#FF7F50] shadow-md text-white"
+                  : "text-[#2A3D45] dark:text-[#E5E7EB]"
+              }`}
+              onClick={() => setPetFilter("dog")}
             >
-              Start Courses
-            </Button>
+              <span className="truncate">Dogs</span>
+            </button>
+            <button
+              className={`flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-full px-2 text-sm font-bold leading-normal transition-colors ${
+                petFilter === "cat"
+                  ? "bg-[#FF7F50] shadow-md text-white"
+                  : "text-[#2A3D45] dark:text-[#E5E7EB]"
+              }`}
+              onClick={() => setPetFilter("cat")}
+            >
+              <span className="truncate">Cats</span>
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Pet Selector Toggle */}
-      <div className="flex px-4 py-3">
-        <div className="flex h-12 flex-1 items-center justify-center rounded-xl bg-slate-200 dark:bg-slate-800 p-1.5">
-          <button
-            className={`flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 text-sm font-medium leading-normal transition-all duration-200 ${
-              petFilter === "dog"
-                ? "bg-white dark:bg-slate-700 shadow-md text-slate-900 dark:text-slate-50"
-                : "text-slate-500 dark:text-slate-400"
-            }`}
-            onClick={() => setPetFilter("dog")}
-          >
-            <span className="truncate">Dog Courses</span>
-          </button>
-          <button
-            className={`flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 text-sm font-medium leading-normal transition-all duration-200 ${
-              petFilter === "cat"
-                ? "bg-white dark:bg-slate-700 shadow-md text-slate-900 dark:text-slate-50"
-                : "text-slate-500 dark:text-slate-400"
-            }`}
-            onClick={() => setPetFilter("cat")}
-          >
-            <span className="truncate">Cat Courses</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Course Cards */}
-      <div className="space-y-4 px-4">
-        {displayedCourses.map((course, index) => (
-          <div
-            key={`${course.id}-${index}-${course.petType}-${course.title}`}
-            className="flex flex-col items-stretch justify-start rounded-xl bg-white dark:bg-slate-800 shadow-sm overflow-hidden"
-          >
-            <div
-              className="w-full bg-center bg-no-repeat aspect-[16/7] bg-cover"
-              style={{
-                backgroundImage: course.petType === "dog"
-                  ? 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuAr_tjCxstrsAEEfSWVSgAJyg1lnpJsQDQ8VUbQUiFvFVAg6vzBCsQ_VrUbFQ1afxSNpwVz1bdkjf074H8l_TIccOXDQ_BsuRmD8DzMWpZLfuCYFM1tryMPjt9jBNzqaz03ldvK46wW_5e41ZpY6vFjrfOcYBBcfh44jCVDj6dJ-x6AcOjN9kIkWoD3Iexzz3IL6Hb78-utTbWxjmdIA0aErfBgWNxSYHLseDFBwLpGZSnKobfCmp9U3kqb7goFAa9ktrnBA7Vg82s")'
-                  : 'url("https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=800")'
-              }}
-            />
-            <div className="flex w-full grow flex-col items-stretch justify-center gap-2 p-4">
-              <p className="text-slate-900 dark:text-slate-50 text-xl font-bold leading-tight tracking-tight font-['Spline_Sans']">
-                {course.title}
-              </p>
-              <div className="flex items-end gap-3 justify-between">
-                <div className="flex flex-col gap-1">
-                  <p className="text-slate-500 dark:text-slate-400 text-base font-normal leading-normal">
-                    {course.description}
-                  </p>
-                  <p className="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal">
-                    {course.difficulty}
-                  </p>
-                </div>
-                <Button
-                  className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-5 bg-[#f48c25] hover:bg-[#f48c25]/90 text-white text-sm font-bold leading-normal"
-                  onClick={() => setSelectedCourse(course)}
+      <main className="flex flex-col gap-6">
+        {/* Featured Courses Section */}
+        <div>
+          <h2 className="text-[#2A3D45] dark:text-[#E5E7EB] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">
+            Featured for Bella
+          </h2>
+          
+          {/* Carousel */}
+          <div className="flex overflow-x-auto [-ms-scrollbar-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pl-4">
+            <div className="flex items-stretch gap-4">
+              {featuredCourses.map((course, idx) => (
+                <div 
+                  key={`featured-${course.id}`}
+                  className={`flex h-full flex-1 flex-col gap-4 rounded-lg bg-white dark:bg-gray-800 shadow-sm min-w-[280px] w-[280px] overflow-hidden ${idx === featuredCourses.length - 1 ? 'pr-4' : ''}`}
                 >
-                  <span className="truncate">View</span>
-                </Button>
-              </div>
+                  <div 
+                    className="w-full bg-center bg-no-repeat aspect-video bg-cover flex flex-col"
+                    style={{
+                      backgroundImage: course.petType === "dog"
+                        ? 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDwCV9tN-JHhmUhOgHfNYZ6DbmfUMfhVt6f31qxjLFDuVcsMDbTffpvJZXNsHD33hs2KoLvw3QHhlioMHRUQBOHWBH8CHCLtAgypLGK-HUV9bNfoMiPbFeWBsIdTTgJrW8w-TtXNe3RGe7Grk38KE5gKbf_CDv7cLLR-cHDDYRNu5vN3jhA2XMsk6eKgJrIOD8z0R2_hGaKVEGeINDoQ3xzs55HaIgbuPoAKB7van5n6pUVqELTahcHQZD4oCUJ9Q2RRjvNqsdCIO4")'
+                        : 'url("https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=800")'
+                    }}
+                  />
+                  <div className="flex flex-col flex-1 justify-between p-4 pt-0 gap-4">
+                    <div>
+                      <p className="text-[#2A3D45] dark:text-[#E5E7EB] text-base font-bold leading-normal">
+                        {course.title}
+                      </p>
+                      <p className="text-[#6B7280] dark:text-[#9CA3AF] text-sm font-normal leading-normal">
+                        {course.description}
+                      </p>
+                    </div>
+                    <button 
+                      onClick={() => setSelectedCourse(course)}
+                      className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#FF7F50] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#FF7F50]/90 transition-colors"
+                    >
+                      <span className="truncate">Start Learning</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        ))}
-      </div>
+        </div>
 
-      
+        {/* Continue Your Training Section */}
+        {inProgressCourses.length > 0 && (
+          <div>
+            <h2 className="text-[#2A3D45] dark:text-[#E5E7EB] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">
+              Continue Your Training
+            </h2>
+            <div className="flex flex-col gap-3 px-4">
+              {inProgressCourses.map((course) => (
+                <div 
+                  key={`progress-${course.id}`}
+                  className="flex items-center gap-4 rounded-lg bg-white dark:bg-gray-800 p-4 shadow-sm"
+                >
+                  <div 
+                    className="w-24 h-24 bg-center bg-no-repeat aspect-square bg-cover rounded-lg"
+                    style={{
+                      backgroundImage: course.petType === "dog"
+                        ? 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuBFHwRUbOECRLUINAfvQVfLwCX_NoHc53vQnvjevneuiZ5NFfEN34VHVwdgCpT-ENeMYXZhVz8zCydSdE0j8Q7Mc7JqWE4WnAxOc_nm7OTgbom9AqQDjet30xr7tbPwra3-8hNnfFm1z7n6xw1TQVaCKvYYqK_7cLKkJVuUoWUGm3G41Kao5Kj3gDR5cfwzwIpA-tVa0Ja7SHmhvt12MZ9NBj4-Kh2OQH9aWDWsQY5Sezdgei49SMN8NqOCpLqI1cv5Aj5JFnxh-YY")'
+                        : 'url("https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=800")'
+                    }}
+                  />
+                  <div className="flex flex-col flex-1 gap-2">
+                    <p className="text-[#2A3D45] dark:text-[#E5E7EB] text-base font-bold leading-normal">
+                      {course.title}
+                    </p>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                      <div 
+                        className="bg-[#FF7F50] h-2 rounded-full transition-all" 
+                        style={{ width: `${course.progress}%` }}
+                      />
+                    </div>
+                    <p className="text-[#6B7280] dark:text-[#9CA3AF] text-xs font-medium">
+                      {course.progress}% Complete
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedCourse(course)}
+                    className="flex items-center justify-center size-12 rounded-full bg-[#FF7F50]/20 dark:bg-[#FF7F50]/30 text-[#FF7F50] hover:bg-[#FF7F50]/30 transition-colors"
+                  >
+                    <Play size={24} fill="currentColor" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Foundational Skills Section */}
+        <div>
+          <h2 className="text-[#2A3D45] dark:text-[#E5E7EB] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">
+            Foundational Skills
+          </h2>
+          <div className="grid grid-cols-1 gap-4 px-4">
+            {foundationalCourses.map((course) => (
+              <div 
+                key={`foundational-${course.id}`}
+                onClick={() => setSelectedCourse(course)}
+                className="flex items-center gap-4 rounded-lg bg-white dark:bg-gray-800 p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+              >
+                <div 
+                  className="w-20 h-20 bg-center bg-no-repeat aspect-square bg-cover rounded-lg"
+                  style={{
+                    backgroundImage: course.petType === "dog"
+                      ? 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuAqmU5I_bOjmxWUnExKh_9B7PoGsAPg7K5ICIzmM9sHy2UzvF1Z50Z_wbmWJRkDqGo4iqV_dxqU_OtV8oye5RlHyEeVSVO6AeeuPac7HiH6r-b8aqdO_flxGZlKvtg3OrRJ-jGkx3s4jAehjJtym1LGqzV8PJAwP2XY6vvSZwv0fpWC-M62BFeWHMiq725DeVFvFAoG1O9m7KVc_YNu1oGS_n6V9lF1T3Vn32Lj_-dTgEaUjBZVwB1iJilj4Mv1lnlce43SEzsnf2I")'
+                      : 'url("https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=800")'
+                  }}
+                />
+                <div className="flex-1">
+                  <p className="text-[#2A3D45] dark:text-[#E5E7EB] text-base font-bold">
+                    {course.title}
+                  </p>
+                  <div className="flex items-center gap-3 text-[#6B7280] dark:text-[#9CA3AF] text-sm mt-1">
+                    <span>{course.difficulty}</span>
+                    <span className="text-gray-300 dark:text-gray-600">•</span>
+                    <span>{course.lessons.length} Lessons</span>
+                  </div>
+                </div>
+                <ChevronRight className="text-[#6B7280] dark:text-[#9CA3AF]" size={24} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
     </div>
   );
 };

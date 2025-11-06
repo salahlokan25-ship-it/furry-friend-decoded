@@ -6,12 +6,10 @@ import { Download, Image as ImageIcon, Play, Wand2, Video, ArrowLeft, Sparkles }
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 
 type GenStep = "idle" | "story" | "image" | "video";
 
 const MemoriesPage = () => {
-  const navigate = useNavigate();
   const [prompt, setPrompt] = useState("");
   const [step, setStep] = useState<GenStep>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -191,7 +189,7 @@ const MemoriesPage = () => {
       {/* Sticky Header */}
       <header className="sticky top-0 z-10 flex items-center bg-background/80 backdrop-blur-sm p-4 pb-3">
         <button 
-          onClick={() => navigate(-1)}
+          onClick={() => (window.history.length > 1 ? window.history.back() : null)}
           className="text-foreground flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-accent transition-colors"
         >
           <ArrowLeft className="w-6 h-6" />

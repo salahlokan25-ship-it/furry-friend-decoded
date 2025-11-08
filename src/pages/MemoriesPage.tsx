@@ -188,19 +188,13 @@ const MemoriesPage = () => {
     <div className="relative flex min-h-screen w-full flex-col bg-background overflow-x-hidden">
       {/* Sticky Header */}
       <header className="sticky top-0 z-10 flex items-center bg-background/80 backdrop-blur-sm p-4 pb-3">
-        <button 
-          onClick={() => (window.history.length > 1 ? window.history.back() : null)}
-          className="text-foreground flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-accent transition-colors"
-        >
-          <ArrowLeft className="w-6 h-6" />
-        </button>
-        <h1 className="text-foreground text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-10">
+        <h1 className="text-foreground text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">
           Create a New Memory
         </h1>
       </header>
 
       {/* Main Content */}
-      <main className="flex flex-1 flex-col px-4 pt-2 pb-32">
+      <main className="flex flex-1 flex-col px-4 pt-2 pb-6">
         {/* Memory Prompt Card */}
         <div className="flex w-full flex-col gap-4 rounded-lg bg-card p-4 shadow-sm">
           <label className="flex flex-col">
@@ -250,6 +244,26 @@ const MemoriesPage = () => {
           </div>
         )}
 
+        {/* Action Buttons */}
+        <div className="mt-6 flex gap-3">
+          <button 
+            onClick={generateStory}
+            disabled={step !== "idle"}
+            className="flex w-full cursor-pointer items-center justify-center gap-3 overflow-hidden rounded-full h-14 px-6 bg-primary text-primary-foreground text-base font-bold leading-normal tracking-[0.015em] shadow-lg transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Sparkles className="w-5 h-5" />
+            <span>{step === "story" ? "Generating..." : "Generate Story"}</span>
+          </button>
+          <button 
+            onClick={generateImage}
+            disabled={step !== "idle"}
+            className="flex w-full cursor-pointer items-center justify-center gap-3 overflow-hidden rounded-full h-14 px-6 bg-primary text-primary-foreground text-base font-bold leading-normal tracking-[0.015em] shadow-lg transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Sparkles className="w-5 h-5" />
+            <span>{step === "image" ? "Generating..." : "Generate Image"}</span>
+          </button>
+        </div>
+
         {/* Inspiration Gallery */}
         <section className="mt-8">
           <h2 className="text-foreground text-lg font-bold leading-tight tracking-[-0.015em] pb-3">
@@ -277,28 +291,6 @@ const MemoriesPage = () => {
           </div>
         </section>
       </main>
-
-      {/* Fixed Footer with Action Buttons */}
-      <footer className="fixed bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-background via-background to-transparent p-4 pt-6">
-        <div className="flex gap-3">
-          <button 
-            onClick={generateStory}
-            disabled={step !== "idle"}
-            className="flex w-full cursor-pointer items-center justify-center gap-3 overflow-hidden rounded-full h-14 px-6 bg-primary text-primary-foreground text-base font-bold leading-normal tracking-[0.015em] shadow-lg transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Sparkles className="w-5 h-5" />
-            <span>{step === "story" ? "Generating..." : "Generate Story"}</span>
-          </button>
-          <button 
-            onClick={generateImage}
-            disabled={step !== "idle"}
-            className="flex w-full cursor-pointer items-center justify-center gap-3 overflow-hidden rounded-full h-14 px-6 bg-primary text-primary-foreground text-base font-bold leading-normal tracking-[0.015em] shadow-lg transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Sparkles className="w-5 h-5" />
-            <span>{step === "image" ? "Generating..." : "Generate Image"}</span>
-          </button>
-        </div>
-      </footer>
     </div>
   );
 };

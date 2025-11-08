@@ -107,7 +107,7 @@ const SubscriptionPlans = ({ onComplete, showTitle = true }: SubscriptionPlansPr
               Premium Monthly
             </CardTitle>
             <div className="space-y-1">
-              <p className="text-3xl font-bold">$7.99</p>
+              <p className="text-3xl font-bold">$9.99</p>
               <p className="text-sm text-muted-foreground">per month</p>
             </div>
           </CardHeader>

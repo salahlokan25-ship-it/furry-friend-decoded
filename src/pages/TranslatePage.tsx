@@ -119,19 +119,19 @@ const TranslatePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-blue-50/50 to-orange-50/50 pb-20">
+    <div className="min-h-screen bg-[#18181B] pb-20">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-[#27272A] shadow-sm border-b border-[#3F3F46]">
         <div className="max-w-md mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <img src="/app-logo.png" alt="PetParadise AI" className="w-12 h-12 rounded-lg shadow-sm" />
               <div>
-                <h1 className="text-xl font-bold text-foreground">PetParadise</h1>
-                <Badge variant="secondary" className="text-xs">AI Powered</Badge>
+                <h1 className="text-xl font-bold text-white">PetParadise</h1>
+                <Badge variant="secondary" className="text-xs bg-[#F97316] text-white">AI Powered</Badge>
               </div>
             </div>
-            <Button variant="ghost" size="icon" className="text-primary">
+            <Button variant="ghost" size="icon" className="text-[#F97316]">
               <Volume2 size={20} />
             </Button>
           </div>
@@ -140,9 +140,9 @@ const TranslatePage = () => {
 
       <div className="max-w-md mx-auto px-4 py-6 space-y-6">
         {/* Pet Type Selection */}
-        <Card className="border-0 shadow-soft">
+        <Card className="border border-[#3F3F46] bg-[#27272A] shadow-soft">
           <CardContent className="p-6">
-            <h2 className="text-lg font-semibold mb-4 text-center">Choose Your Pet</h2>
+            <h2 className="text-lg font-semibold mb-4 text-center text-white">Choose Your Pet</h2>
             <div className="grid grid-cols-2 gap-4">
               <Button
                 variant={selectedPetType === "dog" ? "coral" : "outline"}
@@ -165,7 +165,7 @@ const TranslatePage = () => {
         </Card>
 
         {/* Pet Play Animation */}
-        <Card className="border-0 shadow-soft">
+        <Card className="border border-[#3F3F46] bg-[#27272A] shadow-soft">
           <CardContent className="p-6">
             <PetPlayAnimation />
           </CardContent>
@@ -173,7 +173,7 @@ const TranslatePage = () => {
 
         {/* Translation Result */}
         {translationResult && (
-          <Card className="border-0 shadow-soft bg-gradient-to-br from-primary/5 to-secondary/5">
+          <Card className="border border-[#3F3F46] bg-[#27272A] shadow-soft">
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-3">
                 <h3 className="font-semibold text-lg flex items-center gap-2">
@@ -197,10 +197,10 @@ const TranslatePage = () => {
         )}
 
         {/* Pet Sound Library */}
-        <Card className="border-0 shadow-soft">
+        <Card className="border border-[#3F3F46] bg-[#27272A] shadow-soft">
           <CardContent className="p-6">
-            <h3 className="font-semibold mb-4">Pet Sound Library</h3>
-            <p className="text-sm text-muted-foreground mb-4">
+            <h3 className="font-semibold mb-4 text-white">Pet Sound Library</h3>
+            <p className="text-sm text-[#A1A1AA] mb-4">
               Tap any sound to communicate with your pet
             </p>
             
@@ -274,7 +274,7 @@ const TranslatePage = () => {
             </div>
 
             {/* Interactive Pet Games */}
-            <div className="my-8 p-4 bg-gradient-to-r from-primary/5 via-secondary/5 to-accent/5 rounded-lg border border-primary/10">
+            <div className="my-8 p-4 bg-[#1F1F22] rounded-lg border border-[#3F3F46]">
               <h4 className="text-sm font-medium mb-3 flex items-center gap-2 justify-center">
                 🎮 Interactive Pet Games
               </h4>
@@ -416,8 +416,8 @@ const TranslatePage = () => {
                 </Button>
               </div>
               
-              <div className="mt-4 p-3 bg-white/50 rounded-lg border border-primary/10">
-                <p className="text-xs text-muted-foreground text-center">
+              <div className="mt-4 p-3 bg-[#18181B] rounded-lg border border-[#3F3F46]">
+                <p className="text-xs text-[#A1A1AA] text-center">
                   💡 <strong>Tip:</strong> Play these games regularly to strengthen your bond and keep your pets mentally stimulated!
                 </p>
               </div>
@@ -495,10 +495,10 @@ const TranslatePage = () => {
         </Card>
 
         {/* Pet Mood Interpreter */}
-        <Card className="border-0 shadow-soft">
+        <Card className="border border-[#3F3F46] bg-[#27272A] shadow-soft">
           <CardContent className="p-6">
-            <h3 className="font-semibold mb-4">🎭 Pet Mood Interpreter</h3>
-            <p className="text-sm text-muted-foreground mb-4">
+            <h3 className="font-semibold mb-4 text-white">🎭 Pet Mood Interpreter</h3>
+            <p className="text-sm text-[#A1A1AA] mb-4">
               Learn to read your pet's emotions and understand what they're feeling
             </p>
             
@@ -632,11 +632,11 @@ const TranslatePage = () => {
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 p-4 rounded-lg border border-primary/20">
+            <div className="bg-[#1F1F22] p-4 rounded-lg border border-[#3F3F46]">
               <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
                 💡 Pro Tip
               </h4>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-[#A1A1AA]">
                 Understanding your pet's moods helps you respond appropriately to their needs and strengthens your bond. 
                 Use this guide alongside the sound translator for better communication!
               </p>
@@ -645,10 +645,10 @@ const TranslatePage = () => {
         </Card>
 
         {/* Pet Food Guide */}
-        <Card className="border-0 shadow-soft">
+        <Card className="border border-[#3F3F46] bg-[#27272A] shadow-soft">
           <CardContent className="p-6">
-            <h3 className="font-semibold mb-4">Pet Food Guide</h3>
-            <p className="text-sm text-muted-foreground mb-4">
+            <h3 className="font-semibold mb-4 text-white">Pet Food Guide</h3>
+            <p className="text-sm text-[#A1A1AA] mb-4">
               Discover the best foods for your furry friend
             </p>
             

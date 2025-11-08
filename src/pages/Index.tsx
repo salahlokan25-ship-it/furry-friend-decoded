@@ -589,10 +589,10 @@ const Index = ({ onNavigate }: IndexProps) => {
       {/* AI Quick Action Modals */}
       {activeModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-[#182c50] rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-[#27272A] rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700">
-              <h3 className="text-lg font-bold text-slate-800 dark:text-white">
+            <div className="flex items-center justify-between p-4 border-b border-[#3F3F46]">
+              <h3 className="text-lg font-bold text-white">
                 {activeModal === 'feed' && '🍖 AI Feed Planner'}
                 {activeModal === 'health' && '🩺 AI Health Check'}
                 {activeModal === 'training' && '🐶 AI Training Coach'}
@@ -606,7 +606,7 @@ const Index = ({ onNavigate }: IndexProps) => {
                 variant="ghost"
                 size="sm"
                 onClick={closeModal}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                className="text-[#A1A1AA] hover:text-white"
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -950,8 +950,8 @@ const Index = ({ onNavigate }: IndexProps) => {
                     <div className="w-16 h-16 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 flex items-center justify-center mx-auto mb-3">
                       <Mic className="w-8 h-8 text-white" />
                     </div>
-                    <h4 className="font-bold text-slate-800 mb-2">Pet Translator</h4>
-                    <p className="text-sm text-slate-600">Record your pet's sounds and get AI translation</p>
+                    <h4 className="font-bold text-white mb-2">Pet Translator</h4>
+                    <p className="text-sm text-[#A1A1AA]">Record your pet's sounds and get AI translation</p>
                   </div>
                   
                   {/* Pet Information */}
@@ -1007,8 +1007,8 @@ const Index = ({ onNavigate }: IndexProps) => {
                   </div>
 
                   {/* Audio Recording Interface */}
-                  <div className="border-2 border-pink-200 rounded-xl p-4 bg-gradient-to-br from-pink-50 to-rose-50">
-                    <h5 className="font-semibold text-slate-800 mb-3 text-center">🎤 Voice Recording</h5>
+                  <div className="border-2 border-[#3F3F46] rounded-xl p-4 bg-[#1F1F22]">
+                    <h5 className="font-semibold text-white mb-3 text-center">🎤 Voice Recording</h5>
                     
                     {/* Recording Controls */}
                     <div className="flex gap-2 mb-4">

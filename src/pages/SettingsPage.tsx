@@ -14,7 +14,10 @@ import {
   BookOpen,
   Heart,
   Camera,
-  X
+  X,
+  Crown,
+  Sparkles,
+  Star
 } from "lucide-react";
 // logo now served from public
 import { useSubscription } from "@/contexts/SubscriptionContext";
@@ -45,8 +48,12 @@ interface UserProfile {
   avatar?: string;
 }
 
-const SettingsPage = () => {
-  const { subscribed } = useSubscription();
+interface SettingsPageProps {
+  onNavigate?: (tab: string) => void;
+}
+
+const SettingsPage = ({ onNavigate }: SettingsPageProps = {}) => {
+  const { subscribed, plan, openCustomerPortal } = useSubscription();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [profile, setProfile] = useState<UserProfile>({
@@ -85,11 +92,22 @@ const SettingsPage = () => {
     });
   };
 
-  const handleLogOut = () => {
-    toast({
-      title: "Logged Out",
-      description: "You have been successfully logged out.",
-    });
+  const handleLogOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out.",
+      });
+      // The app will automatically redirect to sign in page via App.tsx
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast({
+        title: "Logout Failed",
+        description: "Failed to log out. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -482,6 +500,92 @@ Made with ❤️ for pets and their humans
               >
                 ✎
               </button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Subscription / Premium Plan */}
+        <h2 className="text-xs font-semibold text-white uppercase tracking-wider px-1">Subscription</h2>
+        <Card className="border border-[#3F3F46] bg-[#27272A] rounded-2xl overflow-hidden">
+          <CardContent className="p-6">
+            <div className="space-y-3">
+              {subscribed ? (
+                <>
+                  {/* Current Plan Status */}
+                  <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-[#F97316]/10 to-[#F97316]/5 border border-[#F97316]/20">
+                    <div className="w-12 h-12 rounded-lg bg-[#F97316]/20 flex items-center justify-center">
+                      <Crown size={24} className="text-[#F97316]" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-white">Premium {plan === 'monthly' ? 'Monthly' : 'Yearly'}</h3>
+                        <Sparkles size={16} className="text-[#F97316]" />
+                      </div>
+                      <p className="text-sm text-[#A1A1AA]">Active subscription</p>
+                    </div>
+                  </div>
+                  
+                  {/* Manage Subscription Button */}
+                  <button
+                    onClick={openCustomerPortal}
+                    className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-[#1f1f22] transition-all group border border-[#3F3F46]"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-[#3F3F46] flex items-center justify-center">
+                        <Crown size={18} className="text-[#F97316]" />
+                      </div>
+                      <span className="font-medium text-[#F4F4F5]">Manage Subscription</span>
+                    </div>
+                    <ChevronRight size={18} className="text-[#A1A1AA]" />
+                  </button>
+                </>
+              ) : (
+                <>
+                  {/* Free Plan Status */}
+                  <div className="flex items-center gap-3 p-4 rounded-xl bg-[#3F3F46]/30 border border-[#3F3F46]">
+                    <div className="w-12 h-12 rounded-lg bg-[#3F3F46] flex items-center justify-center">
+                      <Star size={24} className="text-[#F97316]" fill="#F97316" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-white">Free Plan</h3>
+                      <p className="text-sm text-[#A1A1AA]">Limited features</p>
+                    </div>
+                  </div>
+                  
+                  {/* Upgrade to Premium Button */}
+                  <button
+                    onClick={() => onNavigate?.('subscription')}
+                    className="w-full flex items-center justify-center gap-3 p-4 rounded-xl bg-gradient-to-r from-[#F97316] to-[#F97316]/80 hover:from-[#F97316]/90 hover:to-[#F97316]/70 transition-all shadow-lg"
+                  >
+                    <Crown size={20} className="text-white" />
+                    <span className="font-bold text-white">Upgrade to Premium</span>
+                    <Sparkles size={20} className="text-white" />
+                  </button>
+                  
+                  {/* Premium Features List */}
+                  <div className="mt-4 p-4 rounded-xl bg-[#1f1f22] border border-[#3F3F46]">
+                    <p className="text-xs font-semibold text-[#F97316] uppercase mb-3">Premium Benefits</p>
+                    <ul className="space-y-2 text-sm text-[#A1A1AA]">
+                      <li className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#F97316]" />
+                        Unlimited translations & AI chats
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#F97316]" />
+                        Advanced training courses
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#F97316]" />
+                        Unlimited photo storage
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#F97316]" />
+                        Premium games & exclusive content
+                      </li>
+                    </ul>
+                  </div>
+                </>
+              )}
             </div>
           </CardContent>
         </Card>

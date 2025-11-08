@@ -15,6 +15,7 @@ import CommunityPage from "@/pages/CommunityPage";
 import AuthPage from "@/pages/AuthPage";
 import OnboardingQuiz, { QuizResults } from "@/components/OnboardingQuiz";
 import SubscriptionPlans from "@/components/SubscriptionPlans";
+import SplashScreen from "@/components/SplashScreen";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -26,6 +27,7 @@ const App = () => {
   const [showSubscriptionPlans, setShowSubscriptionPlans] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [sessionUserId, setSessionUserId] = useState<string | null>(null);
+  const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
     // Track auth session
@@ -121,11 +123,22 @@ const App = () => {
       case "auth":
         return <AuthPage onDone={() => setActiveTab("community")} />;
       case "settings":
-        return <SettingsPage />;
+        return <SettingsPage onNavigate={setActiveTab} />;
+      case "subscription":
+        return (
+          <div className="min-h-screen bg-gradient-to-br from-background via-green-50/30 to-blue-50/30 flex items-center justify-center p-4">
+            <SubscriptionPlans onComplete={() => setActiveTab("settings")} />
+          </div>
+        );
       default:
         return <Index onNavigate={setActiveTab} />;
     }
   };
+
+  // Show splash screen on first load
+  if (showSplash) {
+    return <SplashScreen onComplete={() => setShowSplash(false)} />;
+  }
 
   // Show loading state
   if (isLoading) {

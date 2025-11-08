@@ -56,9 +56,9 @@ const AuthPage = ({ onDone }: AuthPageProps) => {
   // Magic link removed per design request – email/password only
 
   return (
-    <div className="min-h-screen w-full overflow-hidden relative flex items-center justify-center">
-      {/* Animated orange background */}
-      <div className="absolute inset-0 bg-[#FF7F50]">
+    <div className="min-h-screen w-full overflow-hidden relative flex items-center justify-center bg-gradient-to-br from-[#F97316] via-[#FF8C42] to-[#FFA500]">
+      {/* Animated overlay effect */}
+      <div className="absolute inset-0">
         <div className="absolute -inset-[20%] bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.25),transparent_40%),radial-gradient(circle_at_80%_30%,rgba(255,255,255,0.2),transparent_40%),radial-gradient(circle_at_50%_80%,rgba(255,255,255,0.18),transparent_45%)] animate-pulse" />
       </div>
 

@@ -22,7 +22,7 @@ const SUBSCRIPTION_PLANS = {
   monthly: {
     priceId: 'price_1SAYsU5zRnOqdXkPWF09uYTZ',
     productId: 'prod_T6mRlHGiGFUfoU',
-    price: '$7.99',
+    price: '$9.99',
     interval: 'month'
   },
   yearly: {

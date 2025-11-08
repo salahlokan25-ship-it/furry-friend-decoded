@@ -6,10 +6,13 @@ import { Download, Image as ImageIcon, Play, Wand2, Video, ArrowLeft, Sparkles }
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { Input } from "@/components/ui/input";
 
 type GenStep = "idle" | "story" | "image" | "video";
 
 const MemoriesPage = () => {
+  const { toast } = useToast();
   const [prompt, setPrompt] = useState("");
   const [step, setStep] = useState<GenStep>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -17,6 +20,8 @@ const MemoriesPage = () => {
   const [story, setStory] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [shareTitle, setShareTitle] = useState("");
+  const [sharing, setSharing] = useState(false);
 
   const ffmpegRef = useRef<FFmpeg | null>(null);
   const [isFFmpegReady, setIsFFmpegReady] = useState(false);
@@ -46,6 +51,52 @@ const MemoriesPage = () => {
     }
   ];
 
+  async function shareImageToCommunity() {
+    if (!imageUrl) return;
+    setSharing(true);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        toast({ title: "Sign in required", description: "Please sign in to share to the community", variant: "destructive" });
+        return;
+      }
+      const userId = sessionData.session.user.id;
+
+      // Create post first (optionally with title/content)
+      const content = (shareTitle || prompt || "A new pet memory").trim();
+      const { data: inserted, error: postErr } = await (supabase as any)
+        .from("posts")
+        .insert({ user_id: userId, content })
+        .select("id")
+        .single();
+      if (postErr) throw postErr;
+      const postId = inserted.id as string;
+
+      // Prepare file from imageUrl (could be blob URL or remote URL)
+      const imgBlob = await (await fetch(imageUrl)).blob();
+      const ext = (imgBlob.type.split("/")[1] || "png").toLowerCase();
+      const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+      const { error: uploadErr } = await (supabase as any).storage
+        .from("community-media")
+        .upload(path, imgBlob, { cacheControl: "3600", upsert: false, contentType: imgBlob.type || "image/png" });
+      if (uploadErr) throw uploadErr;
+      const { data: pub } = (supabase as any).storage.from("community-media").getPublicUrl(path);
+
+      // Link media to post
+      const { error: mediaErr } = await (supabase as any)
+        .from("post_media")
+        .insert({ post_id: postId, url: pub.publicUrl, media_type: "image" });
+      if (mediaErr) throw mediaErr;
+
+      toast({ title: "Shared to Community", description: "Your memory has been posted" });
+    } catch (e: any) {
+      console.error(e);
+      toast({ title: "Share failed", description: e.message, variant: "destructive" });
+    } finally {
+      setSharing(false);
+    }
+  }
+
   useEffect(() => {
     // Warm-up animation pulse control via step
   }, [step]);
@@ -62,6 +113,8 @@ const MemoriesPage = () => {
     setIsFFmpegReady(true);
     return ffmpeg;
   }
+
+  
 
   function requireOpenAIKey(): string {
     const key = import.meta.env.VITE_OPENAI_API_KEY as string | undefined;
@@ -107,6 +160,7 @@ const MemoriesPage = () => {
       } else {
         setImageUrl(base64Data);
       }
+      setShareTitle("");
     } catch (e: any) {
       setErrorMsg(e?.message || "Failed to generate image");
     } finally {
@@ -227,8 +281,26 @@ const MemoriesPage = () => {
 
         {/* Generated Image */}
         {imageUrl && (
-          <div className="mt-4 rounded-xl overflow-hidden border border-border">
-            <img src={imageUrl} alt="generated memory" className="w-full h-auto"/>
+          <div className="mt-4 space-y-2">
+            <div className="rounded-xl overflow-hidden border border-border">
+              <img src={imageUrl} alt="generated memory" className="w-full h-auto"/>
+            </div>
+            <div className="grid grid-cols-1 gap-2">
+              <a href={imageUrl} download="memory.png">
+                <Button variant="outline" size="sm" className="w-full">
+                  <Download className="mr-2" size={16}/>Download Image
+                </Button>
+              </a>
+              <Input
+                placeholder="Add a title or caption for Community"
+                value={shareTitle}
+                onChange={(e) => setShareTitle(e.target.value)}
+                className="text-sm"
+              />
+              <Button onClick={shareImageToCommunity} disabled={sharing} className="w-full bg-[#FF7A00] hover:opacity-90 text-[#121212]">
+                {sharing ? "Sharing..." : "Share to Community"}
+              </Button>
+            </div>
           </div>
         )}
 

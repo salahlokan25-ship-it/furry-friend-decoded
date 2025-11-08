@@ -18,7 +18,6 @@ import {
   Video,
   CheckCircle,
   ArrowRight,
-  Sparkle,
   Bot,
   Cpu,
   ScanLine,
@@ -81,13 +80,11 @@ import {
   Brain as BrainIcon,
   Shield as ShieldIcon,
   Dna as DnaIcon,
-  Stethoscope as StethoscopeIcon2,
   Globe as GlobeIcon,
   Video as VideoIcon,
   AlertTriangle,
   CheckCircle as CheckCircleIcon,
   ArrowRight as ArrowRightIcon,
-  Sparkle as SparkleIcon,
   Wand2,
   Bot as BotIcon,
   Cpu as CpuIcon,
@@ -96,7 +93,8 @@ import {
   Wifi as WifiIcon,
   Battery as BatteryIcon,
   Signal as SignalIcon,
-  Volume2
+  Volume2,
+  X as XIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -122,8 +120,14 @@ const Index = ({ onNavigate }: IndexProps) => {
   const [formData, setFormData] = useState<any>({});
 
   // AI Results State
-  const [aiResults, setAiResults] = useState<any[]>([]);
-  const [showResults, setShowResults] = useState(false);
+  const [aiResults, setAiResults] = useState<any[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('aiReports');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
+  const [showResults, setShowResults] = useState(true);
 
   // Audio Recording State
   const [isRecording, setIsRecording] = useState(false);
@@ -235,7 +239,6 @@ const Index = ({ onNavigate }: IndexProps) => {
     }, 1800);
   };
 
-
   // Audio Recording Functions
   const startRecording = async () => {
     try {
@@ -248,7 +251,7 @@ const Index = ({ onNavigate }: IndexProps) => {
       };
 
       recorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'audio/wav' });
+        const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
         setAudioBlob(blob);
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
@@ -306,7 +309,13 @@ const Index = ({ onNavigate }: IndexProps) => {
   const playRecording = () => {
     if (audioUrl) {
       const audio = new Audio(audioUrl);
-      audio.play();
+      audio.play().catch(err => {
+        console.error('Playback error:', err);
+        toast.error("❌ Playback Error", {
+          description: "Could not play the recording",
+          duration: 2000
+        });
+      });
       toast.success("🔊 Playing Recording!", {
         description: "Listen to your pet's sounds",
         duration: 2000
@@ -324,60 +333,239 @@ const Index = ({ onNavigate }: IndexProps) => {
     setMediaRecorder(null);
   };
 
-
-
   const handleQuickAction = (action: string) => {
     setActiveModal(action);
     setFormData({});
   };
 
-  const handleFormSubmit = async (action: string) => {
-    setIsProcessing(true);
-    
-    // Simulate AI processing
-    setTimeout(() => {
+  // Save AI results to localStorage whenever they change
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('aiReports', JSON.stringify(aiResults));
+    }
+  }, [aiResults]);
+
+  const validateForm = (action: string | null) => {
+    switch (action) {
+      case 'feed':
+        const requiredFields = [
+          { field: 'petName', label: "Pet's name" },
+          { field: 'age', label: "Pet's age" },
+          { field: 'breed', label: "Pet's breed" },
+          { field: 'mealsPerDay', label: "Number of meals per day" },
+          { field: 'activityLevel', label: "Activity level" },
+          { field: 'foodType', label: "Food type preference" },
+          { field: 'weight', label: "Current weight" },
+          { field: 'weightGoal', label: "Weight goal" }
+        ];
+
+        for (const { field, label } of requiredFields) {
+          if (!formData[field]) {
+            toast.error(`${label} is required`);
+            return false;
+          }
+        }
+
+        // Validate weight is a positive number
+        if (isNaN(parseFloat(formData.weight)) || parseFloat(formData.weight) <= 0) {
+          toast.error("Please enter a valid weight");
+          return false;
+        }
+        break;
+      case 'translator':
+        if (!formData.petName) {
+          toast.error("Pet's name is required");
+          return false;
+        }
+        if (!formData.petType) {
+          toast.error("Pet type is required");
+          return false;
+        }
+        if (!formData.soundType) {
+          toast.error("Sound type is required");
+          return false;
+        }
+        if (!audioUrl) {
+          toast.error("Please record your pet's sound first");
+          return false;
+        }
+        break;
+      case 'health':
+        if (!formData.petName) {
+          toast.error("Pet's name is required");
+          return false;
+        }
+        if (!formData.symptoms) {
+          toast.error("Please describe your pet's symptoms");
+          return false;
+        }
+        break;
+      default:
+        if (!formData.petName) {
+          toast.error("Pet's name is required");
+          return false;
+        }
+    }
+    return true;
+  };
+
+  const handleFormSubmit = async (action: string | null) => {
+    // Validate form before proceeding
+    if (!validateForm(action)) {
       setIsProcessing(false);
-      setActiveModal(null);
-      
-      // Create detailed AI report based on action and form data
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      const safeAction = (action === 'feed' || action === 'health' || action === 'translator') ? action : 'feed';
+      // Generate AI report
+      const report = generateAIReport(safeAction, formData);
+      const petName = formData.petName || 'Your Pet';
+
+      // Create a new result
       const newResult = {
         id: Date.now().toString(),
-        type: action,
-        timestamp: new Date().toLocaleTimeString(),
-        petName: formData.petName || 'Your Pet',
+        type: safeAction,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        date: new Date().toLocaleDateString(),
+        petName: petName,
         data: formData,
-        report: generateAIReport(action, formData)
+        report: report
       };
-      
-      // Add to results array
-      setAiResults(prev => [newResult, ...prev.slice(0, 4)]); // Keep only latest 5 results
-      setShowResults(true);
-      
-      // Show success toast
-      toast.success("AI Report Generated! 📊", {
-        description: "Your personalized plan is now available below!",
-        duration: 3000
-      });
-    }, 3000);
+
+      // Add to results and save to localStorage
+      setAiResults(prev => [newResult, ...prev]);
+
+      if (safeAction === 'translator') {
+        const actionTitles = {
+          'translator': 'Pet Translation Report',
+          'feed': 'Feeding Plan',
+          'health': 'Health Check Report'
+        };
+        const r: any = report;
+        const chatMessage = `## ${actionTitles[safeAction as keyof typeof actionTitles]} for ${petName}\n\n` +
+          (typeof report === 'string'
+            ? report
+            : [
+                r?.title ? `### ${r.title}` : '',
+                r?.summary || '',
+                Array.isArray(r?.recommendations) && r.recommendations.length
+                  ? `\nRecommendations:\n- ${r.recommendations.join('\n- ')}`
+                  : '',
+                Array.isArray(r?.mealPlan) && r.mealPlan.length
+                  ? `\nMeal Plan:\n- ${r.mealPlan.join('\n- ')}`
+                  : '',
+                Array.isArray(r?.nextSteps) && r.nextSteps.length
+                  ? `\nNext Steps:\n- ${r.nextSteps.join('\n- ')}`
+                  : '',
+                Array.isArray(r?.additionalTips) && r.additionalTips.length
+                  ? `\nTips:\n- ${r.additionalTips.join('\n- ')}`
+                  : ''
+              ]
+                .filter(Boolean)
+                .join('\n'));
+        sessionStorage.setItem('initialAiPlan', JSON.stringify({
+          content: chatMessage,
+          timestamp: new Date().toISOString()
+        }));
+        onNavigate?.('chat');
+        setAudioUrl?.(null);
+        setAudioBlob?.(null);
+        setTranslationResult?.('');
+        toast.success("AI Plan Generated! 💬", {
+          description: `Navigating to chat with your ${getActionName(safeAction)}...`,
+          duration: 3000
+        });
+      } else {
+        setActiveModal(null);
+        toast.success("AI Plan Generated! 📊", {
+          description: "Your personalized plan is now available below.",
+          duration: 3000
+        });
+        setFormData({});
+      }
+    } catch (err) {
+      console.error('Error generating AI plan:', err ?? '(no error object)');
+      toast.error('Failed to generate the AI plan. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const getActionName = (action: string) => {
+    switch(action) {
+      case 'translator': return 'pet translation';
+      case 'feed': return 'feeding plan';
+      case 'health': return 'health check';
+      default: return 'report';
+    }
+  };
+  
+  const deleteReport = (id: string) => {
+    setAiResults(prev => prev.filter(report => report.id !== id));
+    toast.success("Report Deleted", {
+      description: "The report has been removed.",
+      duration: 2500
+    });
   };
 
   const generateAIReport = (action: string, data: any) => {
+    // Food type recommendations
+    const foodTypeMap = {
+      'dry': 'high-quality dry kibble',
+      'wet': 'wet/canned food',
+      'raw': 'raw food diet',
+      'homecooked': 'homecooked meals',
+      'mix': 'combination of dry and wet food'
+    };
+
     const reports = {
       feed: {
-        title: "🍖 Personalized Feeding Plan",
-        summary: `Nutritional analysis for ${data.petName || 'your pet'}`,
-        recommendations: [
-          `Feed ${data.mealsPerDay || 2} meals per day`,
-          `Recommended portion size: ${data.age === 'puppy' ? 'Small portions' : data.age === 'senior' ? 'Reduced portions' : 'Standard portions'}`,
-          `Best feeding times: ${data.mealsPerDay === '1' ? 'Morning' : data.mealsPerDay === '2' ? 'Morning & Evening' : 'Every 4-6 hours'}`,
-          data.dietaryNeeds ? `Special considerations: ${data.dietaryNeeds}` : 'No special dietary restrictions noted'
-        ],
+        title: `🍖 ${data.petName || 'Your Pet'}'s Personalized Feeding Plan`,
+        summary: `Custom nutrition plan for a ${data.age || 'adult'} ${data.breed || 'pet'} with ${(data.activityLevel || 'moderate')} activity level`,
+        recommendations: (() => {
+          const weight = parseFloat(data.weight || '0');
+          const meals = parseInt(data.mealsPerDay || '2');
+          const baseCalories = weight > 0 ? weight * (data.activityLevel === 'low' ? 30 : data.activityLevel === 'moderate' ? 40 : 50) : 0;
+          const adjustedCalories = data.weightGoal === 'lose' ? baseCalories * 0.9 : data.weightGoal === 'gain' ? baseCalories * 1.1 : baseCalories;
+          const mealCalories = meals > 0 ? Math.round(adjustedCalories / meals) : 0;
+          return [
+            `🔹 Feed ${meals} meals per day (${mealCalories || '—'} calories per meal)`,
+            `🔹 Recommended food type: ${foodTypeMap[data.foodType as keyof typeof foodTypeMap] || 'high-quality dry kibble'}`,
+            `🔹 Portion control: ${data.weightGoal === 'lose' ? 'Reduced portions' : data.weightGoal === 'gain' ? 'Increased portions' : 'Maintenance portions'}`,
+            `🔹 Activity level: ${(data.activityLevel || 'moderate').toString().charAt(0).toUpperCase() + (data.activityLevel || 'moderate').toString().slice(1)} - adjust food quantity if activity changes significantly`,
+            data.allergies ? `🔹 Allergies noted: ${data.allergies}` : '🔹 No known food allergies',
+            data.feedingChallenges ? `🔹 Addressing: ${data.feedingChallenges}` : '🔹 No reported feeding challenges'
+          ];
+        })(),
+        mealPlan: (() => {
+          const weight = parseFloat(data.weight || '0');
+          const meals = parseInt(data.mealsPerDay || '2');
+          const baseCalories = weight > 0 ? weight * (data.activityLevel === 'low' ? 30 : data.activityLevel === 'moderate' ? 40 : 50) : 0;
+          const adjustedCalories = data.weightGoal === 'lose' ? baseCalories * 0.9 : data.weightGoal === 'gain' ? baseCalories * 1.1 : baseCalories;
+          const mealCalories = meals > 0 ? Math.round(adjustedCalories / meals) : 0;
+          return [
+            `🌅 Morning: ${mealCalories || '—'} calories - ${data.foodType === 'dry' ? '1 cup' : data.foodType === 'wet' ? '1 can' : 'appropriate portion'} of ${data.foodType || 'preferred'} food`,
+            meals >= 2 ? `🌇 Afternoon: ${mealCalories || '—'} calories - portioned meal` : '',
+            meals >= 3 ? '🌆 Evening: Light snack or food-dispensing toy' : '',
+            meals >= 4 ? '🌃 Night: Small portion before bed' : ''
+          ].filter(Boolean);
+        })(),
         nextSteps: [
-          "Monitor your pet's weight weekly",
-          "Adjust portions based on activity level",
-          "Schedule regular vet checkups",
-          "Keep fresh water available at all times"
-        ]
+          `📊 Monitor weight weekly - target ${data.weightGoal}ing ${data.weightGoal === 'maintain' ? 'current weight' : 'weight'}`,
+          '💧 Ensure fresh water is always available',
+          '📅 Schedule regular veterinary check-ups',
+          '📝 Keep a food diary to track progress and any reactions',
+          data.weightGoal !== 'maintain' ? `🎯 Goal: ${data.weightGoal} approximately 1-2% of body weight per week` : ''
+        ].filter(Boolean),
+        additionalTips: [
+          data.treats !== 'none' ? `🍪 Treats: ${data.treats} per day (accounting for ~10% of daily calories)` : '🍪 No treats recommended at this time',
+          '🥦 Consider adding fresh vegetables as low-calorie treats',
+          '⏰ Try to feed at consistent times each day',
+          data.activityLevel === 'low' ? '🐕 Consider increasing daily activity to support weight management' : ''
+        ].filter(Boolean)
       },
       health: {
         title: "🩺 Health Assessment Report",
@@ -509,7 +697,6 @@ const Index = ({ onNavigate }: IndexProps) => {
     setCameraError(null);
   };
 
-
   return (
     <div className="min-h-screen bg-[#1A1A1A] relative overflow-hidden font-display">
       <div className="flex flex-col gap-2 p-4 pb-24">
@@ -585,6 +772,74 @@ const Index = ({ onNavigate }: IndexProps) => {
             </div>
           </button>
         </div>
+        {showResults && aiResults.length > 0 && (
+          <div className="mt-6 space-y-3">
+            <h3 className="text-white text-lg font-bold">Your AI Plans</h3>
+            <div className="space-y-3">
+              {aiResults.map((item) => {
+                const r: any = item.report;
+                return (
+                  <Card key={item.id} className="bg-[#2C2C2C] border-[#3F3F46]">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-white text-base">
+                          {r?.title || (item.type === 'feed' ? 'Feeding Plan' : item.type === 'health' ? 'Health Check Report' : 'AI Report')}
+                        </CardTitle>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary">{item.date}</Badge>
+                          <Button size="sm" variant="outline" onClick={() => deleteReport(item.id)}>Delete</Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <p className="text-[#D4D4D8] text-sm">{r?.summary}</p>
+                      {Array.isArray(r?.recommendations) && r.recommendations.length > 0 && (
+                        <div>
+                          <p className="text-white text-sm font-semibold">Recommendations</p>
+                          <ul className="list-disc list-inside text-[#D4D4D8] text-sm">
+                            {r.recommendations.map((rec: string, idx: number) => (
+                              <li key={idx}>{rec}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {Array.isArray(r?.mealPlan) && r.mealPlan.length > 0 && (
+                        <div>
+                          <p className="text-white text-sm font-semibold">Meal Plan</p>
+                          <ul className="list-disc list-inside text-[#D4D4D8] text-sm">
+                            {r.mealPlan.map((rec: string, idx: number) => (
+                              <li key={idx}>{rec}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {Array.isArray(r?.nextSteps) && r.nextSteps.length > 0 && (
+                        <div>
+                          <p className="text-white text-sm font-semibold">Next Steps</p>
+                          <ul className="list-disc list-inside text-[#D4D4D8] text-sm">
+                            {r.nextSteps.map((rec: string, idx: number) => (
+                              <li key={idx}>{rec}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {Array.isArray(r?.additionalTips) && r.additionalTips.length > 0 && (
+                        <div>
+                          <p className="text-white text-sm font-semibold">Tips</p>
+                          <ul className="list-disc list-inside text-[#D4D4D8] text-sm">
+                            {r.additionalTips.map((rec: string, idx: number) => (
+                              <li key={idx}>{rec}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
       {/* AI Quick Action Modals */}
       {activeModal && (
@@ -608,12 +863,160 @@ const Index = ({ onNavigate }: IndexProps) => {
                 onClick={closeModal}
                 className="text-[#A1A1AA] hover:text-white"
               >
-                <X className="w-4 h-4" />
+                <XIcon className="w-4 h-4" />
               </Button>
             </div>
 
             {/* Modal Content */}
             <div className="p-4">
+              {activeModal === 'feed' && (
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="petName">Pet Name</Label>
+                    <Input
+                      id="petName"
+                      placeholder="Enter your pet's name"
+                      value={formData.petName || ''}
+                      onChange={(e) => setFormData({ ...formData, petName: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="age">Age</Label>
+                      <Select onValueChange={(value) => setFormData({ ...formData, age: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select age range" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="puppy">Puppy (0-1 year)</SelectItem>
+                          <SelectItem value="young">Young (1-3 years)</SelectItem>
+                          <SelectItem value="adult">Adult (3-7 years)</SelectItem>
+                          <SelectItem value="senior">Senior (7+ years)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="breed">Breed</Label>
+                      <Input
+                        id="breed"
+                        placeholder="Enter breed (e.g., Golden Retriever)"
+                        value={formData.breed || ''}
+                        onChange={(e) => setFormData({ ...formData, breed: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="mealsPerDay">Meals Per Day</Label>
+                      <Select onValueChange={(value) => setFormData({ ...formData, mealsPerDay: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select number of meals" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1">1 meal per day</SelectItem>
+                          <SelectItem value="2">2 meals per day</SelectItem>
+                          <SelectItem value="3">3 meals per day</SelectItem>
+                          <SelectItem value="4">4+ meals per day</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="activityLevel">Activity Level</Label>
+                      <Select onValueChange={(value) => setFormData({ ...formData, activityLevel: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select activity level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="low">Low (mostly indoors)</SelectItem>
+                          <SelectItem value="moderate">Moderate (regular walks)</SelectItem>
+                          <SelectItem value="high">High (very active)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="foodType">Preferred Food Type</Label>
+                      <Select onValueChange={(value) => setFormData({ ...formData, foodType: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select food type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="dry">Dry Kibble</SelectItem>
+                          <SelectItem value="wet">Wet Food</SelectItem>
+                          <SelectItem value="raw">Raw Diet</SelectItem>
+                          <SelectItem value="homecooked">Homecooked Meals</SelectItem>
+                          <SelectItem value="mix">Mix of Above</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="weight">Current Weight (kg)</Label>
+                      <Input
+                        id="weight"
+                        type="number"
+                        min="1"
+                        max="100"
+                        placeholder="Enter weight in kg"
+                        value={formData.weight || ''}
+                        onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="weightGoal">Weight Goal</Label>
+                      <Select onValueChange={(value) => setFormData({ ...formData, weightGoal: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select weight goal" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="maintain">Maintain Current Weight</SelectItem>
+                          <SelectItem value="lose">Lose Weight</SelectItem>
+                          <SelectItem value="gain">Gain Weight</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="treats">Daily Treats/Snacks</Label>
+                      <Select onValueChange={(value) => setFormData({ ...formData, treats: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="How many treats per day?" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">No treats</SelectItem>
+                          <SelectItem value="few">1-2 treats per day</SelectItem>
+                          <SelectItem value="moderate">3-5 treats per day</SelectItem>
+                          <SelectItem value="many">More than 5 treats per day</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="allergies">Known Allergies or Sensitivities</Label>
+                    <Textarea
+                      id="allergies"
+                      placeholder="List any known food allergies or sensitivities"
+                      value={formData.allergies || ''}
+                      onChange={(e) => setFormData({ ...formData, allergies: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="feedingChallenges">Any Feeding Challenges?</Label>
+                    <Textarea
+                      id="feedingChallenges"
+                      placeholder="E.g., picky eater, eats too fast, food aggression, etc."
+                      value={formData.feedingChallenges || ''}
+                      onChange={(e) => setFormData({ ...formData, feedingChallenges: e.target.value })}
+                    />
+                  </div>
+                </div>
+              )}
               {activeModal === 'camera' && (
                 <div className="space-y-4">
                   <div className="flex flex-col items-center gap-3">
@@ -662,30 +1065,15 @@ const Index = ({ onNavigate }: IndexProps) => {
                           {isAnalyzing ? (
                             <>
                               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                              Analyzing
+                              Analyzing...
                             </>
-                          ) : (
-                            <>
-                              <Brain className="w-4 h-4 mr-2" />
-                              Analyze
-                            </>
-                          )}
+                          ) : 'Analyze Mood'}
                         </Button>
                       </>
                     )}
                   </div>
-                  {moodResult && (
-                    <div className="rounded-xl border p-4">
-                      <h4 className="font-semibold mb-1">Detected Mood</h4>
-                      <p className="text-sm text-foreground">{moodResult}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-              {activeModal === 'feed' && (
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="petName">Pet Name</Label>
+                  <div className="mt-4">
+                    <Label htmlFor="petName">Pet's Name</Label>
                     <Input
                       id="petName"
                       placeholder="Enter your pet's name"
@@ -712,31 +1100,7 @@ const Index = ({ onNavigate }: IndexProps) => {
                     <Input
                       id="breed"
                       placeholder="Enter breed (e.g., Golden Retriever)"
-                      value={formData.breed || ''}
                       onChange={(e) => setFormData({...formData, breed: e.target.value})}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="mealsPerDay">Meals per Day</Label>
-                    <Select onValueChange={(value) => setFormData({...formData, mealsPerDay: value})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select frequency" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1">1 meal per day</SelectItem>
-                        <SelectItem value="2">2 meals per day</SelectItem>
-                        <SelectItem value="3">3 meals per day</SelectItem>
-                        <SelectItem value="4">4+ meals per day</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="dietaryNeeds">Dietary Needs</Label>
-                    <Textarea
-                      id="dietaryNeeds"
-                      placeholder="Any allergies, preferences, or special dietary requirements?"
-                      value={formData.dietaryNeeds || ''}
-                      onChange={(e) => setFormData({...formData, dietaryNeeds: e.target.value})}
                     />
                   </div>
                 </div>
@@ -947,7 +1311,7 @@ const Index = ({ onNavigate }: IndexProps) => {
               {activeModal === 'translator' && (
                 <div className="space-y-4">
                   <div className="text-center mb-4">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 flex items-center justify-center mx-auto mb-3">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-r from-[#F97316] to-[#FF8C42] flex items-center justify-center mx-auto mb-3">
                       <Mic className="w-8 h-8 text-white" />
                     </div>
                     <h4 className="font-bold text-white mb-2">Pet Translator</h4>
@@ -973,9 +1337,6 @@ const Index = ({ onNavigate }: IndexProps) => {
                       <SelectContent>
                         <SelectItem value="dog">Dog</SelectItem>
                         <SelectItem value="cat">Cat</SelectItem>
-                        <SelectItem value="bird">Bird</SelectItem>
-                        <SelectItem value="rabbit">Rabbit</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -1007,7 +1368,7 @@ const Index = ({ onNavigate }: IndexProps) => {
                   </div>
 
                   {/* Audio Recording Interface */}
-                  <div className="border-2 border-[#3F3F46] rounded-xl p-4 bg-[#1F1F22]">
+                  <div className="border-2 border-[#F97316] rounded-xl p-4 bg-gradient-to-br from-[#F97316]/20 to-[#FF8C42]/20">
                     <h5 className="font-semibold text-white mb-3 text-center">🎤 Voice Recording</h5>
                     
                     {/* Recording Controls */}
@@ -1015,7 +1376,7 @@ const Index = ({ onNavigate }: IndexProps) => {
                       {!isRecording ? (
                         <Button 
                           onClick={startRecording}
-                          className="flex-1 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold"
+                          className="flex-1 bg-gradient-to-r from-[#F97316] to-[#FF8C42] hover:from-[#F97316]/90 hover:to-[#FF8C42]/90 text-white font-bold"
                         >
                           <Mic className="w-4 h-4 mr-2" />
                           Start Recording
@@ -1052,7 +1413,7 @@ const Index = ({ onNavigate }: IndexProps) => {
                               onClick={playRecording}
                               size="sm"
                               variant="outline"
-                              className="border-pink-300 text-pink-600 hover:bg-pink-50"
+                              className="border-[#F97316] text-[#F97316] hover:bg-[#F97316]/10"
                             >
                               <Play className="w-4 h-4 mr-1" />
                               Play
@@ -1081,17 +1442,7 @@ const Index = ({ onNavigate }: IndexProps) => {
                     )}
                   </div>
 
-                  {/* Submit Button */}
-                  <div className="text-center">
-                    <Button 
-                      className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold"
-                      onClick={() => handleFormSubmit('translator')}
-                      disabled={!audioUrl}
-                    >
-                      <Brain className="w-4 h-4 mr-2" />
-                      Generate AI Report
-                    </Button>
-                  </div>
+                  {/* Removed Generate AI Report button as per request */}
                 </div>
               )}
 

@@ -6,7 +6,7 @@ interface AuthPageProps {
 }
 
 const AuthPage = ({ onDone }: AuthPageProps) => {
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -19,6 +19,36 @@ const AuthPage = ({ onDone }: AuthPageProps) => {
     setMode(m => (m === "signin" ? "signup" : "signin"));
     setMessage(null);
     setError(null);
+  };
+
+  const showForgotPassword = () => {
+    setMode("forgot");
+    setMessage(null);
+    setError(null);
+  };
+
+  const backToSignIn = () => {
+    setMode("signin");
+    setMessage(null);
+    setError(null);
+  };
+
+  const sendPasswordReset = async () => {
+    setError(null);
+    setMessage(null);
+    setLoading(true);
+    try {
+      if (!email.trim()) throw new Error("Email is required");
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      setMessage("Password reset link sent! Check your email.");
+    } catch (e: any) {
+      setError(e?.message || "Failed to send reset link");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const doEmailPassword = async () => {
@@ -80,11 +110,17 @@ const AuthPage = ({ onDone }: AuthPageProps) => {
               />
             </div>
             <h1 className="text-white text-3xl font-extrabold tracking-tight">
-              {mode === "signin" ? "Welcome Back" : "Create Your Account"}
+              {mode === "signin" ? "Welcome Back" : mode === "signup" ? "Create Your Account" : "Reset Password"}
             </h1>
           </div>
 
           <div className="p-0 flex flex-col gap-3">
+            {mode === "forgot" && (
+              <div className="text-center mb-2">
+                <p className="text-white/90 text-sm">Enter your email address and we'll send you a link to reset your password.</p>
+              </div>
+            )}
+
             {mode === "signup" && (
               <div className="flex flex-col gap-2">
                 <label className="sr-only">Full Name</label>
@@ -109,16 +145,18 @@ const AuthPage = ({ onDone }: AuthPageProps) => {
               />
             </div>
 
-            <div className="flex flex-col gap-2">
-              <label className="sr-only">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e)=>setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full rounded-lg bg-white/20 border-2 border-transparent text-white placeholder-white/70 p-3 focus:outline-none focus:ring-2 focus:ring-white"
-              />
-            </div>
+            {mode !== "forgot" && (
+              <div className="flex flex-col gap-2">
+                <label className="sr-only">Password</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e)=>setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full rounded-lg bg-white/20 border-2 border-transparent text-white placeholder-white/70 p-3 focus:outline-none focus:ring-2 focus:ring-white"
+                />
+              </div>
+            )}
 
             {mode === "signup" && (
               <div className="flex flex-col gap-2">
@@ -137,19 +175,38 @@ const AuthPage = ({ onDone }: AuthPageProps) => {
             {message && <div className="text-sm text-emerald-100 bg-emerald-500/30 border border-emerald-300/50 rounded-md p-2">{message}</div>}
 
             <button
-              onClick={doEmailPassword}
-              disabled={loading || !email || !password || (mode === 'signup' && !confirm)}
+              onClick={mode === "forgot" ? sendPasswordReset : doEmailPassword}
+              disabled={loading || !email || (mode !== 'forgot' && !password) || (mode === 'signup' && !confirm)}
               className="mt-2 inline-flex items-center justify-center w-full h-12 rounded-lg bg-white text-[#ea580c] font-bold tracking-wide hover:bg-gray-100 disabled:opacity-60 shadow-lg"
             >
-              {loading ? "Please wait..." : mode === "signin" ? "Sign In" : "Sign Up"}
+              {loading ? "Please wait..." : mode === "signin" ? "Sign In" : mode === "signup" ? "Sign Up" : "Send Reset Link"}
             </button>
 
-            <button
-              onClick={toggleMode}
-              className="text-center text-white text-sm mt-3 font-semibold hover:underline"
-            >
-              {mode === "signin" ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
-            </button>
+            {mode === "forgot" ? (
+              <button
+                onClick={backToSignIn}
+                className="text-center text-white text-sm mt-3 font-semibold hover:underline"
+              >
+                Back to Sign In
+              </button>
+            ) : (
+              <>
+                {mode === "signin" && (
+                  <button
+                    onClick={showForgotPassword}
+                    className="text-center text-white/90 text-sm mt-1 hover:underline"
+                  >
+                    Forgot Password?
+                  </button>
+                )}
+                <button
+                  onClick={toggleMode}
+                  className="text-center text-white text-sm mt-2 font-semibold hover:underline"
+                >
+                  {mode === "signin" ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

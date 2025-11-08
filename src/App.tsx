@@ -28,6 +28,7 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [sessionUserId, setSessionUserId] = useState<string | null>(null);
   const [showSplash, setShowSplash] = useState(true);
+  const [showAuthSplash, setShowAuthSplash] = useState(false);
 
   useEffect(() => {
     // Track auth session
@@ -47,7 +48,11 @@ const App = () => {
       const subscriptionSeen = localStorage.getItem("petparadise-subscription-seen");
       setHasCompletedOnboarding(!!onboardingCompleted);
       setShowSubscriptionPlans(!!onboardingCompleted && !subscriptionSeen);
-      if (sess?.user?.id) setActiveTab("home");
+      if (sess?.user?.id) {
+        // Show splash animation after auth
+        setShowAuthSplash(true);
+        setTimeout(() => setActiveTab("home"), 100);
+      }
     });
 
     return () => {
@@ -62,16 +67,18 @@ const App = () => {
       const signup = !!e?.detail?.signup;
       const onboardingCompleted = localStorage.getItem("petparadise-onboarding-completed");
       const subscriptionSeen = localStorage.getItem("petparadise-subscription-seen");
+      // Show splash animation after auth
+      setShowAuthSplash(true);
       if (signup) {
         // Show quiz next
         setHasCompletedOnboarding(false);
         setShowSubscriptionPlans(false);
-        setActiveTab("home");
+        setTimeout(() => setActiveTab("home"), 100);
       } else {
         // Returning login: if quiz done and plans not seen -> show plans
         setHasCompletedOnboarding(!!onboardingCompleted);
         setShowSubscriptionPlans(!!onboardingCompleted && !subscriptionSeen);
-        setActiveTab("home");
+        setTimeout(() => setActiveTab("home"), 100);
       }
     };
     window.addEventListener("open-auth", openAuth as any);
@@ -138,6 +145,11 @@ const App = () => {
   // Show splash screen on first load
   if (showSplash) {
     return <SplashScreen onComplete={() => setShowSplash(false)} />;
+  }
+
+  // Show splash screen after authentication
+  if (showAuthSplash) {
+    return <SplashScreen onComplete={() => setShowAuthSplash(false)} />;
   }
 
   // Show loading state

@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { Search, Bell, MoreHorizontal, Heart, MessageCircle, Share2, Plus } from "lucide-react";
+import { Search, Bell, MoreHorizontal, Heart, MessageCircle, Share2, Plus, Pencil, Check, X } from "lucide-react";
 
 type Media = { id: string; url: string; media_type: "image" | "video" };
 type FeedPost = {
@@ -35,6 +35,8 @@ const CommunityPage = () => {
   const [newComment, setNewComment] = useState<Record<string, string>>({});
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState<string>("");
 
   const accept = useMemo(() => ({
     "image/*": [".png", ".jpg", ".jpeg", ".webp"],
@@ -105,6 +107,37 @@ const CommunityPage = () => {
       toast({ title: "Failed to load feed", description: e.message, variant: "destructive" });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const startEditPost = (postId: string, currentContent: string | null) => {
+    setEditingPostId(postId);
+    setEditContent(currentContent || "");
+  };
+
+  const cancelEditPost = () => {
+    setEditingPostId(null);
+    setEditContent("");
+  };
+
+  const saveEditPost = async (postId: string) => {
+    if (!sessionUserId) {
+      toast({ title: "Sign in required", description: "Please sign in to edit posts", variant: "destructive" });
+      return;
+    }
+    try {
+      const { error } = await (supabase as any)
+        .from("posts")
+        .update({ content: editContent.trim() || null })
+        .eq("id", postId)
+        .eq("user_id", sessionUserId);
+      if (error) throw error;
+      await fetchFeed();
+      setEditingPostId(null);
+      setEditContent("");
+      toast({ title: "Post updated", description: "Your changes have been saved" });
+    } catch (e: any) {
+      toast({ title: "Update failed", description: e.message, variant: "destructive" });
     }
   };
 
@@ -380,11 +413,42 @@ const CommunityPage = () => {
                       <p className="font-bold text-white text-sm">{post.profile?.email || "Pet Lover"}</p>
                       <p className="text-xs text-zinc-400">{new Date(post.created_at).toLocaleString()}</p>
                     </div>
-                    <button className="h-8 w-8 flex items-center justify-center text-zinc-400">
-                      <MoreHorizontal size={18} />
-                    </button>
+                    {sessionUserId === post.user_id ? (
+                      editingPostId === post.id ? (
+                        <div className="flex items-center gap-2">
+                          <Button size="sm" variant="outline" onClick={() => saveEditPost(post.id)} className="h-8 px-2 text-zinc-300 border-[#3F3F46]">
+                            <Check size={16} />
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={cancelEditPost} className="h-8 px-2 text-zinc-300 border-[#3F3F46]">
+                            <X size={16} />
+                          </Button>
+                        </div>
+                      ) : (
+                        <button onClick={() => startEditPost(post.id, post.content)} className="h-8 w-8 flex items-center justify-center text-zinc-400 hover:text-white">
+                          <Pencil size={18} />
+                        </button>
+                      )
+                    ) : (
+                      <button className="h-8 w-8 flex items-center justify-center text-zinc-400">
+                        <MoreHorizontal size={18} />
+                      </button>
+                    )}
                   </div>
-                  {post.content && <p className="text-sm leading-relaxed whitespace-pre-wrap px-4 pb-3 text-zinc-200">{post.content}</p>}
+                  {editingPostId === post.id ? (
+                    <div className="px-4 pb-3">
+                      <Textarea
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        className="min-h-[80px] bg-[#121212] border-[#3F3F46] text-white placeholder:text-zinc-500"
+                      />
+                      <div className="flex gap-2 mt-2">
+                        <Button onClick={() => saveEditPost(post.id)} className="bg-[#FF7A00] hover:opacity-90 text-[#121212]">Save</Button>
+                        <Button variant="outline" onClick={cancelEditPost} className="bg-[#1E1E1E] text-zinc-300 border-[#3F3F46] hover:bg-[#262626]">Cancel</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    post.content && <p className="text-sm leading-relaxed whitespace-pre-wrap px-4 pb-3 text-zinc-200">{post.content}</p>
+                  )}
                   {post.media.length > 0 && (
                     <div className="grid grid-cols-1 gap-0">
                       {post.media.map(m => (

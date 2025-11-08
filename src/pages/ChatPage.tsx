@@ -115,35 +115,22 @@ const ChatPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-green-50/50 to-blue-50/50 pb-20">
+    <div className="min-h-screen bg-[#121212] text-white pb-20">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-md mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <img src={petLogo} alt="Pet Paradise AI" className="w-12 h-12 rounded-lg shadow-sm" />
-              <div>
-                <h1 className="text-xl font-bold text-foreground">Vet Chat</h1>
-                <Badge variant="secondary" className="text-xs flex items-center gap-1">
-                  <Stethoscope size={12} />
-                  AI Veterinary Assistant
-                </Badge>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Heart size={20} className="text-red-500" />
-              <Bot size={20} className="text-primary" />
-            </div>
-          </div>
+      <header className="sticky top-0 z-10 flex items-center justify-between bg-[#121212]/80 backdrop-blur-sm px-4 py-4 border-b border-transparent">
+        <h1 className="text-xl font-bold">Vet Chat</h1>
+        <div className="flex items-center gap-2 text-[#FF7A00]">
+          <Stethoscope size={18} />
+          <Bot size={18} />
         </div>
-      </div>
+      </header>
 
       <div className="max-w-md mx-auto px-4 py-6 flex flex-col h-[calc(100vh-180px)]">
         {/* Quick Tips */}
-        <Card className="border-0 shadow-soft mb-4">
+        <Card className="border border-[#3F3F46] bg-[#1E1E1E] mb-4 rounded-2xl">
           <CardContent className="p-4">
-            <h3 className="font-semibold mb-2 text-sm">💡 Ask me about:</h3>
-            <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+            <h3 className="font-semibold mb-2 text-sm text-white">💡 Ask me about:</h3>
+            <div className="grid grid-cols-2 gap-2 text-xs text-zinc-400">
               <div className="flex items-center gap-1">
                 <Cat size={12} />
                 Cat behavior & health
@@ -161,7 +148,7 @@ const ChatPage = () => {
         </Card>
 
         {/* Chat Messages */}
-        <Card className="border-0 shadow-soft flex-1 flex flex-col">
+        <Card className="border border-[#3F3F46] bg-[#1E1E1E] rounded-2xl flex-1 flex flex-col">
           <CardContent className="p-0 flex-1 flex flex-col">
             <ScrollArea className="flex-1 p-4" ref={scrollRef}>
               <div className="space-y-4">
@@ -173,13 +160,13 @@ const ChatPage = () => {
                     <div
                       className={`max-w-[80%] p-3 rounded-2xl ${
                         message.role === 'user'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted'
+                          ? 'bg-[#FF7A00] text-[#121212]'
+                          : 'bg-[#1E1E1E] text-zinc-200 border border-[#3F3F46]'
                       }`}
                     >
                       <div className="flex items-start gap-2">
                         {message.role === 'assistant' && (
-                          <Stethoscope size={16} className="mt-1 text-green-600" />
+                          <Stethoscope size={16} className="mt-1 text-[#FF7A00]" />
                         )}
                         {message.role === 'user' && (
                           <User size={16} className="mt-1" />
@@ -199,13 +186,13 @@ const ChatPage = () => {
                 ))}
                 {isLoading && (
                   <div className="flex justify-start">
-                    <div className="bg-muted p-3 rounded-2xl max-w-[80%]">
+                    <div className="bg-[#1E1E1E] border border-[#3F3F46] p-3 rounded-2xl max-w-[80%] text-zinc-200">
                       <div className="flex items-center gap-2">
-                        <Stethoscope size={16} className="text-green-600" />
+                        <Stethoscope size={16} className="text-[#FF7A00]" />
                         <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                          <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                          <div className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                          <div className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
                         </div>
                       </div>
                     </div>
@@ -215,7 +202,7 @@ const ChatPage = () => {
             </ScrollArea>
 
             {/* Message Input */}
-            <div className="p-4 border-t">
+            <div className="p-4 border-t border-[#3F3F46] bg-[#121212] rounded-b-2xl">
               <div className="flex gap-2">
                 <Input
                   value={inputMessage}
@@ -223,13 +210,13 @@ const ChatPage = () => {
                   placeholder="Ask about your pet's health..."
                   onKeyPress={handleKeyPress}
                   disabled={isLoading}
-                  className="flex-1"
+                  className="flex-1 bg-[#1E1E1E] border-[#3F3F46] text-white placeholder:text-zinc-500"
                 />
                 <Button
                   onClick={sendMessage}
                   disabled={!inputMessage.trim() || isLoading}
                   size="icon"
-                  className="bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+                  className="bg-[#FF7A00] hover:opacity-90 text-[#121212]"
                 >
                   <Send size={16} />
                 </Button>

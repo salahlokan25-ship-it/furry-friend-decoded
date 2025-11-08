@@ -2989,7 +2989,24 @@ const TrainingPage = () => {
   },
 ];
 
-  const displayedCourses = courses.filter(c => c.petType === petFilter);
+  const uniqueById = <T extends { id: string }>(arr: T[]) => {
+    const seen = new Set<string>();
+    return arr.filter((item) => {
+      if (seen.has(item.id)) return false;
+      seen.add(item.id);
+      return true;
+    });
+  };
+
+  const displayedCourses = uniqueById(
+    courses
+      .filter((c) => c.petType === petFilter)
+      .filter((c) => {
+        const isDog = c.id.startsWith("dog-");
+        const isCat = c.id.startsWith("cat-");
+        return petFilter === "dog" ? isDog : isCat;
+      })
+  );
 
   const goBackToCourses = () => {
     setSelectedCourse(null);
@@ -3025,18 +3042,18 @@ const TrainingPage = () => {
   // Render lesson view
   if (selectedLesson) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-green-50/30 to-blue-50/30 pb-20">
-        <div className="bg-white shadow-sm border-b">
+      <div className="min-h-screen bg-[#0F172A] pb-20">
+        <div className="bg-[#0F172A]/80 backdrop-blur-sm border-b border-[#1F2937]">
           <div className="max-w-md mx-auto px-4 py-4">
             <div className="flex items-center space-x-3">
-              <Button variant="ghost" size="sm" onClick={goBackToLessons}>
+              <Button variant="ghost" size="sm" onClick={goBackToLessons} className="text-[#E5E7EB]">
                 ← Back
               </Button>
               <div className="flex-1">
-                <h1 className="text-lg font-bold text-foreground truncate">
+                <h1 className="text-lg font-bold text-[#FF7F50] truncate">
                   {selectedLesson.title}
                 </h1>
-                <Badge variant="secondary" className="text-xs">
+                <Badge variant="secondary" className="text-xs bg-[#1F2937] text-[#E5E7EB] border-0">
                   {selectedLesson.duration}
                 </Badge>
               </div>
@@ -3045,15 +3062,15 @@ const TrainingPage = () => {
         </div>
 
         <div className="max-w-md mx-auto px-4 py-6">
-          <Card className="border-0 shadow-soft">
+          <Card className="border border-[#1F2937] bg-[#1F2937]">
             <CardContent className="p-6">
               <div className="prose prose-sm max-w-none">
-                <p className="text-foreground leading-relaxed whitespace-pre-line">
+                <p className="text-[#E5E7EB] leading-relaxed whitespace-pre-line">
                   {selectedLesson.content}
                 </p>
               </div>
               
-              <div className="flex space-x-3 mt-6 pt-6 border-t">
+              <div className="flex space-x-3 mt-6 pt-6 border-t border-[#334155]">
                 <Button
                   variant={selectedLesson.completed ? "secondary" : "coral"}
                   className="flex-1"
@@ -3082,20 +3099,22 @@ const TrainingPage = () => {
   // Render course lessons view
   if (selectedCourse) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-green-50/30 to-blue-50/30 pb-20">
-        <div className="bg-white shadow-sm border-b">
+      <div className="min-h-screen bg-[#0F172A] pb-20">
+        <div className="bg-[#0F172A]/80 backdrop-blur-sm border-b border-[#1F2937]">
           <div className="max-w-md mx-auto px-4 py-4">
             <div className="flex items-center space-x-3">
-              <Button variant="ghost" size="sm" onClick={goBackToCourses}>
+              <Button variant="ghost" size="sm" onClick={goBackToCourses} className="text-[#E5E7EB]">
                 ← Courses
               </Button>
               <div className="flex-1">
-                <h1 className="text-lg font-bold text-foreground">
+                <h1 className="text-lg font-bold text-[#FF7F50]">
                   {selectedCourse.title}
                 </h1>
                 <div className="flex items-center space-x-2 mt-1">
-                  <Progress value={selectedCourse.progress} className="flex-1 h-2" />
-                  <span className="text-xs text-muted-foreground">
+                  <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-2 bg-[#FF7F50] rounded-full" style={{ width: `${selectedCourse.progress}%` }} />
+                  </div>
+                  <span className="text-xs text-[#9CA3AF]">
                     {selectedCourse.progress}%
                   </span>
                 </div>
@@ -3108,7 +3127,7 @@ const TrainingPage = () => {
           {selectedCourse.lessons.map((lesson, index) => (
             <Card 
               key={lesson.id} 
-              className="border-0 shadow-soft cursor-pointer hover:shadow-lg transition-shadow"
+              className="border border-[#1F2937] bg-[#1F2937] cursor-pointer hover:shadow-md transition-shadow"
               onClick={() => setSelectedLesson(lesson)}
             >
               <CardContent className="p-4">
@@ -3117,7 +3136,7 @@ const TrainingPage = () => {
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                       lesson.completed 
                         ? 'bg-green-500 text-white' 
-                        : 'bg-gray-200 text-gray-600'
+                        : 'bg-gray-600 text-[#E5E7EB]'
                     }`}>
                       {lesson.completed ? (
                         <Award size={16} />
@@ -3126,14 +3145,14 @@ const TrainingPage = () => {
                       )}
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-medium">{lesson.title}</h3>
-                      <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                      <h3 className="font-medium text-[#FF7F50]">{lesson.title}</h3>
+                      <div className="flex items-center space-x-2 text-sm text-[#9CA3AF]">
                         <Clock size={14} />
                         <span>{lesson.duration}</span>
                       </div>
                     </div>
                   </div>
-                  <ChevronRight size={20} className="text-muted-foreground" />
+                  <ChevronRight size={20} className="text-[#9CA3AF]" />
                 </div>
               </CardContent>
             </Card>
@@ -3149,19 +3168,19 @@ const TrainingPage = () => {
   const foundationalCourses = displayedCourses.filter(c => c.difficulty === "Beginner").slice(0, 2);
 
   return (
-    <div className="relative w-full flex-col overflow-x-hidden min-h-screen bg-[#F9F9F9] dark:bg-[#111827] pb-32">
+    <div className="relative w-full flex-col overflow-x-hidden min-h-screen bg-[#0F172A] pb-32">
       {/* Sticky Header */}
-      <div className="sticky top-0 z-10 bg-[#F9F9F9]/80 dark:bg-[#111827]/80 backdrop-blur-sm pb-2">
+      <div className="sticky top-0 z-10 bg-[#0F172A]/80 backdrop-blur-sm pb-2">
         {/* Top App Bar */}
         <div className="flex items-center px-4 pt-4 pb-2 justify-between">
           <div className="flex size-12 shrink-0 items-center justify-start">
-            <Menu className="text-[#2A3D45] dark:text-[#E5E7EB]" size={24} />
+            <Menu className="text-[#E5E7EB]" size={24} />
           </div>
-          <h1 className="text-[#2A3D45] dark:text-[#E5E7EB] text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">
+          <h1 className="text-[#E5E7EB] text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">
             Training Hub
           </h1>
           <div className="flex w-12 items-center justify-end">
-            <button className="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 bg-transparent text-[#2A3D45] dark:text-[#E5E7EB] gap-2 text-base font-bold leading-normal tracking-[0.015em] min-w-0 p-0">
+            <button className="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 bg-transparent text-[#E5E7EB] gap-2 text-base font-bold leading-normal tracking-[0.015em] min-w-0 p-0">
               <Search size={24} />
             </button>
           </div>
@@ -3169,12 +3188,12 @@ const TrainingPage = () => {
 
         {/* Segmented Buttons */}
         <div className="flex px-4 py-3">
-          <div className="flex h-10 flex-1 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-800 p-1">
+          <div className="flex h-10 flex-1 items-center justify-center rounded-full bg-[#1F2937] p-1">
             <button
               className={`flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-full px-2 text-sm font-bold leading-normal transition-colors ${
                 petFilter === "dog"
                   ? "bg-[#FF7F50] shadow-md text-white"
-                  : "text-[#2A3D45] dark:text-[#E5E7EB]"
+                  : "text-[#9CA3AF]"
               }`}
               onClick={() => setPetFilter("dog")}
             >
@@ -3184,7 +3203,7 @@ const TrainingPage = () => {
               className={`flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-full px-2 text-sm font-bold leading-normal transition-colors ${
                 petFilter === "cat"
                   ? "bg-[#FF7F50] shadow-md text-white"
-                  : "text-[#2A3D45] dark:text-[#E5E7EB]"
+                  : "text-[#9CA3AF]"
               }`}
               onClick={() => setPetFilter("cat")}
             >
@@ -3197,7 +3216,7 @@ const TrainingPage = () => {
       <main className="flex flex-col gap-6">
         {/* Featured Courses Section */}
         <div>
-          <h2 className="text-[#2A3D45] dark:text-[#E5E7EB] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">
+          <h2 className="text-[#FF7F50] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">
             Featured for Bella
           </h2>
           
@@ -3207,7 +3226,7 @@ const TrainingPage = () => {
               {featuredCourses.map((course, idx) => (
                 <div 
                   key={`featured-${course.id}`}
-                  className={`flex h-full flex-1 flex-col gap-4 rounded-lg bg-white dark:bg-gray-800 shadow-sm min-w-[280px] w-[280px] overflow-hidden ${idx === featuredCourses.length - 1 ? 'pr-4' : ''}`}
+                  className={`flex h-full flex-1 flex-col gap-4 rounded-lg bg-[#1F2937] shadow-sm min-w-[280px] w-[280px] overflow-hidden ${idx === featuredCourses.length - 1 ? 'pr-4' : ''}`}
                 >
                   <div 
                     className="w-full bg-center bg-no-repeat aspect-video bg-cover flex flex-col"
@@ -3219,10 +3238,10 @@ const TrainingPage = () => {
                   />
                   <div className="flex flex-col flex-1 justify-between p-4 pt-0 gap-4">
                     <div>
-                      <p className="text-[#2A3D45] dark:text-[#E5E7EB] text-base font-bold leading-normal">
+                      <p className="text-[#FF7F50] text-base font-bold leading-normal">
                         {course.title}
                       </p>
-                      <p className="text-[#6B7280] dark:text-[#9CA3AF] text-sm font-normal leading-normal">
+                      <p className="text-[#9CA3AF] text-sm font-normal leading-normal">
                         {course.description}
                       </p>
                     </div>
@@ -3242,14 +3261,14 @@ const TrainingPage = () => {
         {/* Continue Your Training Section */}
         {inProgressCourses.length > 0 && (
           <div>
-            <h2 className="text-[#2A3D45] dark:text-[#E5E7EB] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">
+            <h2 className="text-[#FF7F50] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">
               Continue Your Training
             </h2>
             <div className="flex flex-col gap-3 px-4">
               {inProgressCourses.map((course) => (
                 <div 
                   key={`progress-${course.id}`}
-                  className="flex items-center gap-4 rounded-lg bg-white dark:bg-gray-800 p-4 shadow-sm"
+                  className="flex items-center gap-4 rounded-lg bg-[#1F2937] p-4 shadow-sm"
                 >
                   <div 
                     className="w-24 h-24 bg-center bg-no-repeat aspect-square bg-cover rounded-lg"
@@ -3260,16 +3279,16 @@ const TrainingPage = () => {
                     }}
                   />
                   <div className="flex flex-col flex-1 gap-2">
-                    <p className="text-[#2A3D45] dark:text-[#E5E7EB] text-base font-bold leading-normal">
+                    <p className="text-[#FF7F50] text-base font-bold leading-normal">
                       {course.title}
                     </p>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="w-full bg-gray-700 rounded-full h-2">
                       <div 
                         className="bg-[#FF7F50] h-2 rounded-full transition-all" 
                         style={{ width: `${course.progress}%` }}
                       />
                     </div>
-                    <p className="text-[#6B7280] dark:text-[#9CA3AF] text-xs font-medium">
+                    <p className="text-[#9CA3AF] text-xs font-medium">
                       {course.progress}% Complete
                     </p>
                   </div>
@@ -3287,7 +3306,7 @@ const TrainingPage = () => {
 
         {/* Foundational Skills Section */}
         <div>
-          <h2 className="text-[#2A3D45] dark:text-[#E5E7EB] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">
+          <h2 className="text-[#FF7F50] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">
             Foundational Skills
           </h2>
           <div className="grid grid-cols-1 gap-4 px-4">
@@ -3295,7 +3314,7 @@ const TrainingPage = () => {
               <div 
                 key={`foundational-${course.id}`}
                 onClick={() => setSelectedCourse(course)}
-                className="flex items-center gap-4 rounded-lg bg-white dark:bg-gray-800 p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                className="flex items-center gap-4 rounded-lg bg-[#1F2937] p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
               >
                 <div 
                   className="w-20 h-20 bg-center bg-no-repeat aspect-square bg-cover rounded-lg"
@@ -3306,16 +3325,16 @@ const TrainingPage = () => {
                   }}
                 />
                 <div className="flex-1">
-                  <p className="text-[#2A3D45] dark:text-[#E5E7EB] text-base font-bold">
+                  <p className="text-[#FF7F50] text-base font-bold">
                     {course.title}
                   </p>
-                  <div className="flex items-center gap-3 text-[#6B7280] dark:text-[#9CA3AF] text-sm mt-1">
+                  <div className="flex items-center gap-3 text-[#9CA3AF] text-sm mt-1">
                     <span>{course.difficulty}</span>
                     <span className="text-gray-300 dark:text-gray-600">•</span>
                     <span>{course.lessons.length} Lessons</span>
                   </div>
                 </div>
-                <ChevronRight className="text-[#6B7280] dark:text-[#9CA3AF]" size={24} />
+                <ChevronRight className="text-[#9CA3AF]" size={24} />
               </div>
             ))}
           </div>
@@ -3323,7 +3342,7 @@ const TrainingPage = () => {
 
         {/* All Courses Section */}
         <div>
-          <h2 className="text-[#2A3D45] dark:text-[#E5E7EB] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">
+          <h2 className="text-[#FF7F50] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">
             All Courses
           </h2>
           <div className="grid grid-cols-2 gap-3 px-4">
@@ -3331,7 +3350,7 @@ const TrainingPage = () => {
               <div 
                 key={`all-${course.id}`}
                 onClick={() => setSelectedCourse(course)}
-                className="flex flex-col rounded-lg bg-white dark:bg-gray-800 shadow-sm cursor-pointer hover:shadow-md transition-shadow overflow-hidden"
+                className="flex flex-col rounded-lg bg-[#1F2937] shadow-sm cursor-pointer hover:shadow-md transition-shadow overflow-hidden"
               >
                 <div 
                   className="w-full bg-center bg-no-repeat aspect-video bg-cover"
@@ -3342,16 +3361,16 @@ const TrainingPage = () => {
                   }}
                 />
                 <div className="flex flex-col p-3 gap-2">
-                  <p className="text-[#2A3D45] dark:text-[#E5E7EB] text-sm font-bold leading-tight line-clamp-2">
+                  <p className="text-[#FF7F50] text-sm font-bold leading-tight line-clamp-2">
                     {course.title}
                   </p>
-                  <div className="flex items-center gap-2 text-[#6B7280] dark:text-[#9CA3AF] text-xs">
+                  <div className="flex items-center gap-2 text-[#9CA3AF] text-xs">
                     <span>{course.difficulty}</span>
-                    <span className="text-gray-300 dark:text-gray-600">•</span>
+                    <span className="text-gray-600">•</span>
                     <span>{course.duration}</span>
                   </div>
                   {course.progress > 0 && (
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1">
+                    <div className="w-full bg-gray-700 rounded-full h-1">
                       <div 
                         className="bg-[#FF7F50] h-1 rounded-full transition-all" 
                         style={{ width: `${course.progress}%` }}

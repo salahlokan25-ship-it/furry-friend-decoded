@@ -125,7 +125,7 @@ const TranslatePage = () => {
         <div className="max-w-md mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <img src="/petparadise-logo.png" alt="PetParadise AI" className="w-12 h-12 rounded-lg shadow-sm" />
+              <img src="/app-logo.png" alt="PetParadise AI" className="w-12 h-12 rounded-lg shadow-sm" />
               <div>
                 <h1 className="text-xl font-bold text-foreground">PetParadise</h1>
                 <Badge variant="secondary" className="text-xs">AI Powered</Badge>

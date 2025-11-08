@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Camera, Heart, Trash2, Upload, ChevronRight, Clock, MapPin, Users } from "lucide-react";
-import petLogo from "@/assets/pet-paradise-logo.png";
+// dark redesign uses simple text header
 
 interface Photo {
   id: string;
@@ -394,130 +394,86 @@ const AlbumPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-purple-50/30 to-pink-50/30 pb-20">
+    <div className="min-h-screen bg-[#121212] text-white pb-20">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-md mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <img src={petLogo} alt="Pet Paradise" className="w-10 h-10" />
-              <div>
-                <h1 className="text-xl font-bold text-foreground">Pet Album</h1>
-                <Badge variant="secondary" className="text-xs">{photos.length} Photos</Badge>
-              </div>
-            </div>
-            <Button 
-              variant="coral" 
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Plus size={16} />
-              Add
-            </Button>
+      <header className="sticky top-0 z-10 flex items-center justify-between bg-[#121212]/80 backdrop-blur-sm px-4 py-4 border-b border-transparent">
+        <h1 className="text-xl font-bold">Pet Album</h1>
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="flex min-w-[96px] items-center justify-center gap-2 rounded-full h-10 px-4 bg-[#FF7A00] text-[#121212] text-sm font-semibold"
+        >
+          <Upload size={16} />
+          Upload
+        </button>
+      </header>
+
+      <div className="max-w-md mx-auto py-4 space-y-6">
+        {/* Filters */}
+        <div className="px-4">
+          <div className="flex gap-2">
+            {([
+              { id: "all", label: "All" },
+              { id: "dog", label: "Dog" },
+              { id: "cat", label: "Cat" },
+            ] as const).map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setSelectedPetType(f.id as any)}
+                className={`${selectedPetType === f.id ? "bg-[#FF7A00] text-[#121212]" : "bg-[#1E1E1E] text-zinc-300"} px-4 py-2 rounded-full text-sm font-semibold`}
+              >
+                {f.label}
+              </button>
+            ))}
           </div>
         </div>
-      </div>
 
-      <div className="max-w-md mx-auto px-4 py-6 space-y-6">
-        {/* Pet Type Filter */}
-        <Card className="border-0 shadow-soft">
-          <CardContent className="p-4">
-            <div className="flex space-x-2">
-              {[
-                { id: "all", label: "All Pets", emoji: "🐾" },
-                { id: "dog", label: "Dogs", emoji: "🐕" },
-                { id: "cat", label: "Cats", emoji: "🐱" },
-              ].map((filter) => (
-                <Button
-                  key={filter.id}
-                  variant={selectedPetType === filter.id ? "coral" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedPetType(filter.id as any)}
-                  className="flex-1"
-                >
-                  <span className="mr-1">{filter.emoji}</span>
-                  {filter.label}
-                </Button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Upload Area */}
+        {/* Empty state */}
         {photos.length === 0 && (
-          <Card className="border-2 border-dashed border-orange-300 bg-gradient-to-br from-orange-50 to-orange-100">
-            <CardContent className="p-8 text-center">
-              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
-                <Camera size={40} className="text-white" />
+          <div className="px-4">
+            <div className="aspect-square rounded-lg border-2 border-dashed border-zinc-700 bg-[#1E1E1E] flex flex-col items-center justify-center gap-3">
+              <div className="flex items-center justify-center size-10 rounded-full bg-[#FF7A00]/20 text-[#FF7A00]">
+                <Camera size={20} />
               </div>
-              <h3 className="font-semibold text-lg mb-2 text-orange-900">No Photos Yet</h3>
-              <p className="text-orange-700 mb-4">
-                Start building your pet's album by adding some photos!
-              </p>
-              <Button
-                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Upload size={18} />
-                Upload Photos
-              </Button>
-            </CardContent>
-          </Card>
+              <p className="text-sm text-zinc-300">Add new memory</p>
+              <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 rounded-full bg-[#FF7A00] text-[#121212] text-sm font-semibold">Upload</button>
+            </div>
+          </div>
         )}
 
         {/* Photo Grid */}
         {filteredPhotos.length > 0 && (
-          <Card className="border-0 shadow-soft">
-            <CardContent className="p-4">
-              <h3 className="font-semibold mb-4">Your Pet Photos</h3>
-              <div className="grid grid-cols-2 gap-3">
-                {filteredPhotos.map((photo) => (
-                  <div key={photo.id} className="relative group">
-                    <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-                      <img
-                        src={photo.url}
-                        alt="Pet photo"
-                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                      />
-                    </div>
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-white hover:bg-white/20"
-                      >
-                        <Heart size={18} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => deletePhoto(photo.id)}
-                        className="text-white hover:bg-red-500/20"
-                      >
-                        <Trash2 size={18} />
-                      </Button>
-                    </div>
-                    <Badge
-                      variant="secondary"
-                      className="absolute top-2 right-2 bg-white/90 text-xs"
-                    >
-                      {photo.petType === "cat" ? "🐱" : "🐕"}
-                    </Badge>
+          <div className="px-4">
+            <div className="grid grid-cols-3 gap-1">
+              {filteredPhotos.map((photo) => (
+                <div key={photo.id} className="relative group">
+                  <div className="aspect-square rounded-lg overflow-hidden bg-[#1E1E1E]">
+                    <img
+                      src={photo.url}
+                      alt="Pet photo"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                </div>
+              ))}
+              {/* Add new tile */}
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex flex-col items-center justify-center text-center gap-2 aspect-square rounded-lg bg-[#1E1E1E] border-2 border-dashed border-zinc-700 p-4"
+              >
+                <div className="flex items-center justify-center size-8 rounded-full bg-[#FF7A00]/20 text-[#FF7A00]">
+                  <Upload size={16} />
+                </div>
+                <p className="text-xs font-semibold text-zinc-200">Add new memory</p>
+              </button>
+            </div>
+          </div>
         )}
 
         {/* Activity Suggestions */}
-        <Card className="border-0 shadow-soft">
-          <CardContent className="p-6">
-            <h3 className="font-semibold mb-4 flex items-center">
-              <span className="mr-2">Activity Suggestions</span>
-              <Badge variant="secondary" className="text-xs">{activities.length} Activities</Badge>
-            </h3>
-            <div className="space-y-3">
+        <div className="px-4 mt-2">
+          <h2 className="text-lg font-bold text-white">Activity Suggestions</h2>
+          <p className="text-sm text-zinc-400">Capture these precious moments!</p>
+          <div className="mt-4 space-y-3">
               {(() => {
                 const list = activities.filter(activity => 
                   selectedPetType === "all" || 
@@ -533,42 +489,22 @@ const AlbumPage = () => {
                   <div
                     key={activity.id}
                     onClick={() => setSelectedActivity(activity)}
-                    className="flex items-center space-x-4 p-4 rounded-lg bg-gradient-to-r from-primary/5 to-secondary/5 hover:from-primary/10 hover:to-secondary/10 transition-all cursor-pointer border hover:border-primary/20"
+                    className="flex items-center gap-4 rounded-lg bg-[#1E1E1E] p-4 cursor-pointer"
                   >
-                    <span className="text-3xl">{activity.icon}</span>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <h4 className="font-semibold">{activity.title}</h4>
-                        <Badge variant="outline" className="text-xs">
-                          {activity.difficulty}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-2">
-                        {activity.description}
-                      </p>
-                      <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                        <span className="flex items-center">
-                          <Clock size={12} className="mr-1" />
-                          {activity.duration}
-                        </span>
-                        <span className="flex items-center">
-                          <MapPin size={12} className="mr-1" />
-                          {activity.location}
-                        </span>
-                        <span className="flex items-center">
-                          <Users size={12} className="mr-1" />
-                          {activity.petTypes.includes("both") ? "All Pets" : 
-                           activity.petTypes.includes("cat") ? "Cats" : "Dogs"}
-                        </span>
-                      </div>
+                    <div className="flex size-10 items-center justify-center rounded-full bg-[#FF7A00]/20 text-[#FF7A00] text-lg">
+                      <span>{activity.icon}</span>
                     </div>
-                    <ChevronRight size={20} className="text-muted-foreground" />
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-white">{activity.title}</h3>
+                      <p className="text-sm text-zinc-400">{activity.description}</p>
+                    </div>
+                    <ChevronRight className="text-zinc-500" />
                   </div>
                 ));
               })()}
-            </div>
+          </div>
 
-            {(() => {
+          {(() => {
               const list = activities.filter(activity => 
                 selectedPetType === "all" || 
                 activity.petTypes.includes("both") || 
@@ -578,13 +514,14 @@ const AlbumPage = () => {
               if (totalPages <= 1) return null;
               return (
                 <div className="flex items-center justify-between mt-4">
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-zinc-400">
                     Page {activitiesPage + 1} of {totalPages}
                   </span>
                   <div className="flex items-center gap-2">
                     <Button
                       variant="outline"
                       size="sm"
+                      className="bg-[#1E1E1E] text-zinc-300 border-[#3F3F46] hover:bg-[#262626]"
                       disabled={activitiesPage === 0}
                       onClick={() => setActivitiesPage(p => Math.max(0, p - 1))}
                     >
@@ -593,6 +530,7 @@ const AlbumPage = () => {
                     <Button
                       variant="outline"
                       size="sm"
+                      className="bg-[#1E1E1E] text-zinc-300 border-[#3F3F46] hover:bg-[#262626]"
                       disabled={activitiesPage >= totalPages - 1}
                       onClick={() => setActivitiesPage(p => Math.min(totalPages - 1, p + 1))}
                     >
@@ -602,8 +540,7 @@ const AlbumPage = () => {
                 </div>
               );
             })()}
-          </CardContent>
-        </Card>
+        </div>
       </div>
 
       {/* Activity Details Dialog */}

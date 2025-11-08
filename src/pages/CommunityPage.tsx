@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { Search, Bell, MoreHorizontal, Heart, MessageCircle, Share2, Plus } from "lucide-react";
 
 type Media = { id: string; url: string; media_type: "image" | "video" };
 type FeedPost = {
@@ -32,6 +33,8 @@ const CommunityPage = () => {
   const [commentsOpen, setCommentsOpen] = useState<Record<string, boolean>>({});
   const [comments, setComments] = useState<Record<string, { id: string; content: string; user_id: string; created_at: string }[]>>({});
   const [newComment, setNewComment] = useState<Record<string, string>>({});
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const accept = useMemo(() => ({
     "image/*": [".png", ".jpg", ".jpeg", ".webp"],
@@ -284,32 +287,58 @@ const CommunityPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-green-50/30 to-blue-50/30 pb-24">
-      <div className="max-w-2xl mx-auto px-4 pt-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Community</h1>
+    <div className="min-h-screen bg-[#121212] text-white pb-24">
+      <header className="sticky top-0 z-10 flex items-center justify-between bg-[#121212]/80 backdrop-blur-sm px-4 py-4 border-b border-transparent">
+        <button className="h-10 w-10 flex items-center justify-center rounded-full text-white/90">
+          <Search size={20} />
+        </button>
+        <h1 className="text-lg font-bold">Community</h1>
+        <button className="relative h-10 w-10 flex items-center justify-center rounded-full text-white/90">
+          <Bell size={20} />
+          <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-[#121212] bg-[#FF7A00]"></span>
+        </button>
+      </header>
+
+      <div className="max-w-md mx-auto px-4 pt-4 space-y-4">
+        <div className="flex w-full gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none]">
+          {[
+            { id: "all", label: "All" },
+            { id: "training", label: "Training Tips" },
+            { id: "health", label: "Health Q&A" },
+            { id: "moments", label: "Cute Moments" },
+            { id: "reviews", label: "Product Reviews" },
+          ].map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`flex h-9 shrink-0 items-center justify-center rounded-full px-4 text-sm font-medium ${selectedCategory === cat.id ? "bg-[#FF7A00] text-[#121212]" : "bg-[#1E1E1E] text-zinc-300"}`}
+            >
+              {cat.label}
+            </button>
+          ))}
         </div>
 
         {!sessionUserId && (
-          <Card className="border-orange-200/60">
+          <Card className="border border-[#3F3F46] bg-[#1E1E1E] rounded-2xl">
             <CardContent className="p-4 space-y-3">
-              <div className="text-sm">Sign in to post, like, and comment</div>
+              <div className="text-sm text-zinc-300">Sign in to post, like, and comment</div>
               <div className="flex gap-2">
-                <Input type="email" placeholder="you@example.com" value={signInEmail} onChange={e => setSignInEmail(e.target.value)} />
-                <Button onClick={signInWithEmail} disabled={authLoading}>{authLoading ? "Sending..." : "Send magic link"}</Button>
+                <Input type="email" placeholder="you@example.com" value={signInEmail} onChange={e => setSignInEmail(e.target.value)} className="bg-[#121212] border-[#3F3F46] text-white placeholder:text-zinc-500" />
+                <Button onClick={signInWithEmail} disabled={authLoading} className="bg-[#FF7A00] hover:opacity-90 text-[#121212]">{authLoading ? "Sending..." : "Send magic link"}</Button>
               </div>
             </CardContent>
           </Card>
         )}
 
-        <Card className="border-orange-200/60">
+        <Card className="border border-[#3F3F46] bg-[#1E1E1E] rounded-2xl">
           <CardContent className="p-4 space-y-3">
             <div className="grid grid-cols-1 gap-3">
               <Textarea
                 placeholder="Share something about your pet..."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="min-h-[100px]"
+                className="min-h-[100px] bg-[#121212] border-[#3F3F46] text-white placeholder:text-zinc-500"
+                ref={textareaRef}
               />
               <Input
                 type="file"
@@ -317,16 +346,17 @@ const CommunityPage = () => {
                 accept={Object.keys(accept).join(",")}
                 onChange={handleFileChange}
                 ref={fileInputRef}
+                className="bg-[#121212] border-[#3F3F46] text-white file:text-zinc-300"
               />
               <div className="flex items-center gap-3">
-                <div className="text-xs text-muted-foreground">
+                <div className="text-xs text-zinc-400">
                   {files.length > 0 ? `${files.length} file(s) selected` : "You can attach images or short videos"}
                 </div>
-                <Button onClick={createPost} disabled={submitting || !sessionUserId} className="ml-auto">
+                <Button onClick={createPost} disabled={submitting || !sessionUserId} className="ml-auto bg-[#FF7A00] hover:opacity-90 text-[#121212]">
                   {submitting ? "Posting..." : "Post"}
                 </Button>
                 {sessionUserId && (
-                  <Button variant="secondary" onClick={signOut}>Sign out</Button>
+                  <Button variant="outline" onClick={signOut} className="bg-[#1E1E1E] text-zinc-300 border-[#3F3F46] hover:bg-[#262626]">Sign out</Button>
                 )}
               </div>
             </div>
@@ -336,56 +366,66 @@ const CommunityPage = () => {
         <ScrollArea className="h-[55vh] rounded-md">
           <div className="space-y-4 pr-2">
             {loading && (
-              <div className="text-sm text-muted-foreground px-1">Loading feed...</div>
+              <div className="text-sm text-zinc-400 px-1">Loading feed...</div>
             )}
             {!loading && feed.length === 0 && (
-              <div className="text-sm text-muted-foreground px-1">No posts yet. Be the first to share!</div>
+              <div className="text-sm text-zinc-400 px-1">No posts yet. Be the first to share!</div>
             )}
             {feed.map((post) => (
-              <Card key={post.id} className="border-orange-200/60 overflow-hidden">
-                <CardContent className="p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-orange-200" />
-                      <div className="flex flex-col">
-                        <span className="text-sm font-semibold">{post.profile?.email || "Pet Lover"}</span>
-                        <span className="text-xs text-muted-foreground">{new Date(post.created_at).toLocaleString()}</span>
-                      </div>
+              <Card key={post.id} className="bg-[#1E1E1E] border border-[#2D2D2D] rounded-xl overflow-hidden">
+                <CardContent className="p-0">
+                  <div className="flex items-center gap-3 p-4 pb-2">
+                    <div className="w-10 h-10 rounded-full bg-[#3F3F46]" />
+                    <div className="flex-1">
+                      <p className="font-bold text-white text-sm">{post.profile?.email || "Pet Lover"}</p>
+                      <p className="text-xs text-zinc-400">{new Date(post.created_at).toLocaleString()}</p>
                     </div>
+                    <button className="h-8 w-8 flex items-center justify-center text-zinc-400">
+                      <MoreHorizontal size={18} />
+                    </button>
                   </div>
-                  {post.content && <p className="text-sm leading-relaxed whitespace-pre-wrap">{post.content}</p>}
+                  {post.content && <p className="text-sm leading-relaxed whitespace-pre-wrap px-4 pb-3 text-zinc-200">{post.content}</p>}
                   {post.media.length > 0 && (
-                    <div className="grid grid-cols-1 gap-2">
+                    <div className="grid grid-cols-1 gap-0">
                       {post.media.map(m => (
                         m.media_type === "image" ? (
-                          <img key={m.id} src={m.url} alt="" className="w-full rounded-md object-cover max-h-96" />
+                          <div key={m.id} className="w-full bg-center bg-no-repeat bg-cover" style={{backgroundImage: `url(${m.url})`}}>
+                            <div className="w-full" style={{paddingBottom: '56.25%'}} />
+                          </div>
                         ) : (
-                          <video key={m.id} src={m.url} controls className="w-full rounded-md max-h-96" />
+                          <video key={m.id} src={m.url} controls className="w-full max-h-96" />
                         )
                       ))}
                     </div>
                   )}
-                  <div className="flex items-center gap-4 pt-1">
-                    <button onClick={() => toggleLike(post.id)} className="text-sm">
-                      {likes[post.id]?.liked ? "♥" : "♡"} {likes[post.id]?.count ?? 0}
-                    </button>
-                    <button
-                      onClick={async () => {
-                        const open = !commentsOpen[post.id];
-                        setCommentsOpen({ ...commentsOpen, [post.id]: open });
-                        if (open && !comments[post.id]) await loadComments(post.id);
-                      }}
-                      className="text-sm"
-                    >
-                      Comments
+                  <div className="flex items-center justify-between border-t border-[#2D2D2D] p-1 px-2">
+                    <div className="flex items-center">
+                      <button onClick={() => toggleLike(post.id)} className={`flex items-center gap-1 rounded-full p-2 ${likes[post.id]?.liked ? 'text-[#FF7A00]' : 'text-zinc-400'} hover:bg-[#FF7A00]/10 hover:text-[#FF7A00]`}>
+                        <Heart size={18} className={likes[post.id]?.liked ? 'fill-[#FF7A00]' : ''} />
+                        <span className="text-xs font-semibold">{likes[post.id]?.count ?? 0}</span>
+                      </button>
+                      <button
+                        onClick={async () => {
+                          const open = !commentsOpen[post.id];
+                          setCommentsOpen({ ...commentsOpen, [post.id]: open });
+                          if (open && !comments[post.id]) await loadComments(post.id);
+                        }}
+                        className="flex items-center gap-1 rounded-full p-2 text-zinc-400 hover:bg-[#FF7A00]/10 hover:text-[#FF7A00]"
+                      >
+                        <MessageCircle size={18} />
+                        <span className="text-xs font-semibold">{(comments[post.id] || []).length}</span>
+                      </button>
+                    </div>
+                    <button className="flex items-center gap-1 rounded-full p-2 text-zinc-400 hover:bg-[#FF7A00]/10 hover:text-[#FF7A00]">
+                      <Share2 size={18} />
                     </button>
                   </div>
                   {commentsOpen[post.id] && (
-                    <div className="pt-2 space-y-2">
+                    <div className="pt-2 space-y-2 px-4 pb-4">
                       <div className="space-y-1">
                         {(comments[post.id] || []).map(c => (
-                          <div key={c.id} className="text-sm">
-                            <span className="text-muted-foreground mr-2">{new Date(c.created_at).toLocaleString()}</span>
+                          <div key={c.id} className="text-sm text-zinc-300">
+                            <span className="text-zinc-500 mr-2">{new Date(c.created_at).toLocaleString()}</span>
                             {c.content}
                           </div>
                         ))}
@@ -395,8 +435,9 @@ const CommunityPage = () => {
                           placeholder="Add a comment"
                           value={newComment[post.id] || ""}
                           onChange={(e) => setNewComment({ ...newComment, [post.id]: e.target.value })}
+                          className="bg-[#121212] border-[#3F3F46] text-white placeholder:text-zinc-500"
                         />
-                        <Button disabled={!sessionUserId || !(newComment[post.id] || "").trim()} onClick={() => addComment(post.id)}>
+                        <Button disabled={!sessionUserId || !(newComment[post.id] || "").trim()} onClick={() => addComment(post.id)} className="bg-[#FF7A00] hover:opacity-90 text-[#121212]">
                           Send
                         </Button>
                       </div>
@@ -408,6 +449,16 @@ const CommunityPage = () => {
           </div>
         </ScrollArea>
       </div>
+
+      <button
+        onClick={() => {
+          if (textareaRef.current) textareaRef.current.focus();
+          else fileInputRef.current?.click();
+        }}
+        className="fixed bottom-6 right-6 z-20 h-14 w-14 rounded-2xl bg-[#FF7A00] text-[#121212] shadow-lg flex items-center justify-center hover:opacity-90"
+      >
+        <Plus size={28} />
+      </button>
     </div>
   );
 };

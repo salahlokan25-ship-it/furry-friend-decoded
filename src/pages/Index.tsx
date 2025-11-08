@@ -511,7 +511,81 @@ const Index = ({ onNavigate }: IndexProps) => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-[#0c1426] dark:via-[#0c1426] dark:to-[#0c1426] relative overflow-hidden font-[Poppins,sans-serif]">
+    <div className="min-h-screen bg-[#1A1A1A] relative overflow-hidden font-display">
+      <div className="flex flex-col gap-2 p-4 pb-24">
+        <div className="flex h-12 items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div
+              className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
+              style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDir0XdNKT1G1Uc5LEkIOUxeWWbh7DeAXu8npbUKEXSAQ1NVLPQYrNAkZgwlkEmC_ZaMKFKbNK1O3FSql3RsltSeu7eFVViWFk9WjKN_QttU6HbQsb7ZOwffDa4FsebuVgKLxe_dK3scUxFKCKskR24DjRo9kteljiFIyDfIDMTmpBpr_2akUA5LzVHVZ3PvsxiCkmQBY8LHl0TQsg13a1kfmHiYZEzNNdnDsMv8kMwy0IQqiHyPe6engkFCcO0Qb0qKjCyoLdi4iA')" }}
+            />
+            <p className="text-white text-base font-bold leading-normal">Buddy & Mittens</p>
+          </div>
+          <div className="flex w-12 items-center justify-end">
+            <button className="flex cursor-pointer items-center justify-center rounded-full h-10 w-10 text-white">
+              <Bell className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+        <p className="text-white tracking-tight text-[28px] font-bold leading-tight">Welcome back, Alex</p>
+        <div className="p-4 pt-2 -mx-4">
+          <div className="flex flex-col rounded-xl bg-[#2C2C2C] overflow-hidden shadow-sm">
+            <div className="flex w-full">
+              <div
+                className="w-1/2 bg-center bg-no-repeat aspect-[2/3] bg-cover"
+                style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCZ96MEphmk7JiDRpSSXGUSUHEtDgPWeePyDReBrtwnYeOBP5wHTnA4tZ9zEVhbndq1Wy1aM4CFUsz70tY2W34z1itfgdZq59CjaLnpZm-I9sKXCx5uKjTx7c0VuAjctcZVr_svp32FdKpaCXElEHZe4L9kpJvHqRnpJ2pECe83FcbvAlJQmvd9vGViB1oV5pTPMq3-Q62pY0Jz2HBOxL7neU0ye4ViqlNL0d_mfB6ej_IhUTaCLim2HuBQEZCKouP_tzu92jaD1X0')" }}
+              />
+              <div
+                className="w-1/2 bg-center bg-no-repeat aspect-[2/3] bg-cover"
+                style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDkgIAmB0Bnpj68R-2UTVItavahfkseFUvgR5ZsnAYxAnLW4ED3slMXz8VVcNgJq2keDw0rjaAFfYMg28YMkWLwuHK54fp6aU0olXyj8j_FGFLBmUd3-TPI9nExqNd53G3-s2Zlnw3_AbEmL0h4oBjqzy7691MvzsIS3b138PBIjAgc4vurNK0E1HlktKqIYJARlXoj-dqv2kPYXHCEAYyF-CwC2E_QEZURJq9_sr0-7-6TtAHWj3l4FjStfc3dW526Cc4RAIfDuPY')" }}
+              />
+            </div>
+            <div className="flex w-full flex-col gap-2 p-4">
+              <p className="text-primary text-sm font-medium leading-normal">Your pets are feeling...</p>
+              <p className="text-white text-xl font-bold leading-tight tracking-[-0.015em]">Playful!</p>
+              <div className="flex items-end gap-3 justify-between">
+                <p className="text-[#AEAEB2] text-base leading-normal">They seem ready for some fun.</p>
+                <button
+                  onClick={() => handleQuickAction('translator')}
+                  className="flex min-w-[84px] cursor-pointer items-center justify-center rounded-full h-8 px-4 bg-[#F97316] text-white text-sm font-bold"
+                >
+                  <span className="truncate">View Details</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <button onClick={() => handleQuickAction('translator')} className="text-left flex flex-col items-start justify-between gap-4 p-4 rounded-lg bg-[#2C2C2C]">
+            <div className="text-[#F97316]"><Mic className="w-6 h-6" /></div>
+            <div className="flex flex-col gap-1">
+              <h2 className="text-white text-base font-bold leading-tight">Translator</h2>
+              <p className="text-[#AEAEB2] text-sm">Understand your pet</p>
+            </div>
+          </button>
+          <button onClick={() => handleQuickAction('feed')} className="text-left flex flex-col items-start justify-between gap-4 p-4 rounded-lg bg-[#2C2C2C]">
+            <div className="text-[#F97316]"><Utensils className="w-6 h-6" /></div>
+            <div className="flex flex-col gap-1">
+              <h2 className="text-white text-base font-bold leading-tight">Feed Planner</h2>
+              <p className="text-[#AEAEB2] text-sm">Plan their meals</p>
+            </div>
+          </button>
+          <button onClick={() => handleQuickAction('health')} className="text-left flex flex-col items-start justify-between gap-4 p-4 rounded-lg bg-[#2C2C2C]">
+            <div className="text-[#F97316]"><StethoscopeIcon className="w-6 h-6" /></div>
+            <div className="flex flex-col gap-1">
+              <h2 className="text-white text-base font-bold leading-tight">Health Check</h2>
+              <p className="text-[#AEAEB2] text-sm">Scan their vitals</p>
+            </div>
+          </button>
+          <button onClick={() => (onNavigate ? onNavigate('training') : handleQuickAction('training'))} className="text-left flex flex-col items-start justify-between gap-4 p-4 rounded-lg bg-[#2C2C2C]">
+            <div className="text-[#F97316]"><PawPrint className="w-6 h-6" /></div>
+            <div className="flex flex-col gap-1">
+              <h2 className="text-white text-base font-bold leading-tight">Training Hub</h2>
+              <p className="text-[#AEAEB2] text-sm">Learn new tricks</p>
+            </div>
+          </button>
+        </div>
+      </div>
       {/* AI Quick Action Modals */}
       {activeModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -1133,153 +1207,7 @@ const Index = ({ onNavigate }: IndexProps) => {
         </div>
       )}
 
-
-      <div className="container mx-auto px-0 py-0 pb-28 max-w-md">
-        
-        {/* Header */}
-        <header className="p-4 flex items-center justify-between bg-white dark:bg-[#0c1426]">
-          <div className="flex items-center space-x-3">
-            <img alt="Pet Paradise app logo" className="w-12 h-12 rounded-xl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGMsrlcvL6ppCdiRlD3TBAeseSzdf8SGJIzXESXU8EwSvNEBOYRSSt-2FIVlT6rTwt7xkYNItXycZ1ehgZFev-8N8NC8tPx-Gmpg7I7tKU1A9LkQpnugmxO9T6iFtKwsYEJpqBR9oEiYW968K13ml9WvMPjTb63LP8JVRMQmt1XqADxk0Isa2eivS6weyDWVzVVvenHg2Q6PRb1GrjWrkUBY5caBBXDdxTJ8R2M4JU3HggM3_GaiWnqpzq4D0TvjpqGCY-a3deQnc" />
-            <div>
-              <h1 className="font-bold text-lg text-slate-900 dark:text-white">PetParadise</h1>
-              <p className="text-xs text-slate-600 dark:text-slate-400">Your AI Pet Companion</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-3">
-            <button className="w-10 h-10 flex items-center justify-center bg-blue-100 dark:bg-[#182c50] rounded-full">
-              <Bell className="w-5 h-5 text-blue-500 dark:text-blue-400" />
-            </button>
-            <button className="w-10 h-10 flex items-center justify-center bg-blue-500 dark:bg-blue-600 rounded-full">
-              <User className="w-5 h-5 text-white" />
-            </button>
-          </div>
-        </header>
-
-        <main className="p-4 space-y-8">
-          {/* Hero Section with AI PetMood and Pet Translator */}
-          <section className="grid grid-cols-5 gap-4">
-            {/* AI PetMood Card - Large */}
-            <div className="col-span-3 bg-gradient-to-br from-blue-500 to-indigo-600 p-6 rounded-3xl text-white flex flex-col justify-between h-56 relative overflow-hidden animate-gradient-bg">
-              <div>
-                <h2 className="text-lg font-bold">AI PetMood</h2>
-                <p className="text-xs opacity-80">Live face & sound scan</p>
-              </div>
-              <button 
-                onClick={() => setActiveModal('camera')}
-                className="w-full bg-white/20 backdrop-blur-sm text-white font-bold py-3 rounded-full flex items-center justify-center space-x-2 border border-white/30 transition-transform hover:scale-105 active:scale-95"
-              >
-                <Camera className="w-5 h-5" />
-                <span>Scan Now</span>
-              </button>
-            </div>
-
-            {/* Pet Translator Card - Small */}
-            <div 
-              onClick={() => setActiveModal('translator')}
-              className="col-span-2 bg-slate-900 dark:bg-[#182c50] p-4 rounded-3xl text-white flex flex-col items-center justify-center space-y-4 text-center h-56 relative overflow-hidden cursor-pointer hover:scale-105 transition-transform"
-            >
-              <div className="relative w-24 h-24 flex items-center justify-center">
-                <div className="absolute inset-0 bg-orange-400/20 rounded-full animate-pulse"></div>
-                <div className="w-20 h-20 bg-orange-500 rounded-full flex items-center justify-center">
-                  <Volume2 className="w-10 h-10 text-white" />
-                </div>
-              </div>
-              <h3 className="font-semibold text-sm">Pet Translator</h3>
-            </div>
-          </section>
-
-          {/* AI Quick Actions */}
-          <section>
-            <div className="flex items-center space-x-2 mb-4">
-              <Zap className="text-orange-500 dark:text-orange-400 text-2xl" />
-              <h2 className="text-base font-bold tracking-wide text-slate-900 dark:text-white">AI Quick Actions</h2>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div 
-                onClick={() => handleQuickAction('feed')}
-                className="bg-white dark:bg-[#182c50] p-4 rounded-2xl text-center flex flex-col items-center justify-between space-y-3 shadow-lg shadow-blue-100/50 dark:shadow-black/20 relative overflow-hidden cursor-pointer hover:scale-105 transition-transform"
-              >
-                <div className="bg-blue-100 dark:bg-blue-500/10 p-3 rounded-full">
-                  <span className="text-3xl">🥥</span>
-                </div>
-                <h3 className="font-bold text-sm text-slate-900 dark:text-white">Feed Planner</h3>
-                <button className="w-full bg-slate-800 dark:bg-slate-700 text-white font-semibold py-2.5 rounded-full text-sm transition-transform hover:scale-105 active:scale-95">Try Now</button>
-              </div>
-
-              <div 
-                onClick={() => handleQuickAction('health')}
-                className="bg-white dark:bg-[#182c50] p-4 rounded-2xl text-center flex flex-col items-center justify-between space-y-3 shadow-lg shadow-blue-100/50 dark:shadow-black/20 relative overflow-hidden cursor-pointer hover:scale-105 transition-transform"
-              >
-                <div className="bg-indigo-100 dark:bg-indigo-500/10 p-3 rounded-full">
-                  <span className="text-3xl">🩺</span>
-                </div>
-                <h3 className="font-bold text-sm text-slate-900 dark:text-white">Health Check</h3>
-                <button className="w-full bg-slate-800 dark:bg-slate-700 text-white font-semibold py-2.5 rounded-full text-sm transition-transform hover:scale-105 active:scale-95">Try Now</button>
-              </div>
-
-              <div 
-                onClick={() => handleQuickAction('training')}
-                className="bg-white dark:bg-[#182c50] p-4 rounded-2xl text-center flex flex-col items-center justify-between space-y-3 shadow-lg shadow-blue-100/50 dark:shadow-black/20 relative overflow-hidden cursor-pointer hover:scale-105 transition-transform"
-              >
-                <div className="bg-green-100 dark:bg-green-500/10 p-3 rounded-full">
-                  <span className="text-3xl">🎓</span>
-                </div>
-                <h3 className="font-bold text-sm text-slate-900 dark:text-white">AI Training</h3>
-                <button className="w-full bg-slate-800 dark:bg-slate-700 text-white font-semibold py-2.5 rounded-full text-sm transition-transform hover:scale-105 active:scale-95">Start</button>
-              </div>
-
-              <div 
-                onClick={() => handleQuickAction('social')}
-                className="bg-white dark:bg-[#182c50] p-4 rounded-2xl text-center flex flex-col items-center justify-between space-y-3 shadow-lg shadow-blue-100/50 dark:shadow-black/20 relative overflow-hidden cursor-pointer hover:scale-105 transition-transform"
-              >
-                <div className="bg-rose-100 dark:bg-rose-500/10 p-3 rounded-full">
-                  <span className="text-3xl">❤️</span>
-                </div>
-                <h3 className="font-bold text-sm text-slate-900 dark:text-white">Pet Match</h3>
-                <button className="w-full bg-slate-800 dark:bg-slate-700 text-white font-semibold py-2.5 rounded-full text-sm transition-transform hover:scale-105 active:scale-95">Discover</button>
-              </div>
-            </div>
-          </section>
-        </main>
-
-        {/* Bottom Navigation */}
-        <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/70 dark:bg-[#0c1426]/70 backdrop-blur-xl border-t border-gray-200/80 dark:border-slate-800/80 rounded-t-3xl h-24">
-          <div className="flex justify-around items-center h-full px-2">
-            <a className="flex flex-col items-center text-center text-blue-500 dark:text-blue-400 space-y-1" href="#">
-              <span className="material-symbols-outlined">home</span>
-              <span className="text-[10px] font-bold">Home</span>
-            </a>
-            <a className="flex flex-col items-center text-center text-gray-400 dark:text-gray-500 space-y-1" href="#" onClick={(e) => { e.preventDefault(); onNavigate?.('training'); }}>
-              <span className="material-symbols-outlined">school</span>
-              <span className="text-[10px] font-medium">Training</span>
-            </a>
-            <a className="flex flex-col items-center text-center text-gray-400 dark:text-gray-500 space-y-1" href="#" onClick={(e) => { e.preventDefault(); onNavigate?.('memories'); }}>
-              <span className="material-symbols-outlined">photo_library</span>
-              <span className="text-[10px] font-medium">Memories</span>
-            </a>
-            <a className="flex flex-col items-center text-center" href="#" onClick={(e) => { e.preventDefault(); setActiveModal('camera'); }}>
-              <div className="w-16 h-16 -translate-y-8 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white shadow-lg shadow-orange-500/30 dark:shadow-orange-400/20 transition-transform hover:rotate-12 hover:scale-110">
-                <ScanLine className="w-8 h-8" />
-              </div>
-            </a>
-            <a className="flex flex-col items-center text-center text-gray-400 dark:text-gray-500 space-y-1" href="#" onClick={(e) => { e.preventDefault(); onNavigate?.('chat'); }}>
-              <span className="material-symbols-outlined">chat_bubble</span>
-              <span className="text-[10px] font-medium">Chat</span>
-            </a>
-            <a className="flex flex-col items-center text-center text-gray-400 dark:text-gray-500 space-y-1" href="#" onClick={(e) => { e.preventDefault(); onNavigate?.('community'); }}>
-              <span className="material-symbols-outlined">groups</span>
-              <span className="text-[10px] font-medium">Community</span>
-            </a>
-            <a className="flex flex-col items-center text-center text-gray-400 dark:text-gray-500 space-y-1" href="#" onClick={(e) => { e.preventDefault(); onNavigate?.('settings'); }}>
-              <span className="material-symbols-outlined">settings</span>
-              <span className="text-[10px] font-medium">Settings</span>
-            </a>
-          </div>
-        </nav>
-
-
-
-      </div>
+      
     </div>
   );
 };

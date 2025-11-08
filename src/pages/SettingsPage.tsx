@@ -16,7 +16,7 @@ import {
   Camera,
   X
 } from "lucide-react";
-import petLogo from "@/assets/pet-paradise-logo.png";
+// logo now served from public
 import { useSubscription } from "@/contexts/SubscriptionContext";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -57,6 +57,11 @@ const SettingsPage = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [legalDocOpen, setLegalDocOpen] = useState(false);
   const [legalDocType, setLegalDocType] = useState<'privacy' | 'terms' | 'references' | null>(null);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editSaving, setEditSaving] = useState(false);
 
   const handleEditProfile = () => {
     toast({
@@ -150,12 +155,22 @@ const SettingsPage = () => {
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('profile-images')
-        .getPublicUrl(fileName);
+      // Persist avatar path to profiles table
+      await (supabase as any).from('profiles').upsert({ id: userId, avatar_url: fileName }, { onConflict: 'id' });
 
-      setProfile({ ...profile, avatar: publicUrl });
+      // Create a signed URL (works for private buckets) with cache busting
+      const { data: signedData, error: signedErr } = await supabase.storage
+        .from('profile-images')
+        .createSignedUrl(fileName, 60 * 60);
+      if (signedErr || !signedData?.signedUrl) {
+        // Fallback to public URL if bucket is public
+        const { data: { publicUrl } } = supabase.storage
+          .from('profile-images')
+          .getPublicUrl(fileName);
+        setProfile({ ...profile, avatar: `${publicUrl}?t=${Date.now()}` });
+      } else {
+        setProfile({ ...profile, avatar: `${signedData.signedUrl}&t=${Date.now()}` });
+      }
 
       toast({
         title: "Success!",
@@ -392,165 +407,135 @@ Made with ❤️ for pets and their humans
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5F5F7] via-white to-[#F5F5F7] pb-24">
-      {/* Enhanced Header with Better Logo */}
-      <div className="bg-[#FF6B5A] text-white py-12 px-6 rounded-b-3xl shadow-2xl mb-8 relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-4 left-4 text-6xl">🐾</div>
-          <div className="absolute top-8 right-8 text-4xl">🐕</div>
-          <div className="absolute bottom-4 left-8 text-5xl">🐱</div>
-          <div className="absolute bottom-6 right-4 text-3xl">🐾</div>
-        </div>
-        
-        <div className="max-w-md mx-auto text-center relative z-10">
-          {/* Enhanced Logo */}
-          <div className="flex items-center justify-center gap-4 mb-4">
-            <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
-              <img 
-                src={petLogo} 
-                alt="PetParadise Logo" 
-                className="w-12 h-12 rounded-full"
-              />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-white">PetParadise</h1>
-              <p className="text-white/90 text-sm font-medium">AI Pet Companion</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <h2 className="text-2xl font-bold">Settings</h2>
-            <span className="text-3xl animate-bounce">⚙️</span>
-          </div>
-          <p className="text-white/90 text-sm">Manage your pet companion account</p>
+    <div className="min-h-screen bg-[#18181B] pb-24 text-[#F4F4F5]">
+      {/* Header */}
+      <div className="max-w-md mx-auto px-6 py-6">
+        <div className="flex flex-col items-center gap-3">
+          <img src="/app-logo.png" alt="PetParadise" className="w-14 h-14 rounded-xl" onError={(e)=>{(e.currentTarget as HTMLImageElement).src='/app-icon.png';}} />
+          <h1 className="text-3xl font-bold">Settings</h1>
         </div>
       </div>
 
       <div className="max-w-md mx-auto px-6 space-y-6">
-        {/* Enhanced Profile Section 🐶 */}
-        <Card className="border-0 shadow-lg bg-white rounded-3xl overflow-hidden hover:shadow-xl transition-all duration-300">
-          <CardContent className="p-8">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-16 h-16 rounded-full bg-[#FF6B5A] flex items-center justify-center shadow-lg">
-                <span className="text-3xl">🐶</span>
+        {/* Profile */}
+        <h2 className="text-xs font-semibold text-white uppercase tracking-wider px-1">Profile</h2>
+        <Card className="border border-[#3F3F46] bg-[#27272A] rounded-2xl overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-4">
+              {/* Avatar (click to upload) */}
+              <div
+                className="relative group cursor-pointer"
+                onClick={() => fileInputRef.current?.click()}
+                role="button"
+                aria-label="Change profile image"
+              >
+                {profile.avatar ? (
+                  <img
+                    src={profile.avatar}
+                    onError={async (e)=>{
+                      try {
+                        const { data: { session } } = await supabase.auth.getSession();
+                        if (!session) return;
+                        const userId = session.user.id;
+                        const guessExt = (profile.avatar || 'avatar.png').split('.').pop()?.split('?')[0] || 'png';
+                        const fileName = `${userId}/avatar.${guessExt}`;
+                        const { data } = await supabase.storage.from('profile-images').createSignedUrl(fileName, 3600);
+                        if (data?.signedUrl) {
+                          (e.currentTarget as HTMLImageElement).src = `${data.signedUrl}&t=${Date.now()}`;
+                        }
+                      } catch {}
+                    }}
+                    alt="Profile"
+                    className="w-16 h-16 rounded-full object-cover shadow-lg"
+                  />
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-[#3F3F46] flex items-center justify-center shadow-lg">
+                    <User className="text-white" size={24} />
+                  </div>
+                )}
+                <div className="absolute inset-0 rounded-full bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  {isUploading ? (
+                    <div className="w-5 h-5 border-2 border-white/80 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Camera size={20} className="text-white" />
+                  )}
+                </div>
               </div>
+              {/* Hidden file input to trigger uploads */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
               <div>
                 <div className="bg-[#1A3B5C] text-white px-4 py-2 rounded-xl inline-block mb-2">
                   <h2 className="text-lg font-bold">PROFILE</h2>
                 </div>
-                <p className="text-sm text-[#333333] font-medium">Manage your account details</p>
+                <p className="text-sm text-white font-medium">Manage your account details</p>
               </div>
+              <button
+                onClick={() => { setEditName(profile.name); setEditEmail(profile.email); setEditOpen(true); }}
+                className="ml-auto text-[#F97316] hover:opacity-90 p-2"
+                aria-label="Edit profile"
+              >
+                ✎
+              </button>
             </div>
-            
-            <div className="flex items-center gap-6 mb-8">
-              {/* Enhanced Avatar with Better Camera Button */}
-              <div className="relative group">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-                {profile.avatar ? (
-                  <div className="relative">
-                    <img 
-                      src={profile.avatar} 
-                      alt="Profile" 
-                      className="w-28 h-28 rounded-full object-cover shadow-xl"
-                    />
-                    <div className="absolute inset-0 rounded-full bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <Camera size={24} className="text-white" />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="w-28 h-28 rounded-full bg-[#FF6B5A] flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform">
-                    <User size={48} className="text-white" />
-                  </div>
-                )}
-                
-                {/* Enhanced Camera Button */}
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploading}
-                  className="absolute -bottom-2 -right-2 w-12 h-12 rounded-full bg-[#1A3B5C] text-white flex items-center justify-center shadow-lg hover:bg-[#1A3B5C]/90 transition-all disabled:opacity-50 hover:scale-110"
-                >
-                  {isUploading ? (
-                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <Camera size={20} />
-                  )}
-                </button>
-              </div>
-              
-              <div className="flex-1">
-                <div className="flex items-center gap-4 mb-3">
-                  <div className="w-10 h-10 rounded-full bg-[#1A3B5C] flex items-center justify-center">
-                    <User size={20} className="text-white" />
-                  </div>
-                  <p className="font-bold text-[#1A3B5C] text-xl">{profile.name}</p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-[#4CAF50] flex items-center justify-center">
-                    <Mail size={20} className="text-white" />
-                  </div>
-                  <p className="text-base text-[#333333] font-semibold">{profile.email}</p>
-                </div>
-              </div>
-            </div>
-
-            <Button 
-              onClick={handleEditProfile}
-              className="w-full rounded-full bg-[#1A3B5C] hover:bg-[#1A3B5C]/90 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 py-4 text-base"
-            >
-              <User className="w-5 h-5 mr-2" />
-              Edit Profile
-            </Button>
           </CardContent>
         </Card>
 
-        {/* Enhanced Account Management */}
-        <Card className="border-0 shadow-lg bg-white rounded-3xl overflow-hidden hover:shadow-xl transition-all duration-300">
-          <CardContent className="p-8">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-16 h-16 rounded-full bg-[#1A3B5C] flex items-center justify-center shadow-lg">
-                <span className="text-3xl">⚙️</span>
-              </div>
-              <div>
-                <div className="bg-[#1A3B5C] text-white px-4 py-2 rounded-xl inline-block mb-2">
-                  <h2 className="text-lg font-bold">ACCOUNT MANAGEMENT</h2>
+        {/* Notifications */}
+        <h2 className="text-xs font-semibold text-white uppercase tracking-wider px-1">Notifications</h2>
+        <Card className="border border-[#3F3F46] bg-[#27272A] rounded-2xl overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[#3F3F46] flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[#F97316]">notifications</span>
                 </div>
-                <p className="text-sm text-[#333333] font-medium">Manage your account settings</p>
+                <span className="font-medium text-white">Enable Notifications</span>
               </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" className="sr-only peer" checked={notificationsEnabled} onChange={(e)=>setNotificationsEnabled(e.target.checked)} />
+                <div className="w-11 h-6 bg-[#3F3F46] rounded-full peer-checked:bg-[#F97316] transition-colors"></div>
+                <div className="absolute top-[2px] left-[2px] h-5 w-5 bg-white rounded-full transition-transform peer-checked:translate-x-[20px]"></div>
+              </label>
             </div>
-            
-            <div className="space-y-6">
+          </CardContent>
+        </Card>
+
+        {/* Account Management */}
+        <h2 className="text-xs font-semibold text-white uppercase tracking-wider px-1">Account Management</h2>
+        <Card className="border border-[#3F3F46] bg-[#27272A] rounded-2xl overflow-hidden">
+          <CardContent className="p-6">
+            <div className="space-y-2">
               {/* Change Password */}
               <button
-                onClick={handleChangePassword}
-                className="w-full flex items-center justify-between p-6 rounded-2xl bg-[#F5F5F7] hover:bg-[#F5F5F7]/80 transition-all group border border-[#E8E8E8] hover:border-[#4CAF50]"
+                onClick={() => console.log('Change password')}
+                className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-[#1f1f22] transition-all group border border-[#3F3F46]"
               >
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-full bg-[#4CAF50] flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
-                    <Lock size={24} className="text-white" />
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-[#3F3F46] flex items-center justify-center">
+                    <Lock size={18} className="text-[#F4F4F5]" />
                   </div>
-                  <span className="font-bold text-[#1A3B5C] text-base">Change Password</span>
+                  <span className="font-medium text-[#F4F4F5] text-sm">Change Password</span>
                 </div>
-                <ChevronRight size={24} className="text-[#4CAF50] group-hover:text-[#4CAF50]/80 transition-colors" />
+                <ChevronRight size={18} className="text-[#A1A1AA]" />
               </button>
 
               {/* Delete Account */}
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <button className="w-full flex items-center justify-between p-6 rounded-2xl bg-[#F5F5F7] hover:bg-[#F5F5F7]/80 transition-all group border border-[#E8E8E8] hover:border-[#FF5252]">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-full bg-[#FF5252] flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
-                        <Trash2 size={24} className="text-white" />
+                  <button className="w-full flex items-center justify-between p-4 rounded-xl bg-transparent hover:bg-[#1f1f22] transition-all group border border-[#3F3F46]">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-[#3F3F46] flex items-center justify-center">
+                        <Trash2 size={18} className="text-red-400" />
                       </div>
-                      <span className="font-bold text-[#1A3B5C] text-base">Delete Account</span>
+                      <span className="font-medium text-red-400 text-sm">Delete Account</span>
                     </div>
-                    <ChevronRight size={24} className="text-[#FF5252] group-hover:text-[#FF5252]/80 transition-colors" />
+                    <ChevronRight size={18} className="text-[#A1A1AA]" />
                   </button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -573,158 +558,47 @@ Made with ❤️ for pets and their humans
               {/* Log Out */}
               <button
                 onClick={handleLogOut}
-                className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-pet-gray-light transition-all group"
+                className="w-full mt-2 text-center text-[#F97316] font-semibold py-3 border-2 border-[#F97316] rounded-xl hover:bg-[#F97316]/10 transition-colors"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-all">
-                    <LogOut size={20} className="text-gray-600" />
-                  </div>
-                  <span className="font-medium text-gray-600">Log Out</span>
-                </div>
-                <ChevronRight size={20} className="text-gray-400 group-hover:text-gray-600 transition-colors" />
+                Log Out
               </button>
             </div>
           </CardContent>
         </Card>
 
         {/* App Info & Legal */}
-        <Card className="border-2 border-pet-beige shadow-soft rounded-2xl overflow-hidden">
+        <h2 className="text-xs font-semibold text-white uppercase tracking-wider px-1">App Info & Legal</h2>
+        <Card className="border border-[#3F3F46] bg-[#27272A] rounded-2xl overflow-hidden">
           <CardContent className="p-6">
-            <h2 className="text-xl font-bold text-pet-orange mb-4">App Info & Legal</h2>
-            
             <div className="space-y-3">
               {/* Privacy Policy */}
               <button
                 onClick={handlePrivacyPolicy}
-                className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-pet-beige transition-all group"
+                className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-[#1f1f22] transition-all group border border-[#3F3F46]"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-pet-orange/10 flex items-center justify-center group-hover:bg-pet-orange/20 transition-all">
-                    <Shield size={20} className="text-pet-orange" />
+                  <div className="w-10 h-10 rounded-lg bg-[#3F3F46] flex items-center justify-center">
+                    <Shield size={18} className="text-[#F97316]" />
                   </div>
-                  <span className="font-medium text-gray-800">Privacy Policy</span>
+                  <span className="font-medium text-[#F4F4F5]">Privacy Policy</span>
                 </div>
-                <ChevronRight size={20} className="text-gray-400 group-hover:text-pet-orange transition-colors" />
+                <ChevronRight size={18} className="text-[#A1A1AA]" />
               </button>
 
               {/* Terms of Service */}
               <button
                 onClick={handleTermsOfUse}
-                className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-pet-beige transition-all group"
+                className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-[#1f1f22] transition-all group border border-[#3F3F46]"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-pet-orange/10 flex items-center justify-center group-hover:bg-pet-orange/20 transition-all">
-                    <FileText size={20} className="text-pet-orange" />
+                  <div className="w-10 h-10 rounded-lg bg-[#3F3F46] flex items-center justify-center">
+                    <FileText size={18} className="text-[#F97316]" />
                   </div>
-                  <span className="font-medium text-gray-800">Terms of Service</span>
+                  <span className="font-medium text-[#F4F4F5]">Terms of Service</span>
                 </div>
-                <ChevronRight size={20} className="text-gray-400 group-hover:text-pet-orange transition-colors" />
+                <ChevronRight size={18} className="text-[#A1A1AA]" />
               </button>
-
-              {/* References */}
-              <button
-                onClick={handleReferences}
-                className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-pet-beige transition-all group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-pet-orange/10 flex items-center justify-center group-hover:bg-pet-orange/20 transition-all">
-                    <BookOpen size={20} className="text-pet-orange" />
-                  </div>
-                  <span className="font-medium text-gray-800">References</span>
-                </div>
-                <ChevronRight size={20} className="text-gray-400 group-hover:text-pet-orange transition-colors" />
-              </button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Community & Rewards 🎁 */}
-        <Card className="border-0 shadow-floating rounded-2xl overflow-hidden bg-gradient-to-br from-pet-orange to-pet-orange-light">
-          <CardContent className="p-6">
-            <button
-              onClick={handleReferFriend}
-              className="w-full text-left"
-            >
-              <div className="flex items-start gap-4">
-                <div className="w-14 h-14 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center shrink-0">
-                  <Gift size={28} className="text-white" />
-                </div>
-                
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-xl font-bold text-white">Refer a Friend</h3>
-                    <span className="text-2xl">🎁</span>
-                  </div>
-                  <p className="text-white/90 text-sm mb-3">
-                    Invite other pet lovers and earn rewards!
-                  </p>
-                  <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-                    <Heart size={16} className="text-white" />
-                    <span className="text-white text-sm font-medium">Share the love</span>
-                    <ChevronRight size={16} className="text-white" />
-                  </div>
-                </div>
-              </div>
-            </button>
-          </CardContent>
-        </Card>
-
-        {/* Enhanced App Info Footer */}
-        <Card className="border-2 border-purple-200 shadow-xl bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300">
-          <CardContent className="p-8">
-            <div className="text-center space-y-6">
-              {/* Gift Box Icon */}
-              <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-xl border-4 border-white">
-                <Gift size={32} className="text-white" />
-              </div>
               
-              {/* App Logo and Info */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-center gap-4">
-                  <img 
-                    src={petLogo} 
-                    alt="Pet Paradise" 
-                    className="w-16 h-16 rounded-2xl shadow-lg border-4 border-white"
-                  />
-                  <div className="text-left">
-                    <h3 className="text-2xl font-bold text-slate-800">Pet Paradise</h3>
-                    <p className="text-sm text-slate-600 font-medium">AI Pet Companion</p>
-                  </div>
-                </div>
-                
-                {/* Version Badge */}
-                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded-full shadow-lg">
-                  <span className="text-sm font-semibold">Version 1.0.0</span>
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                </div>
-                
-                {/* Tagline */}
-                <div className="flex items-center justify-center gap-2 text-slate-600">
-                  <span className="text-sm font-medium">Made with</span>
-                  <span className="text-red-500 text-lg animate-pulse">❤️</span>
-                  <span className="text-sm font-medium">for pet lovers everywhere</span>
-                </div>
-              </div>
-              
-              {/* Feature Highlights */}
-              <div className="grid grid-cols-2 gap-3 mt-6">
-                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-purple-200">
-                  <div className="text-2xl mb-1">🎤</div>
-                  <p className="text-xs font-semibold text-slate-700">AI Translation</p>
-                </div>
-                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-purple-200">
-                  <div className="text-2xl mb-1">🐶</div>
-                  <p className="text-xs font-semibold text-slate-700">Pet Training</p>
-                </div>
-                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-purple-200">
-                  <div className="text-2xl mb-1">📸</div>
-                  <p className="text-xs font-semibold text-slate-700">Mood Detection</p>
-                </div>
-                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-purple-200">
-                  <div className="text-2xl mb-1">🌟</div>
-                  <p className="text-xs font-semibold text-slate-700">AI Insights</p>
-                </div>
-              </div>
             </div>
           </CardContent>
         </Card>
@@ -768,6 +642,77 @@ Made with ❤️ for pets and their humans
               })}
             </div>
           </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Profile Dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="max-w-md bg-[#27272A] text-white border border-[#3F3F46]">
+          <DialogHeader>
+            <DialogTitle>Edit Profile</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm text-[#A1A1AA]">Full Name</label>
+              <input
+                value={editName}
+                onChange={(e)=>setEditName(e.target.value)}
+                className="mt-1 w-full rounded-md bg-[#1F1F22] border border-[#3F3F46] p-2 text-white"
+              />
+            </div>
+            <div>
+              <label className="text-sm text-[#A1A1AA]">Email</label>
+              <input
+                type="email"
+                value={editEmail}
+                onChange={(e)=>setEditEmail(e.target.value)}
+                className="mt-1 w-full rounded-md bg-[#1F1F22] border border-[#3F3F46] p-2 text-white"
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="ghost" onClick={()=>setEditOpen(false)} className="text-[#A1A1AA]">Cancel</Button>
+              <Button
+                disabled={editSaving}
+                onClick={async ()=>{
+                  try {
+                    setEditSaving(true);
+                    const newName = editName.trim();
+                    const newEmail = editEmail.trim();
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (!session) throw new Error('Not signed in');
+                    const userId = session.user.id;
+
+                    // Update auth email if changed
+                    if (newEmail && newEmail !== profile.email) {
+                      const { error: authErr } = await supabase.auth.updateUser({ email: newEmail });
+                      if (authErr) throw authErr;
+                      toast({ title: 'Email update requested', description: 'Check your inbox to confirm the new email.' });
+                    }
+
+                    // Upsert to profiles table
+                    const payload: any = { id: userId };
+                    if (newEmail) payload.email = newEmail;
+                    if (newName) payload.full_name = newName;
+                    const { error: upsertErr } = await (supabase as any)
+                      .from('profiles')
+                      .upsert(payload, { onConflict: 'id' });
+                    if (upsertErr) throw upsertErr;
+
+                    setProfile({ ...profile, name: newName || profile.name, email: newEmail || profile.email });
+                    setEditOpen(false);
+                    toast({ title: 'Profile updated' });
+                  } catch (e: any) {
+                    toast({ title: 'Update failed', description: e?.message || 'Could not save profile', variant: 'destructive' });
+                  } finally {
+                    setEditSaving(false);
+                  }
+                }}
+                className="bg-[#F97316] text-white hover:opacity-95"
+              >
+                {editSaving ? 'Saving...' : 'Save'}
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

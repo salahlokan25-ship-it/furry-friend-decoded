@@ -12,9 +12,11 @@ import MemoriesPage from "@/pages/MemoriesPage";
 import ChatPage from "@/pages/ChatPage";
 import SettingsPage from "@/pages/SettingsPage";
 import CommunityPage from "@/pages/CommunityPage";
+import AuthPage from "@/pages/AuthPage";
 import OnboardingQuiz, { QuizResults } from "@/components/OnboardingQuiz";
 import SubscriptionPlans from "@/components/SubscriptionPlans";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const queryClient = new QueryClient();
 
@@ -23,18 +25,59 @@ const App = () => {
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [showSubscriptionPlans, setShowSubscriptionPlans] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [sessionUserId, setSessionUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check if user has completed onboarding
-    const onboardingCompleted = localStorage.getItem("petparadise-onboarding-completed");
-    const subscriptionSeen = localStorage.getItem("petparadise-subscription-seen");
-    
-    if (onboardingCompleted && !subscriptionSeen) {
-      setShowSubscriptionPlans(true);
-    } else {
+    // Track auth session
+    supabase.auth.getSession().then(({ data }) => {
+      setSessionUserId(data.session?.user?.id ?? null);
+      // Compute flags at startup
+      const onboardingCompleted = localStorage.getItem("petparadise-onboarding-completed");
+      const subscriptionSeen = localStorage.getItem("petparadise-subscription-seen");
       setHasCompletedOnboarding(!!onboardingCompleted);
-    }
-    setIsLoading(false);
+      setShowSubscriptionPlans(!!onboardingCompleted && !subscriptionSeen);
+      setIsLoading(false);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, sess) => {
+      setSessionUserId(sess?.user?.id ?? null);
+      // Recompute on auth change (e.g., re-login without reload)
+      const onboardingCompleted = localStorage.getItem("petparadise-onboarding-completed");
+      const subscriptionSeen = localStorage.getItem("petparadise-subscription-seen");
+      setHasCompletedOnboarding(!!onboardingCompleted);
+      setShowSubscriptionPlans(!!onboardingCompleted && !subscriptionSeen);
+      if (sess?.user?.id) setActiveTab("home");
+    });
+
+    return () => {
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  // Listen for global navigation/auth events
+  useEffect(() => {
+    const openAuth = () => setActiveTab("auth");
+    const onAuthSuccess = (e: any) => {
+      const signup = !!e?.detail?.signup;
+      const onboardingCompleted = localStorage.getItem("petparadise-onboarding-completed");
+      const subscriptionSeen = localStorage.getItem("petparadise-subscription-seen");
+      if (signup) {
+        // Show quiz next
+        setHasCompletedOnboarding(false);
+        setShowSubscriptionPlans(false);
+        setActiveTab("home");
+      } else {
+        // Returning login: if quiz done and plans not seen -> show plans
+        setHasCompletedOnboarding(!!onboardingCompleted);
+        setShowSubscriptionPlans(!!onboardingCompleted && !subscriptionSeen);
+        setActiveTab("home");
+      }
+    };
+    window.addEventListener("open-auth", openAuth as any);
+    window.addEventListener("auth-success", onAuthSuccess as any);
+    return () => {
+      window.removeEventListener("open-auth", openAuth as any);
+      window.removeEventListener("auth-success", onAuthSuccess as any);
+    };
   }, []);
 
   const handleOnboardingComplete = (results: QuizResults) => {
@@ -75,6 +118,8 @@ const App = () => {
         return <ChatPage />;
       case "community":
         return <CommunityPage />;
+      case "auth":
+        return <AuthPage onDone={() => setActiveTab("community")} />;
       case "settings":
         return <SettingsPage />;
       default:
@@ -93,6 +138,21 @@ const App = () => {
               <p className="text-muted-foreground">Loading PetParadise...</p>
             </div>
           </div>
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  }
+
+  // Always require authentication before opening the app
+  if (!sessionUserId) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <SubscriptionProvider>
+            <Toaster />
+            <Sonner />
+            <AuthPage onDone={() => setActiveTab("home")} />
+          </SubscriptionProvider>
         </TooltipProvider>
       </QueryClientProvider>
     );

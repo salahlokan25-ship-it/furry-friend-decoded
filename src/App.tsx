@@ -222,7 +222,7 @@ const App = () => {
         <SubscriptionProvider>
           <Toaster />
           <Sonner />
-          <div className="relative pb-24">
+          <div className="relative">
             {renderActivePage()}
             <BottomNavigation 
               activeTab={activeTab} 

@@ -164,7 +164,7 @@ const ChatPage = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user?.id) return;
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('chat_messages')
         .insert([{
           user_id: session.user.id,

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { PawPrint } from "lucide-react";
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -8,119 +9,35 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
   const [fadeOut, setFadeOut] = useState(false);
 
   useEffect(() => {
-    // Start fade out animation after 2.5 seconds
-    const timer = setTimeout(() => {
-      setFadeOut(true);
-    }, 2500);
-
-    // Complete and hide splash screen after fade out
-    const completeTimer = setTimeout(() => {
-      onComplete();
-    }, 3500);
-
+    const fadeTimer = setTimeout(() => setFadeOut(true), 1800);
+    const completeTimer = setTimeout(() => onComplete(), 2200);
+    
     return () => {
-      clearTimeout(timer);
+      clearTimeout(fadeTimer);
       clearTimeout(completeTimer);
     };
   }, [onComplete]);
 
   return (
-    <div
-      className={`fixed inset-0 z-[9999] flex items-center justify-center bg-gradient-to-br from-[#F97316] via-[#FF8C42] to-[#FFA500] transition-opacity duration-1000 ${
-        fadeOut ? "opacity-0" : "opacity-100"
-      }`}
+    <div 
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-background transition-opacity duration-500 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}
     >
-      <div className="flex flex-col items-center justify-center space-y-6 animate-fade-in">
-        {/* Animated Logo */}
-        <div className="relative">
-          <div className="absolute inset-0 animate-ping">
-            <div className="w-32 h-32 rounded-3xl bg-white/30"></div>
-          </div>
-          <div className="relative w-32 h-32 rounded-3xl overflow-hidden bg-white shadow-2xl animate-bounce-slow">
-            <img
-              src="/app-logo.png"
-              alt="PetParadise Logo"
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                const img = e.currentTarget as HTMLImageElement;
-                if (img.src.indexOf('/app-icon.png') === -1) {
-                  img.src = '/app-icon.png';
-                }
-              }}
-            />
-          </div>
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent-teal/5" />
+      
+      <div className="relative flex flex-col items-center animate-scale-in">
+        <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center shadow-primary mb-6">
+          <PawPrint className="w-12 h-12 text-primary-foreground" />
         </div>
-
-        {/* Animated Title */}
-        <div className="text-center space-y-2">
-          <h1 className="text-5xl font-bold text-white tracking-tight animate-slide-up">
-            PetParadise
-          </h1>
-          <p className="text-white/90 text-lg font-medium animate-slide-up-delay">
-            Your Pet's Best Friend
-          </p>
-        </div>
-
-        {/* Loading Dots */}
-        <div className="flex space-x-2 animate-fade-in-delay">
-          <div className="w-3 h-3 bg-white rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
-          <div className="w-3 h-3 bg-white rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
-          <div className="w-3 h-3 bg-white rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
+        
+        <h1 className="text-3xl font-bold text-foreground tracking-tight mb-2">PetParadise</h1>
+        <p className="text-muted-foreground text-sm">Your pet's best companion</p>
+        
+        <div className="mt-8 flex gap-1.5">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="w-2 h-2 rounded-full bg-primary animate-pulse" style={{ animationDelay: `${i * 0.15}s` }} />
+          ))}
         </div>
       </div>
-
-      <style>{`
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: scale(0.8);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-
-        @keyframes slide-up {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes bounce-slow {
-          0%, 100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-10px);
-          }
-        }
-
-        .animate-fade-in {
-          animation: fade-in 0.8s ease-out;
-        }
-
-        .animate-fade-in-delay {
-          animation: fade-in 0.8s ease-out 0.3s backwards;
-        }
-
-        .animate-slide-up {
-          animation: slide-up 0.8s ease-out 0.4s backwards;
-        }
-
-        .animate-slide-up-delay {
-          animation: slide-up 0.8s ease-out 0.6s backwards;
-        }
-
-        .animate-bounce-slow {
-          animation: bounce-slow 2s ease-in-out infinite;
-        }
-      `}</style>
     </div>
   );
 };

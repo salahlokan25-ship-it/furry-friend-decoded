@@ -2,219 +2,249 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ========================================
+   PETPARADISE PROFESSIONAL DESIGN SYSTEM
+   Modern, Clean, Sophisticated
+   ======================================== */
+
 /* Custom Animations */
 @keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes bounce-slow {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 5px rgba(251, 146, 60, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(251, 146, 60, 0.6);
-  }
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
-@keyframes gradient-bg {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 .animate-fade-in {
-  animation: fade-in 0.6s ease-out;
+  animation: fade-in 0.4s ease-out;
 }
 
 .animate-slide-up {
-  animation: slide-up 0.8s ease-out;
+  animation: slide-up 0.5s ease-out;
 }
 
-.animate-bounce-slow {
-  animation: bounce-slow 2s ease-in-out infinite;
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out;
 }
 
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
 }
 
-.animate-gradient-bg {
-  background-size: 200% 200%;
-  animation: gradient-bg 8s ease infinite;
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, hsl(var(--muted)/0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
 }
 
-/* PetParadise Design System - Professional Dog Training App Theme
-Based on the provided design system JSON
-*/
+/* Glass morphism utilities */
+.glass {
+  background: hsl(var(--card) / 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
 
-/* Subtle background pattern to reduce white appearance */
-.bg-pattern {
-  background-image: 
-    radial-gradient(circle at 20% 80%, rgba(255, 107, 90, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(184, 167, 232, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(255, 224, 132, 0.03) 0%, transparent 50%);
+.glass-strong {
+  background: hsl(var(--card) / 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Gradient utilities */
+.gradient-primary {
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-glow)) 100%);
+}
+
+.gradient-accent {
+  background: linear-gradient(135deg, hsl(var(--accent-teal)) 0%, hsl(var(--accent-emerald)) 100%);
+}
+
+.gradient-surface {
+  background: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--surface-elevated)) 100%);
+}
+
+/* Text gradient */
+.text-gradient {
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-glow)) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 @layer base {
   :root {
-    /* Design System Color Palette */
-    --primary-coral: 6 100% 65%; /* #FF6B5A - Primary coral/salmon orange */
-    --secondary-navy: 210 50% 25%; /* #1A3B5C - Deep navy blue */
-    --accent-purple: 260 60% 75%; /* #B8A7E8 - Purple accent */
-    --accent-yellow: 45 100% 70%; /* #FFE084 - Yellow accent */
-    --accent-light-blue: 180 60% 80%; /* #A8E6E3 - Light blue accent */
+    /* ========================================
+       LIGHT MODE (Default)
+       Clean, minimal, sophisticated
+       ======================================== */
     
-    /* Neutral Colors */
-    --neutral-white: 0 0% 100%; /* #FFFFFF */
-    --neutral-light-gray: 0 0% 96%; /* #F5F5F7 */
-    --neutral-medium-gray: 0 0% 91%; /* #E8E8E8 */
-    --neutral-dark-gray: 0 0% 20%; /* #333333 */
-    
-    /* Semantic Colors */
-    --semantic-success: 120 60% 50%; /* #4CAF50 */
-    --semantic-error: 0 100% 60%; /* #FF5252 */
-    --semantic-warning: 45 100% 50%; /* #FFC107 */
-    
-    /* Design System Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary-coral)) 0%, hsl(var(--primary-coral) / 0.8) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary-navy)) 0%, hsl(var(--secondary-navy) / 0.9) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(var(--accent-purple)) 0%, hsl(var(--accent-yellow)) 100%);
-    
-    /* Design System Shadows */
-    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
-    --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
-    --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.16);
-    
-    /* Design System Spacing (8px base unit) */
-    --spacing-xs: 8px;
-    --spacing-sm: 12px;
-    --spacing-md: 16px;
-    --spacing-lg: 24px;
-    --spacing-xl: 32px;
-    --spacing-xxl: 48px;
-    
-    /* Design System Border Radius */
-    --radius-small: 8px;
-    --radius-medium: 12px;
-    --radius-large: 16px;
-    --radius-xlarge: 24px;
-    --radius-pill: 999px;
-    
-    /* Animation */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    
-    /* Dark theme as default */
-    --background: 120 36% 10%;
-    --foreground: 210 20% 98%;
-
-    --card: 120 28% 14%;
-    --card-foreground: 210 20% 98%;
-
-    --popover: 120 28% 14%;
-    --popover-foreground: 210 20% 98%;
-
-    --primary: 11 100% 68%;
+    /* Core brand colors */
+    --primary: 15 90% 55%; /* Warm orange #F97316 */
     --primary-foreground: 0 0% 100%;
-
-    --secondary: 166 100% 39%;
-    --secondary-foreground: 0 0% 100%;
-
-    --muted: 120 28% 20%;
-    --muted-foreground: 120 18% 67%;
-
-    --accent: 120 28% 20%;
-    --accent-foreground: 210 20% 98%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 120 28% 25%;
-    --input: 120 28% 25%;
-    --ring: 11 100% 68%;
-
-    --radius: 0.5rem;
-
+    --primary-glow: 25 95% 60%; /* Lighter orange for gradients */
+    --primary-muted: 15 80% 95%; /* Very light orange tint */
+    
+    /* Accent colors */
+    --accent-teal: 168 80% 40%;
+    --accent-emerald: 155 75% 45%;
+    --accent-violet: 262 80% 60%;
+    --accent-rose: 350 80% 60%;
+    
+    /* Background hierarchy */
+    --background: 0 0% 100%; /* Pure white */
+    --surface: 210 20% 98%; /* Very subtle gray */
+    --surface-elevated: 210 15% 96%; /* Slightly darker for cards */
+    
+    /* Foreground hierarchy */
+    --foreground: 220 25% 10%; /* Near black */
+    --foreground-secondary: 220 15% 40%; /* Medium gray */
+    --foreground-muted: 220 10% 55%; /* Light gray */
+    
+    /* Component tokens */
+    --card: 0 0% 100%;
+    --card-foreground: 220 25% 10%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 25% 10%;
+    
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 220 20% 25%;
+    
+    --muted: 210 15% 94%;
+    --muted-foreground: 220 10% 50%;
+    
+    --accent: 210 20% 96%;
+    --accent-foreground: 220 25% 10%;
+    
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --success: 145 70% 45%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 38 95% 55%;
+    --warning-foreground: 38 95% 15%;
+    
+    /* Borders and inputs */
+    --border: 220 15% 90%;
+    --input: 220 15% 90%;
+    --ring: 15 90% 55%;
+    
+    /* Radius */
+    --radius: 0.75rem;
+    
+    /* Shadows */
+    --shadow-xs: 0 1px 2px hsl(220 25% 10% / 0.04);
+    --shadow-sm: 0 2px 4px hsl(220 25% 10% / 0.06);
+    --shadow-md: 0 4px 12px hsl(220 25% 10% / 0.08);
+    --shadow-lg: 0 8px 24px hsl(220 25% 10% / 0.12);
+    --shadow-xl: 0 16px 48px hsl(220 25% 10% / 0.16);
+    --shadow-primary: 0 8px 24px hsl(15 90% 55% / 0.25);
+    
+    /* Sidebar */
     --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-foreground: 220 15% 40%;
+    --sidebar-primary: 15 90% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 20% 96%;
+    --sidebar-accent-foreground: 220 25% 10%;
+    --sidebar-border: 220 15% 90%;
+    --sidebar-ring: 15 90% 55%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    /* ========================================
+       DARK MODE
+       Deep, rich, professional
+       ======================================== */
+    
+    /* Core brand colors */
+    --primary: 20 95% 60%; /* Slightly warmer orange in dark mode */
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 30 95% 65%;
+    --primary-muted: 20 80% 15%;
+    
+    /* Accent colors */
+    --accent-teal: 168 70% 50%;
+    --accent-emerald: 155 65% 55%;
+    --accent-violet: 262 75% 70%;
+    --accent-rose: 350 75% 65%;
+    
+    /* Background hierarchy - Rich dark tones */
+    --background: 220 20% 8%; /* Deep navy-black */
+    --surface: 220 18% 11%; /* Slightly lighter */
+    --surface-elevated: 220 16% 14%; /* Card background */
+    
+    /* Foreground hierarchy */
+    --foreground: 210 20% 98%; /* Near white */
+    --foreground-secondary: 215 15% 70%; /* Medium gray */
+    --foreground-muted: 215 10% 50%; /* Muted gray */
+    
+    /* Component tokens */
+    --card: 220 18% 12%;
+    --card-foreground: 210 20% 98%;
+    
+    --popover: 220 18% 12%;
+    --popover-foreground: 210 20% 98%;
+    
+    --secondary: 220 16% 18%;
+    --secondary-foreground: 210 15% 85%;
+    
+    --muted: 220 16% 18%;
+    --muted-foreground: 215 12% 55%;
+    
+    --accent: 220 16% 18%;
+    --accent-foreground: 210 20% 98%;
+    
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --success: 145 60% 50%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 38 90% 55%;
+    --warning-foreground: 0 0% 100%;
+    
+    /* Borders and inputs */
+    --border: 220 15% 20%;
+    --input: 220 15% 20%;
+    --ring: 20 95% 60%;
+    
+    /* Shadows */
+    --shadow-xs: 0 1px 2px hsl(0 0% 0% / 0.2);
+    --shadow-sm: 0 2px 4px hsl(0 0% 0% / 0.25);
+    --shadow-md: 0 4px 12px hsl(0 0% 0% / 0.3);
+    --shadow-lg: 0 8px 24px hsl(0 0% 0% / 0.4);
+    --shadow-xl: 0 16px 48px hsl(0 0% 0% / 0.5);
+    --shadow-primary: 0 8px 24px hsl(20 95% 60% / 0.2);
+    
+    /* Sidebar */
+    --sidebar-background: 220 20% 8%;
+    --sidebar-foreground: 215 15% 70%;
+    --sidebar-primary: 20 95% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 220 16% 18%;
+    --sidebar-accent-foreground: 210 20% 98%;
+    --sidebar-border: 220 15% 20%;
+    --sidebar-ring: 20 95% 60%;
   }
 }
 
@@ -223,7 +253,82 @@ Based on the provided design system JSON
     @apply border-border;
   }
 
+  html {
+    @apply antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
+}
+
+@layer components {
+  /* Professional card styles */
+  .card-elevated {
+    @apply bg-card rounded-2xl border border-border/50;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  
+  .card-elevated:hover {
+    box-shadow: var(--shadow-md);
+  }
+  
+  .card-interactive {
+    @apply card-elevated cursor-pointer;
+  }
+  
+  .card-interactive:hover {
+    @apply scale-[1.01];
+    box-shadow: var(--shadow-lg);
+  }
+  
+  /* Button enhancements */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground font-medium;
+    box-shadow: var(--shadow-primary);
+    transition: all 0.2s ease;
+  }
+  
+  .btn-primary:hover {
+    @apply brightness-110;
+    box-shadow: 0 12px 32px hsl(var(--primary) / 0.35);
+    transform: translateY(-1px);
+  }
+  
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+  
+  /* Section headers */
+  .section-title {
+    @apply text-lg font-semibold text-foreground tracking-tight;
+  }
+  
+  .section-subtitle {
+    @apply text-sm text-muted-foreground;
+  }
+  
+  /* Icon containers */
+  .icon-container {
+    @apply flex items-center justify-center rounded-xl;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.1), hsl(var(--primary) / 0.05));
+  }
+  
+  .icon-container-accent {
+    @apply flex items-center justify-center rounded-xl;
+    background: linear-gradient(135deg, hsl(var(--accent-teal) / 0.1), hsl(var(--accent-emerald) / 0.05));
+  }
+}
+
+/* Safe area for mobile devices */
+.safe-area-pb {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.safe-area-pt {
+  padding-top: max(1rem, env(safe-area-inset-top));
 }

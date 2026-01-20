@@ -10,14 +10,12 @@ import {
   Loader2,
   Utensils,
   Stethoscope,
-  TrendingUp,
   ChevronRight,
   Image,
-  Activity,
-  Calendar,
   Star,
   Zap
 } from "lucide-react";
+import PetProfileCard from "@/components/PetProfileCard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -271,15 +269,8 @@ const Index = ({ onNavigate }: IndexProps) => {
     { id: 'training', icon: PawPrint, label: 'Training', description: 'Learn tricks', gradient: 'from-warning to-primary' },
   ];
 
-  const stats = [
-    { label: 'Health Score', value: '95%', icon: Heart, color: 'text-success', bg: 'bg-success/10' },
-    { label: 'Activity', value: 'High', icon: Activity, color: 'text-primary', bg: 'bg-primary/10' },
-    { label: 'Mood', value: 'Happy', icon: Sparkles, color: 'text-warning', bg: 'bg-warning/10' },
-    { label: 'Next Checkup', value: '14 days', icon: Calendar, color: 'text-accent-violet', bg: 'bg-accent-violet/10' },
-  ];
-
   const tips = [
-    { title: 'Daily Walk', description: '30 min walk keeps your pet healthy and happy', icon: TrendingUp },
+    { title: 'Daily Walk', description: '30 min walk keeps your pet healthy and happy', icon: Sparkles },
     { title: 'Hydration', description: 'Fresh water available at all times', icon: Zap },
     { title: 'Play Time', description: '15 min interactive play daily', icon: Star },
   ];
@@ -306,65 +297,12 @@ const Index = ({ onNavigate }: IndexProps) => {
       </header>
 
       <main className="px-5 py-6 pb-28 space-y-6">
-        {/* Hero Card */}
+        {/* Pet Profile Card */}
         <section className="animate-fade-in">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-surface-elevated via-surface to-surface-elevated border border-border/50">
-            {/* Ambient glow effects */}
-            <div className="absolute top-0 right-0 w-40 h-40 bg-primary/15 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-accent-teal/10 rounded-full blur-2xl" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-accent-violet/5 rounded-full blur-3xl" />
-            
-            <div className="relative p-6">
-              <div className="flex items-start justify-between mb-5">
-                <div>
-                  <Badge className="bg-primary/15 text-primary border-primary/25 mb-3 font-medium">
-                    <Sparkles className="w-3 h-3 mr-1.5" />
-                    AI Powered
-                  </Badge>
-                  <h2 className="text-2xl font-bold text-foreground mb-1.5">Your Pets Are Happy!</h2>
-                  <p className="text-muted-foreground text-sm">Everything looks great today</p>
-                </div>
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center shadow-primary">
-                  <Heart className="w-8 h-8 text-primary-foreground" />
-                </div>
-              </div>
-              
-              <div className="flex gap-3">
-                <Button 
-                  size="sm" 
-                  onClick={() => handleQuickAction('camera')}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-primary font-medium"
-                >
-                  <Camera className="w-4 h-4 mr-2" />
-                  Scan Mood
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => onNavigate?.('chat')}
-                  className="border-border/60 bg-surface-elevated/50 text-foreground hover:bg-muted hover:border-border"
-                >
-                  <Mic className="w-4 h-4 mr-2" />
-                  Ask AI
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Stats Grid */}
-        <section className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
-          <div className="grid grid-cols-4 gap-2.5">
-            {stats.map((stat) => (
-              <div key={stat.label} className="bg-surface-elevated rounded-2xl p-3.5 border border-border/40 text-center group hover:border-primary/30 transition-all duration-200">
-                <div className={`w-9 h-9 rounded-xl ${stat.bg} flex items-center justify-center mx-auto mb-2.5 group-hover:scale-105 transition-transform`}>
-                  <stat.icon className={`w-4 h-4 ${stat.color}`} />
-                </div>
-                <p className="text-sm font-bold text-foreground">{stat.value}</p>
-                <p className="text-2xs text-muted-foreground truncate mt-0.5">{stat.label}</p>
-              </div>
-            ))}
-          </div>
+          <PetProfileCard 
+            onScanMood={() => handleQuickAction('camera')}
+            onEditProfile={() => toast.info("Edit profile coming soon!")}
+          />
         </section>
 
         {/* Quick Actions */}

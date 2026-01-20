@@ -287,26 +287,20 @@ const Index = ({ onNavigate }: IndexProps) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-card/80 backdrop-blur-xl border-b border-border/50">
+      <header className="sticky top-0 z-40 bg-surface/90 backdrop-blur-2xl border-b border-border/40">
         <div className="flex items-center justify-between px-5 py-4">
           <div className="flex items-center gap-3">
-            <img 
-              src="/app-logo.png" 
-              alt="PetParadise" 
-              className="w-10 h-10 rounded-xl object-cover"
-              onError={(e) => {
-                const img = e.currentTarget;
-                img.style.display = 'none';
-              }}
-            />
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center shadow-primary">
+              <PawPrint className="w-6 h-6 text-primary-foreground" />
+            </div>
             <div>
               <h1 className="text-lg font-bold text-foreground tracking-tight">PetParadise</h1>
-              <p className="text-xs text-muted-foreground">Welcome back!</p>
+              <p className="text-xs text-muted-foreground">AI Pet Companion</p>
             </div>
           </div>
-          <button className="relative w-10 h-10 rounded-full bg-surface-elevated flex items-center justify-center hover:bg-muted transition-colors">
-            <Bell className="w-5 h-5 text-muted-foreground" />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full" />
+          <button className="relative w-11 h-11 rounded-xl bg-surface-elevated border border-border/50 flex items-center justify-center hover:bg-muted transition-all duration-200 group">
+            <Bell className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-primary rounded-full ring-2 ring-surface" />
           </button>
         </div>
       </header>
@@ -314,18 +308,20 @@ const Index = ({ onNavigate }: IndexProps) => {
       <main className="px-5 py-6 pb-28 space-y-6">
         {/* Hero Card */}
         <section className="animate-fade-in">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-accent-teal/10 border border-primary/10">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-accent-teal/10 rounded-full blur-2xl" />
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-surface-elevated via-surface to-surface-elevated border border-border/50">
+            {/* Ambient glow effects */}
+            <div className="absolute top-0 right-0 w-40 h-40 bg-primary/15 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-accent-teal/10 rounded-full blur-2xl" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-accent-violet/5 rounded-full blur-3xl" />
             
             <div className="relative p-6">
-              <div className="flex items-start justify-between mb-4">
+              <div className="flex items-start justify-between mb-5">
                 <div>
-                  <Badge className="bg-primary/10 text-primary border-primary/20 mb-3">
-                    <Sparkles className="w-3 h-3 mr-1" />
+                  <Badge className="bg-primary/15 text-primary border-primary/25 mb-3 font-medium">
+                    <Sparkles className="w-3 h-3 mr-1.5" />
                     AI Powered
                   </Badge>
-                  <h2 className="text-2xl font-bold text-foreground mb-1">Your Pets Are Happy!</h2>
+                  <h2 className="text-2xl font-bold text-foreground mb-1.5">Your Pets Are Happy!</h2>
                   <p className="text-muted-foreground text-sm">Everything looks great today</p>
                 </div>
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center shadow-primary">
@@ -333,11 +329,11 @@ const Index = ({ onNavigate }: IndexProps) => {
                 </div>
               </div>
               
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <Button 
                   size="sm" 
                   onClick={() => handleQuickAction('camera')}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-primary font-medium"
                 >
                   <Camera className="w-4 h-4 mr-2" />
                   Scan Mood
@@ -346,7 +342,7 @@ const Index = ({ onNavigate }: IndexProps) => {
                   size="sm" 
                   variant="outline"
                   onClick={() => onNavigate?.('chat')}
-                  className="border-primary/20 text-primary hover:bg-primary/5"
+                  className="border-border/60 bg-surface-elevated/50 text-foreground hover:bg-muted hover:border-border"
                 >
                   <Mic className="w-4 h-4 mr-2" />
                   Ask AI
@@ -358,14 +354,14 @@ const Index = ({ onNavigate }: IndexProps) => {
 
         {/* Stats Grid */}
         <section className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-4 gap-2.5">
             {stats.map((stat) => (
-              <div key={stat.label} className="bg-card rounded-2xl p-3 border border-border/50 text-center">
-                <div className={`w-8 h-8 rounded-xl ${stat.bg} flex items-center justify-center mx-auto mb-2`}>
+              <div key={stat.label} className="bg-surface-elevated rounded-2xl p-3.5 border border-border/40 text-center group hover:border-primary/30 transition-all duration-200">
+                <div className={`w-9 h-9 rounded-xl ${stat.bg} flex items-center justify-center mx-auto mb-2.5 group-hover:scale-105 transition-transform`}>
                   <stat.icon className={`w-4 h-4 ${stat.color}`} />
                 </div>
                 <p className="text-sm font-bold text-foreground">{stat.value}</p>
-                <p className="text-2xs text-muted-foreground truncate">{stat.label}</p>
+                <p className="text-2xs text-muted-foreground truncate mt-0.5">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -384,13 +380,16 @@ const Index = ({ onNavigate }: IndexProps) => {
               <button
                 key={action.id}
                 onClick={() => action.id === 'training' ? onNavigate?.('training') : handleQuickAction(action.id)}
-                className="group relative overflow-hidden bg-card rounded-2xl p-4 border border-border/50 text-left transition-all hover:border-primary/30 hover:shadow-md active:scale-[0.98]"
+                className="group relative overflow-hidden bg-surface-elevated rounded-2xl p-4 border border-border/40 text-left transition-all duration-200 hover:border-primary/40 hover:shadow-lg active:scale-[0.98]"
               >
-                <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${action.gradient} flex items-center justify-center mb-3 shadow-sm group-hover:scale-105 transition-transform`}>
+                {/* Subtle gradient overlay on hover */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                
+                <div className={`relative w-12 h-12 rounded-xl bg-gradient-to-br ${action.gradient} flex items-center justify-center mb-3.5 shadow-lg group-hover:scale-105 group-hover:shadow-xl transition-all`}>
                   <action.icon className="w-5 h-5 text-white" />
                 </div>
-                <h4 className="font-semibold text-foreground text-sm">{action.label}</h4>
-                <p className="text-xs text-muted-foreground mt-0.5">{action.description}</p>
+                <h4 className="relative font-semibold text-foreground text-sm">{action.label}</h4>
+                <p className="relative text-xs text-muted-foreground mt-1">{action.description}</p>
               </button>
             ))}
           </div>
@@ -401,20 +400,20 @@ const Index = ({ onNavigate }: IndexProps) => {
           <section className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-semibold text-foreground">Your AI Plans</h3>
-              <Badge variant="secondary" className="text-2xs">{aiResults.length}</Badge>
+              <Badge variant="secondary" className="text-2xs bg-primary/15 text-primary border-primary/25">{aiResults.length}</Badge>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {aiResults.slice(0, 3).map((item) => (
-                <div key={item.id} className="bg-card rounded-2xl p-4 border border-border/50">
+                <div key={item.id} className="bg-surface-elevated rounded-2xl p-4 border border-border/40 hover:border-border transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-sm font-semibold text-foreground truncate">{item.report?.title}</span>
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-1">{item.report?.summary}</p>
-                      <p className="text-2xs text-muted-foreground mt-1">{item.date} • {item.timestamp}</p>
+                      <p className="text-2xs text-muted-foreground/70 mt-1.5">{item.date} • {item.timestamp}</p>
                     </div>
-                    <button onClick={() => deleteReport(item.id)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors ml-2">
+                    <button onClick={() => deleteReport(item.id)} className="p-1.5 rounded-lg hover:bg-destructive/15 text-muted-foreground hover:text-destructive transition-colors ml-2">
                       <X className="w-4 h-4" />
                     </button>
                   </div>
@@ -429,17 +428,17 @@ const Index = ({ onNavigate }: IndexProps) => {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-semibold text-foreground">Daily Tips</h3>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             {tips.map((tip, i) => (
-              <div key={i} className="flex items-center gap-4 bg-card rounded-2xl p-4 border border-border/50">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <div key={i} className="flex items-center gap-4 bg-surface-elevated rounded-2xl p-4 border border-border/40 hover:border-border transition-colors group cursor-pointer">
+                <div className="w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
                   <tip.icon className="w-5 h-5 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="text-sm font-medium text-foreground">{tip.title}</h4>
-                  <p className="text-xs text-muted-foreground">{tip.description}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{tip.description}</p>
                 </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
               </div>
             ))}
           </div>
@@ -447,32 +446,32 @@ const Index = ({ onNavigate }: IndexProps) => {
 
         {/* Weekly Progress */}
         <section className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
-          <div className="bg-card rounded-2xl p-5 border border-border/50">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-surface-elevated rounded-2xl p-5 border border-border/40">
+            <div className="flex items-center justify-between mb-5">
               <h3 className="text-base font-semibold text-foreground">Weekly Progress</h3>
-              <Badge className="bg-success/10 text-success border-success/20 text-2xs">On Track</Badge>
+              <Badge className="bg-success/15 text-success border-success/25 text-2xs font-medium">On Track</Badge>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
-                <div className="flex justify-between text-sm mb-1.5">
+                <div className="flex justify-between text-sm mb-2">
                   <span className="text-muted-foreground">Activity Goals</span>
                   <span className="font-medium text-foreground">85%</span>
                 </div>
-                <Progress value={85} className="h-2" />
+                <Progress value={85} className="h-2.5 bg-muted/50" />
               </div>
               <div>
-                <div className="flex justify-between text-sm mb-1.5">
+                <div className="flex justify-between text-sm mb-2">
                   <span className="text-muted-foreground">Feeding Schedule</span>
                   <span className="font-medium text-foreground">100%</span>
                 </div>
-                <Progress value={100} className="h-2" />
+                <Progress value={100} className="h-2.5 bg-muted/50" />
               </div>
               <div>
-                <div className="flex justify-between text-sm mb-1.5">
+                <div className="flex justify-between text-sm mb-2">
                   <span className="text-muted-foreground">Training Sessions</span>
                   <span className="font-medium text-foreground">60%</span>
                 </div>
-                <Progress value={60} className="h-2" />
+                <Progress value={60} className="h-2.5 bg-muted/50" />
               </div>
             </div>
           </div>
